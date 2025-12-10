@@ -25,8 +25,8 @@ const portalRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/portal/Overview/index.vue'),
         meta: {
           title: '概览',
-          requiresAuth: true,
-          roles: ['student', 'teacher', 'admin']
+          requiresAuth: false,
+          roles: []
         }
       },
       {

@@ -3,6 +3,10 @@
     <!-- 顶部图片区域 -->
     <div class="course-card__image">
       <img :src="course.cover" :alt="course.title" />
+      <!-- 标签 -->
+      <div v-if="badge" class="course-card__badge">
+        {{ badge }}
+      </div>
       <div class="course-card__department">
         {{ course.teacherList[0]?.department || '电气工程与自动学院' }}
       </div>
@@ -32,7 +36,10 @@ import type { CourseCardProps, CourseCardEmits } from './types'
 /**
  * 课程卡片组件
  */
-const props = defineProps<CourseCardProps>()
+const props = withDefaults(defineProps<CourseCardProps>(), {
+  badge: '',
+  badgeType: 'primary'
+})
 const emit = defineEmits<CourseCardEmits>()
 
 /**
@@ -82,6 +89,18 @@ const handleClick = () => {
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.course-card__badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 8px;
+  background: linear-gradient(270deg, #bc2220 0%, #bc7120 100%);
+  color: #ffffff;
+  font-size: 14px;
+  border-radius: 0 8px 0 8px;
+  z-index: 2;
 }
 
 .course-card__department {

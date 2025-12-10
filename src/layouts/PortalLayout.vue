@@ -14,16 +14,14 @@
         <!-- 左侧 Logo 区域 -->
         <div class="portal-footer__brand">
           <div class="portal-footer__logo-placeholder">
-            <svg width="180" height="60" viewBox="0 0 180 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="180" height="60" rx="4" fill="rgba(255, 255, 255, 0.1)"/>
-              <text x="90" y="38" text-anchor="middle" fill="white" font-size="20" font-family="Source Han Sans CN, sans-serif" font-weight="700">福州大学</text>
-            </svg>
+            <img src="/images/fuzhoudaxue.png" alt="福州大学" />
           </div>
           <div class="portal-footer__emblem-placeholder">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <img src="/images/xiaohui.png" alt="福州大学" />
+            <!-- <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="40" cy="40" r="38" stroke="white" stroke-width="2" stroke-opacity="0.5"/>
               <text x="40" y="45" text-anchor="middle" fill="white" font-size="14" font-weight="bold">校徽</text>
-            </svg>
+            </svg> -->
           </div>
         </div>
 
@@ -43,10 +41,10 @@
               </a>
             </p>
             <div class="portal-footer__beian">
-              <!-- <img src="/images/icons/beian.png" alt="备案" /> -->
-              <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <img src="/images/beian.png" alt="备案" />
+              <!-- <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 2L2 5V9C2 13.5 5 17.5 9 19C13 17.5 16 13.5 16 9V5L9 2Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
-              </svg>
+              </svg> -->
               <span>闽公网安备35018302000122</span>
             </div>
           </div>

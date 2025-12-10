@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成首页标题占位图</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Source Han Sans CN', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #bc2220;
+            border-bottom: 2px solid #bc2220;
+            padding-bottom: 10px;
+        }
+        .canvas-wrapper {
+            margin: 20px 0;
+            border: 2px dashed #ddd;
+            display: inline-block;
+        }
+        canvas {
+            display: block;
+            background: transparent;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background: #bc2220;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #a01d1b;
+        }
+        .info {
+            background: #fff9ed;
+            border-left: 4px solid #bc2220;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #bc2220;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 生成首页主标题占位图</h1>
+        
+        <div class="info">
+            <strong>📋 说明：</strong>
+            <p>此工具用于生成临时的"不忘初心 牢记使命"标题图片。</p>
+            <p>尺寸：1116 x 275 px | 格式：PNG（透明背景）</p>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="titleCanvas" width="1116" height="275"></canvas>
+        </div>
+
+        <div class="controls">
+            <button onclick="drawTitle()">🎨 重新绘制</button>
+            <button onclick="downloadImage()">💾 下载图片</button>
+        </div>
+
+        <div class="step">
+            <h3>📥 使用步骤：</h3>
+            <ol>
+                <li>点击"重新绘制"查看效果</li>
+                <li>点击"下载图片"保存为 PNG 文件</li>
+                <li>将下载的文件重命名为 <code>hero-title.png</code></li>
+                <li>移动到项目目录：<code>public/images/home/hero-title.png</code></li>
+                <li>刷新页面查看效果</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>⚠️ 注意：</h3>
+            <ul>
+                <li>这是临时占位图，建议最终使用Figma导出的设计稿</li>
+                <li>文字效果会尽量接近设计稿的金色艺术字</li>
+                <li>如果效果不满意，请直接从Figma导出</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('titleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawTitle() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 设置字体
+            ctx.font = 'bold 120px "Source Han Serif CN", "STXingkai", "华文行楷", serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // 创建金色渐变
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#ffd89a');
+            gradient.addColorStop(0.5, '#ffb347');
+            gradient.addColorStop(1, '#d4905f');
+
+            // 绘制发光效果（外层阴影）
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = 'rgba(255, 216, 154, 0.8)';
+            ctx.fillStyle = gradient;
+
+            // 绘制"不忘初心"
+            ctx.fillText('不忘初心', canvas.width * 0.3, canvas.height / 2);
+            
+            // 绘制"牢记使命"
+            ctx.fillText('牢记使命', canvas.width * 0.7, canvas.height / 2);
+
+            // 添加描边增加立体感
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(212, 144, 95, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeText('不忘初心', canvas.width * 0.3, canvas.height / 2);
+            ctx.strokeText('牢记使命', canvas.width * 0.7, canvas.height / 2);
+        }
+
+        function downloadImage() {
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.download = 'hero-title.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            alert('✅ 图片已下载！\n\n请执行以下步骤：\n1. 重命名为 hero-title.png\n2. 移动到 public/images/home/ 目录\n3. 刷新页面查看效果');
+        }
+
+        // 页面加载时自动绘制
+        window.onload = drawTitle;
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,20 @@
+{
+  "home/hero-banner-1.jpg": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&h=756&fit=crop",
+  "home/hero-banner-2.jpg": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920&h=756&fit=crop",
+  "home/hero-banner-3.jpg": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&h=756&fit=crop",
+  "home/fzu-logo.png": "https://via.placeholder.com/144x48/bc2220/ffffff?text=FZU",
+  "home/fzu-logo-white.png": "https://via.placeholder.com/180x60/bc2220/ffffff?text=FZU",
+  "home/fzu-emblem.png": "https://via.placeholder.com/80x80/bc2220/ffffff?text=校徽",
+  "home/course-1.jpg": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=364&h=200&fit=crop",
+  "home/video-1.jpg": "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=320&h=212&fit=crop",
+  "home/video-2.jpg": "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=320&h=172&fit=crop",
+  "home/video-3.jpg": "https://images.unsplash.com/photo-1562774053-701939374585?w=320&h=172&fit=crop",
+  "home/video-4.jpg": "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=320&h=172&fit=crop",
+  "home/title-decoration.png": "https://via.placeholder.com/96x96/ffffff/bc2220?text=★",
+  "home/title-decoration-small.png": "https://via.placeholder.com/20x20/ffffff/bc2220?text=★",
+  "home/title-line-left.png": "https://via.placeholder.com/121x37/bc2220/ffffff?text=━",
+  "home/title-line-right.png": "https://via.placeholder.com/121x37/bc2220/ffffff?text=━",
+  "home/button-pattern.png": "https://via.placeholder.com/197x261/ecd9ba/ecd9ba?text=pattern",
+  "backgrounds/footer-pattern.png": "https://via.placeholder.com/1920x220/bc2220/bc2220?text=pattern",
+  "icons/beian.png": "https://via.placeholder.com/18x20/ffffff/ffffff?text=备"
+}

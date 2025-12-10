@@ -93,13 +93,15 @@
         </div>
         <div class="home__video-controls">
           <button class="home__video-control" @click="prevVideo" aria-label="上一个视频">
-            <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
-              <path d="M45 54L27 36L45 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <path d="M36 9C21.0883 9 9 21.0883 9 36C9 50.9117 21.0883 63 36 63C50.9117 63 63 50.9117 63 36C63 21.0883 50.9117 9 36 9Z" fill="#BC2220"/>
+              <path d="M39 27L30 36L39 45" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
           <button class="home__video-control" @click="nextVideo" aria-label="下一个视频">
-            <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
-              <path d="M27 54L45 36L27 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <path d="M36 9C50.9117 9 63 21.0883 63 36C63 50.9117 50.9117 63 36 63C21.0883 63 9 50.9117 9 36C9 21.0883 21.0883 9 36 9Z" fill="#BC2220"/>
+              <path d="M33 27L42 36L33 45" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         </div>

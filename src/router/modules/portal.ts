@@ -65,8 +65,8 @@ const portalRoutes: RouteRecordRaw[] = [
         redirect: '/study/courses',
         meta: {
           title: '学习中心',
-          requiresAuth: true,
-          roles: ['student', 'teacher', 'admin']
+          requiresAuth: false,
+          roles: []
         },
         children: [
           {
@@ -75,8 +75,8 @@ const portalRoutes: RouteRecordRaw[] = [
             component: () => import('@/views/portal/Study/index.vue'),
             meta: {
               title: '我的课程',
-              requiresAuth: true,
-              roles: ['student', 'teacher', 'admin']
+              requiresAuth: false,
+              roles: []
             }
           },
           {
@@ -85,8 +85,8 @@ const portalRoutes: RouteRecordRaw[] = [
             component: () => import('@/views/portal/Study/VideoDetail.vue'),
             meta: {
               title: '视频学习',
-              requiresAuth: true,
-              roles: ['student', 'teacher', 'admin']
+              requiresAuth: false,
+              roles: []
             }
           }
         ]

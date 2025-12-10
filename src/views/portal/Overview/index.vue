@@ -14,14 +14,17 @@
 
         <!-- 左侧目录 -->
         <div class="overview__menu">
+          <!-- 背景图 -->
+          <div class="overview__menu-bg">
+            <img src="/images/overview__menu_BG1.png" alt="" />
+          </div>
+          <div class="overview__menu-bg2">
+            <img src="/images/overview__menu_BG2.png" alt="" />
+          </div>
+
           <div class="overview__menu-header">
             <!-- 图标暂时用 SVG 模拟 -->
-            <svg width="38" height="35" viewBox="0 0 38 35" fill="none" class="overview__menu-icon">
-              <rect x="4" y="4" width="12" height="12" fill="#BC2220" opacity="0.8"/>
-              <rect x="18" y="4" width="12" height="12" fill="#BC2220" opacity="0.4"/>
-              <rect x="4" y="18" width="12" height="12" fill="#BC2220" opacity="0.6"/>
-              <rect x="18" y="18" width="12" height="12" fill="#BC2220" opacity="0.2"/>
-            </svg>
+            <img width="38px" height="35px" src="/images/gailanmulu_icon.png" alt="">
             <h2 class="overview__menu-title">概览目录</h2>
           </div>
           
@@ -236,7 +239,7 @@ const courseList = ref<any[]>([
 
 .overview__pillar {
   position: absolute;
-  left: -230px; /* 向左偏移，利用 padding 空间 */
+  left: -14%; /* 向左偏移，利用 padding 空间 */
   bottom: -40px; /* 稍微向下调整，或根据设计稿 */
   z-index: 2;
   pointer-events: none;
@@ -248,10 +251,41 @@ const courseList = ref<any[]>([
 
 /* 左侧目录 */
 .overview__menu {
-  width: 578px;
+  top: 70px;
+  right: -50px;
+
+  /* left: 40px; */
+  width: 598px;
   flex-shrink: 0;
   z-index: 5;
+  position: relative;
+  padding: 24px; /* 给背景图留出内边距，或者是背景图撑满 */
 }
+
+.overview__menu-bg {
+  position: absolute;
+  width: 100%;
+  height: 534px;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.overview__menu-bg2 {
+  position: absolute;
+  width: 100%;
+  top: 20px;
+  z-index: -1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* .overview__menu-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+} */
 
 .overview__menu-header {
   display: flex;
@@ -359,6 +393,7 @@ const courseList = ref<any[]>([
   background: #952322;
   padding: 16px;
   border-radius: 8px;
+  z-index: 5;
 }
 
 .overview__player {

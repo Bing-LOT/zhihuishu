@@ -9,10 +9,6 @@
 
       <!-- 主标题图 -->
       <div class="home__hero-title">
-        <h1 class="home__hero-title-text">
-          <span>不忘初心</span>
-          <span>牢记使命</span>
-        </h1>
       </div>
 
       <!-- 轮播指示器 -->
@@ -549,6 +545,7 @@ onUnmounted(() => {
 /* 背景图 */
 .home__hero-background {
   position: absolute;
+  background: rgba(255, 249, 237, 0.9); /* 背景色不透明度 0.1 */
   top: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -572,7 +569,7 @@ onUnmounted(() => {
 /* 主标题图 */
 .home__hero-title {
   position: absolute;
-  top: 38px;
+  /* top: 38px; */
   left: 50%;
   transform: translateX(calc(-50% - 30px));
   width: 1116px;

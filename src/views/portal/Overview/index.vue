@@ -52,6 +52,7 @@
       <section class="overview__hero">
         <!-- 柱子装饰图 -->
         <img src="/images/zhuzi.png" alt="" class="overview__pillar" />
+        <img src="/images/piaodai1.png" alt="" class="overview__piaodai1" />
 
         <!-- 左侧目录 -->
         <div class="overview__menu">
@@ -353,7 +354,7 @@ const courseList = ref<any[]>([
   position: relative; /* 确保作为定位参考 */
   display: flex;
   gap: 48px;
-  margin-bottom: 96px;
+  margin-bottom: 396px; /* 增加间距 (96 + 100) */
   align-items: flex-start;
 }
 
@@ -367,6 +368,18 @@ const courseList = ref<any[]>([
   object-fit: contain;
   object-position: bottom;
   transform: scaleX(-1); /* 左右反转 */
+}
+
+.overview__piaodai1 {
+  position: absolute;
+  right: -260px; /* 向右偏移，对齐到容器边缘或浏览器边缘 */
+  bottom: -150px; /* 位于视频播放器下方 */
+  z-index: 2;
+  pointer-events: none;
+  /* 根据图片实际尺寸调整宽度，或者不设 */
+  width: 1100px; 
+  transform: scaleX(-1); /* 左右反转 */
+
 }
 
 /* 左侧目录 */

@@ -44,9 +44,7 @@
       <button class="home__scroll-hint" @click="scrollToVideo">
         <span>滚动继续</span>
         <div class="home__scroll-icon">
-          <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-            <path d="M8 0V16M8 16L1 9M8 16L15 9" stroke="#bc2220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <img src="/images/home__scroll-icon.svg" alt="滚动" />
         </div>
       </button>
     </section>
@@ -699,13 +697,10 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-.home__scroll-hint .home__scroll-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent; /* 占位，保持布局稳定 */
+.home__scroll-hint .home__scroll-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 

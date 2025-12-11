@@ -45,8 +45,18 @@ const portalRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/portal/Resources/index.vue'),
         meta: {
           title: '大资源',
-          requiresAuth: true,
-          roles: ['student', 'teacher', 'admin']
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
+        path: 'resources/detail/:id',
+        name: 'ResourceDetail',
+        component: () => import('@/views/portal/Resources/Detail.vue'),
+        meta: {
+          title: '资源详情',
+          requiresAuth: false,
+          roles: []
         }
       },
       {
@@ -55,41 +65,39 @@ const portalRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/portal/Topics/index.vue'),
         meta: {
           title: '大主题',
-          requiresAuth: true,
-          roles: ['student', 'teacher', 'admin']
+          requiresAuth: false,
+          roles: []
         }
       },
       {
         path: 'study',
         name: 'Study',
-        redirect: '/study/courses',
+        component: () => import('@/views/portal/Study/index.vue'),
         meta: {
-          title: '学习中心',
+          title: '特色专题',
           requiresAuth: false,
           roles: []
-        },
-        children: [
-          {
-            path: 'courses',
-            name: 'StudyCourses',
-            component: () => import('@/views/portal/Study/index.vue'),
-            meta: {
-              title: '我的课程',
-              requiresAuth: false,
-              roles: []
-            }
-          },
-          {
-            path: 'video/:id',
-            name: 'VideoDetail',
-            component: () => import('@/views/portal/Study/VideoDetail.vue'),
-            meta: {
-              title: '视频学习',
-              requiresAuth: false,
-              roles: []
-            }
-          }
-        ]
+        }
+      },
+      {
+        path: 'study/courses',
+        name: 'StudyCourses',
+        component: () => import('@/views/portal/Study/CourseList.vue'),
+        meta: {
+          title: '党员教师课程思政示范课展播',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
+        path: 'study/video/:id',
+        name: 'VideoDetail',
+        component: () => import('@/views/portal/Study/VideoDetail.vue'),
+        meta: {
+          title: '视频学习',
+          requiresAuth: false,
+          roles: []
+        }
       },
       {
         path: 'exam',

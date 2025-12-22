@@ -85,7 +85,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'resources/excellent-class',
         name: 'AdminResourcesExcellentClass',
-        component: () => import('@/views/admin/Resources/index.vue'),
+        component: () => import('@/views/admin/Resources/ExcellentClass.vue'),
         meta: {
           title: '优秀思政课堂'
         }

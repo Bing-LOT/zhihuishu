@@ -215,7 +215,7 @@ const list3 = ref(generateList(8, 's3'))
 .topics-hero {
   position: relative;
   height: 756px;
-  margin-bottom: 96px;
+  margin-bottom: 456px;
   display: flex;
   align-items: center;
   padding-top: 80px; /* 内容保持原位置 */

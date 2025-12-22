@@ -61,7 +61,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'resources/practice-case',
         name: 'AdminResourcesPracticeCase',
-        component: () => import('@/views/admin/Resources/ModelDisplay.vue'),
+        component: () => import('@/views/admin/Resources/PracticeCase.vue'),
         meta: {
           title: '习思想融入学科教学实践示范案例展播'
         }

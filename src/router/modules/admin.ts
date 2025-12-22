@@ -93,7 +93,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'resources/college-special',
         name: 'AdminResourcesCollegeSpecial',
-        component: () => import('@/views/admin/Resources/index.vue'),
+        component: () => import('@/views/admin/Resources/CollegeSpecial.vue'),
         meta: {
           title: '一院一品'
         }
@@ -101,7 +101,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'resources/culture-map',
         name: 'AdminResourcesCultureMap',
-        component: () => import('@/views/admin/Resources/index.vue'),
+        component: () => import('@/views/admin/Resources/CultureMap.vue'),
         meta: {
           title: '红色文化资源地图'
         }

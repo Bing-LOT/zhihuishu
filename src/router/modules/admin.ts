@@ -69,7 +69,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'resources/practice-footprint',
         name: 'AdminResourcesPracticeFootprint',
-        component: () => import('@/views/admin/Resources/ModelDisplay.vue'),
+        component: () => import('@/views/admin/Resources/PracticeFootprint.vue'),
         meta: {
           title: '总书记的福建足迹'
         }

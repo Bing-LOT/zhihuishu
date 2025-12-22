@@ -77,7 +77,7 @@ const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'resources/list',
         name: 'AdminResourcesList',
-        component: () => import('@/views/admin/Resources/index.vue'),
+        component: () => import('@/views/admin/Resources/ResourceList.vue'),
         meta: {
           title: '思政资源'
         }

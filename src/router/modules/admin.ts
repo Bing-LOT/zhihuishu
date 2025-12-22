@@ -145,8 +145,8 @@ const adminRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/admin/System/index.vue'),
         meta: {
           title: '系统配置',
-          requiresAuth: true,
-          roles: ['admin'],
+          requiresAuth: false,
+          roles: [],
           icon: 'setting'
         }
       }

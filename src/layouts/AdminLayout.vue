@@ -112,8 +112,18 @@ const sideMenus = ref([
     expanded: false,
     children: [
       { key: 'party-course', label: '"党建+课程思政"工作概览', path: '/admin/resources/party-course' },
-      { key: 'model-display', label: '党员教师课程思政示范展播', path: '/admin/resources/model-display' },
-      { key: 'great-practice', label: '习思想的伟大实践', path: '/admin/resources/great-practice' }
+      { key: 'model-display', label: '党员教师课程思政示范展播', path: '/admin/resources/model-display' }
+    ]
+  },
+  {
+    key: 'great-practice',
+    label: '习思想的伟大实践',
+    expanded: false,
+    children: [
+      { key: 'practice-achievement', label: '习思想融入成果', path: '/admin/resources/practice-achievement' },
+      { key: 'practice-video', label: '习思想优秀视频展播', path: '/admin/resources/practice-video' },
+      { key: 'practice-case', label: '习思想融入学科教学实践示范案例展播', path: '/admin/resources/practice-case' },
+      { key: 'practice-footprint', label: '总书记的福建足迹', path: '/admin/resources/practice-footprint' }
     ]
   },
   {

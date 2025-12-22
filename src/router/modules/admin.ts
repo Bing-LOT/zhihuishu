@@ -43,11 +43,35 @@ const adminRoutes: RouteRecordRaw[] = [
         }
       },
       {
-        path: 'resources/great-practice',
-        name: 'AdminResourcesGreatPractice',
-        component: () => import('@/views/admin/Resources/index.vue'),
+        path: 'resources/practice-achievement',
+        name: 'AdminResourcesPracticeAchievement',
+        component: () => import('@/views/admin/Resources/PracticeAchievement.vue'),
         meta: {
-          title: '伟大实践'
+          title: '习思想融入成果'
+        }
+      },
+      {
+        path: 'resources/practice-video',
+        name: 'AdminResourcesPracticeVideo',
+        component: () => import('@/views/admin/Resources/PracticeVideo.vue'),
+        meta: {
+          title: '习思想优秀视频展播'
+        }
+      },
+      {
+        path: 'resources/practice-case',
+        name: 'AdminResourcesPracticeCase',
+        component: () => import('@/views/admin/Resources/ModelDisplay.vue'),
+        meta: {
+          title: '习思想融入学科教学实践示范案例展播'
+        }
+      },
+      {
+        path: 'resources/practice-footprint',
+        name: 'AdminResourcesPracticeFootprint',
+        component: () => import('@/views/admin/Resources/ModelDisplay.vue'),
+        meta: {
+          title: '总书记的福建足迹'
         }
       },
       {

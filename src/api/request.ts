@@ -8,24 +8,25 @@ import type { ApiResponse } from '@/types'
 import { useUserStore } from '@/stores/user'
 
 // API基础地址配置
-// 开发环境：使用 /api 走Vite代理（避免CORS问题）
+// 开发环境：空字符串（直接使用 /upload 等路径，走Vite代理）
 // 生产环境：使用完整URL
 const API_BASE_URL = import.meta.env.MODE === 'production' 
   ? (import.meta.env.VITE_API_BASE_URL || 'http://prod-cn.your-api-server.com')
-  : '/api'
+  : ''
 
 // 创建 Axios 实例
 const request: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 30000
+  // 不要在这里设置默认Content-Type，让axios根据data类型自动设置
 })
 
+console.log('================== API配置 ==================')
 console.log('当前环境:', import.meta.env.MODE)
-console.log('API Base URL:', API_BASE_URL)
-console.log('实际请求地址: 开发环境通过Vite代理到 https://dszk.fzu.edu.cn/dszk-api')
+console.log('API Base URL:', API_BASE_URL || '(空，直接使用路径)')
+console.log('开发环境: 请求/upload等路径，通过Vite代理转发')
+console.log('生产环境: 使用完整URL', import.meta.env.VITE_API_BASE_URL || 'http://prod-cn.your-api-server.com')
+console.log('=============================================')
 
 // 请求拦截器
 request.interceptors.request.use(
@@ -35,9 +36,29 @@ request.interceptors.request.use(
     // 添加 AuthToken 到请求头
     if (userStore.authToken) {
       config.headers['AuthToken'] = userStore.authToken
-      console.log('发送请求:', config.method?.toUpperCase(), config.url)
-      console.log('携带 AuthToken:', userStore.authToken)
     }
+    
+    console.log('========== 请求拦截器 ==========')
+    console.log('URL:', config.url)
+    console.log('Method:', config.method)
+    console.log('Data类型:', config.data?.constructor?.name)
+    console.log('是否为FormData:', config.data instanceof FormData)
+    
+    // 🔑 关键：如果是FormData，确保不覆盖Content-Type
+    if (config.data instanceof FormData) {
+      console.log('✅ 检测到FormData，删除Content-Type让axios自动处理')
+      // 删除可能存在的Content-Type设置
+      delete config.headers['Content-Type']
+    } else {
+      // 非FormData请求，设置JSON
+      if (!config.headers['Content-Type']) {
+        config.headers['Content-Type'] = 'application/json'
+      }
+    }
+    
+    console.log('最终Content-Type:', config.headers['Content-Type'] || 'axios自动设置')
+    console.log('AuthToken:', userStore.authToken)
+    console.log('==============================')
     
     return config
   },

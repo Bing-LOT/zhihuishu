@@ -316,13 +316,22 @@ const saveBanner = async () => {
     // 如果是新上传的文件，先上传图片
     if (selectedFile.value) {
       try {
-        console.log('开始上传图片到 /upload...')
+        console.log('====== 开始上传文件 ======')
+        console.log('selectedFile.value:', selectedFile.value)
+        console.log('文件名:', selectedFile.value.name)
+        console.log('文件类型:', selectedFile.value.type)
+        console.log('文件大小:', selectedFile.value.size, 'bytes')
+        console.log('========================')
+        
         const uploadRes = await uploadFile(selectedFile.value)
         picUrl = uploadRes.url
-        console.log('图片上传成功，URL:', picUrl)
+        console.log('✅ 图片上传成功，返回URL:', picUrl)
       } catch (uploadError: any) {
-        console.error('上传图片失败:', uploadError)
-        const errorMsg = uploadError.response?.data?.msg || uploadError.message || '上传失败'
+        console.error('❌ 上传图片失败')
+        console.error('错误对象:', uploadError)
+        console.error('错误响应:', uploadError.response?.data)
+        console.error('错误状态:', uploadError.response?.status)
+        const errorMsg = uploadError.response?.data?.msg || uploadError.response?.data?.error || uploadError.message || '上传失败'
         alert(`上传图片失败: ${errorMsg}`)
         loading.value = false
         return

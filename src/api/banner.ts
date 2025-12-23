@@ -18,17 +18,68 @@ export interface BannerItem {
  * @param file 文件对象
  * @returns 返回文件URL
  */
+/**
+ * 上传文件（通过Vite代理，避免CORS）
+ */
 export function uploadFile(file: File): Promise<{ url: string }> {
-  const formData = new FormData()
-  formData.append('file', file)
-  
-  return request({
-    url: '/upload',
-    method: 'POST',
-    data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data'
+  return new Promise((resolve, reject) => {
+    console.log('========== 上传文件（走Vite代理） ==========')
+    console.log('文件信息:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    })
+    
+    // 创建Headers对象
+    const myHeaders = new Headers()
+    myHeaders.append("AuthToken", "e568ff77ee9e45f488a6faff3c827366")
+    
+    // 创建FormData
+    const formdata = new FormData()
+    formdata.append("file", file)
+    
+    console.log('✅ Headers已设置: AuthToken')
+    console.log('✅ FormData已创建: file字段')
+    
+    // 请求配置
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow'
     }
+    
+    // 使用代理路径（/upload 会被Vite代理转发到 https://dszk.fzu.edu.cn/dszk-api/upload）
+    const uploadUrl = '/upload'
+    console.log('请求URL:', uploadUrl)
+    console.log('通过Vite代理转发到: https://dszk.fzu.edu.cn/dszk-api/upload')
+    console.log('==========================================')
+    
+    // 使用fetch发送请求
+    fetch(uploadUrl, requestOptions)
+      .then(response => {
+        console.log('收到响应，状态码:', response.status)
+        if (!response.ok) {
+          return response.json().then(err => {
+            throw new Error(err.msg || `HTTP ${response.status}: ${response.statusText}`)
+          })
+        }
+        return response.json()
+      })
+      .then(result => {
+        console.log('✅ 上传成功，响应数据:', result)
+        
+        // 解析响应格式：{ msg, code, data: { url } }
+        if (result.code === 200 && result.data?.url) {
+          resolve({ url: result.data.url })
+        } else {
+          reject(new Error(result.msg || '上传失败'))
+        }
+      })
+      .catch(error => {
+        console.error('❌ 上传失败:', error)
+        reject(error)
+      })
   })
 }
 

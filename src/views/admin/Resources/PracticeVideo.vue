@@ -24,8 +24,11 @@
             type="text"
             placeholder="搜索视频主题/关键词..."
             class="search-input"
-            @input="handleSearch"
+            @keyup.enter="handleSearch"
           />
+          <button class="btn-search" @click="handleSearch" title="搜索">
+            搜索
+          </button>
         </div>
         
         <select v-model="seriesFilter" class="filter-select" @change="handleFilter">
@@ -58,13 +61,19 @@
 
     <!-- 数据统计 -->
     <div class="data-stats">
-      共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+      共 {{ totalCount }} 条，当前显示 {{ displayItems.length }} 条
+    </div>
+
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>加载中...</p>
     </div>
 
     <!-- 列表内容 -->
-    <div class="content-list">
+    <div v-else class="content-list">
       <div
-        v-for="(item, index) in filteredItems"
+        v-for="(item, index) in displayItems"
         :key="item.id"
         class="content-item"
         :draggable="true"
@@ -135,12 +144,57 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="displayItems.length === 0" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <p>暂无数据</p>
+      </div>
+    </div>
+
+    <!-- 分页 -->
+    <div v-if="!loading && displayItems.length > 0" class="pagination-wrapper">
+      <div class="pagination">
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+        >
+          上一页
+        </button>
+        
+        <div class="pagination-pages">
+          <button
+            v-for="page in getPageNumbers()"
+            :key="page"
+            class="pagination-page"
+            :class="{ active: page === currentPage }"
+            @click="handlePageChange(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+        
+        <button 
+          class="pagination-btn"
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+        >
+          下一页
+        </button>
+        
+        <div class="pagination-info">
+          <span>共 {{ totalPages }} 页</span>
+          <span class="divider">|</span>
+          <span>每页</span>
+          <select v-model.number="pageSize" @change="handlePageSizeChange(pageSize)" class="page-size-select">
+            <option :value="10">10</option>
+            <option :value="20">20</option>
+            <option :value="50">50</option>
+          </select>
+          <span>条</span>
+        </div>
       </div>
     </div>
 
@@ -343,15 +397,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { uploadFile, addVideoExpo } from '@/api/banner'
-import type { VideoExpoItem } from '@/api/banner'
+import { ref, computed, onMounted } from 'vue'
+import { uploadFile, addVideoExpo, getVideoExpoList, editVideoExpo } from '@/api/banner'
+import type { VideoExpoItem, VideoExpoListItem, VideoExpoEditItem } from '@/api/banner'
 
 interface VideoItem {
   id: string
   title: string
   series: string
   unit: string
+  host?: string // 主持人
   description: string
   status: 'active' | 'inactive'
   publishTime: string
@@ -361,36 +416,19 @@ interface VideoItem {
 }
 
 // 数据列表
-const items = ref<VideoItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    series: '教师岗',
-    unit: '计算机学院',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    status: 'active',
-    publishTime: '2024-11-20',
-    cover: '/images/home/video-1.jpg',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    series: '管理岗',
-    unit: '机械学院',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    status: 'active',
-    publishTime: '2024-11-18',
-    cover: '/images/home/video-2.jpg',
-    sort: 2
-  }
-])
+const items = ref<VideoItem[]>([])
 
 // 搜索和筛选
 const searchKeyword = ref('')
 const seriesFilter = ref('all')
 const unitFilter = ref('all')
 const statusFilter = ref('all')
+
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalCount = ref(0)
+const loading = ref(false)
 
 // 对话框状态
 const showAddDialog = ref(false)
@@ -423,28 +461,155 @@ const previewData = ref<VideoItem | null>(null)
 const draggedIndex = ref<number | null>(null)
 
 // 计算属性
-const totalCount = computed(() => items.value.length)
+const filteredItems = computed(() => items.value)
 
-const filteredItems = computed(() => {
+// 计算总页数
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
+
+// 获取列表数据
+const fetchList = async () => {
+  try {
+    loading.value = true
+    console.log('========== 获取视频展播列表 ==========')
+    
+    const params: any = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value
+    }
+    
+    // 添加搜索关键词
+    if (searchKeyword.value) {
+      params.keyword = searchKeyword.value
+    }
+    
+    // 添加显示状态筛选
+    if (statusFilter.value !== 'all') {
+      params.showFront = statusFilter.value === 'active' ? 1 : 0
+    }
+    
+    console.log('请求参数:', params)
+    
+    const response = await getVideoExpoList(params)
+    console.log('响应数据:', response)
+    console.log('响应数据类型:', typeof response)
+    console.log('响应数据结构:', JSON.stringify(response, null, 2))
+    
+    // 兼容多种可能的响应格式
+    let listData: any[] = []
+    let total = 0
+    
+    if (Array.isArray(response)) {
+      // 如果响应直接是数组
+      console.log('响应是数组格式')
+      listData = response
+      total = response.length
+    } else if (response && typeof response === 'object') {
+      // 如果响应是对象，尝试多种字段名
+      console.log('响应是对象格式')
+      listData = response.list || response.records || response.data || []
+      total = response.total || response.totalCount || listData.length
+    }
+    
+    console.log('解析后的列表数据:', listData)
+    console.log('列表长度:', listData.length)
+    
+    // 转换数据格式
+    if (Array.isArray(listData) && listData.length > 0) {
+      items.value = listData.map((item: any) => ({
+        id: item.id?.toString() || '',
+        title: item.title || '',
+        series: item.expoType || '',
+        unit: item.college || '',
+        host: item.presenter || '', // 主持人
+        description: item.content || '',
+        status: item.showFront === 1 ? 'active' : 'inactive',
+        publishTime: item.createTime || item.updateTime || '',
+        cover: item.coverUrl || '',
+        videoFile: item.videoUrl ? { name: '视频文件', url: item.videoUrl } : undefined,
+        sort: 0
+      }))
+    } else {
+      console.warn('没有找到有效的列表数据')
+      items.value = []
+    }
+    
+    totalCount.value = total
+    console.log('列表加载完成，共', totalCount.value, '条数据，当前页', items.value.length, '条')
+    console.log('========================================')
+  } catch (error: any) {
+    console.error('获取列表失败:', error)
+    console.error('错误详情:', error.stack)
+    alert(`获取列表失败：${error.message || '未知错误'}`)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 前端筛选（在已加载的数据中筛选 expoType 和 college）
+const displayItems = computed(() => {
   return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
     const matchSeries = seriesFilter.value === 'all' || item.series === seriesFilter.value
     const matchUnit = unitFilter.value === 'all' || item.unit === unitFilter.value
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchSeries && matchUnit && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
+    return matchSeries && matchUnit
+  })
 })
 
 // 搜索处理
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  currentPage.value = 1
+  fetchList()
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  currentPage.value = 1
+  fetchList()
+}
+
+// 分页处理
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  fetchList()
+}
+
+// 改变每页大小
+const handlePageSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1
+  fetchList()
+}
+
+// 生成页码数组
+const getPageNumbers = () => {
+  const pages: number[] = []
+  const maxVisible = 5 // 最多显示5个页码
+  
+  if (totalPages.value <= maxVisible) {
+    // 总页数少于最大显示数，显示所有页码
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    // 总页数多于最大显示数，智能显示页码
+    if (currentPage.value <= 3) {
+      // 当前页在前面
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+    } else if (currentPage.value >= totalPages.value - 2) {
+      // 当前页在后面
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i)
+      }
+    } else {
+      // 当前页在中间
+      for (let i = currentPage.value - 2; i <= currentPage.value + 2; i++) {
+        pages.push(i)
+      }
+    }
+  }
+  
+  return pages
 }
 
 // 拖拽开始
@@ -460,15 +625,18 @@ const handleDrop = (targetIndex: number, event: DragEvent) => {
   event.preventDefault()
   if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
 
-  const draggedItem = filteredItems.value[draggedIndex.value]
-  const targetItem = filteredItems.value[targetIndex]
+  const draggedItem = displayItems.value[draggedIndex.value]
+  const targetItem = displayItems.value[targetIndex]
   
-  // 交换排序
+  // 交换排序（仅前端展示，后续可对接排序接口）
   const tempSort = draggedItem.sort
   draggedItem.sort = targetItem.sort
   targetItem.sort = tempSort
 
   draggedIndex.value = null
+  
+  // TODO: 如果后端提供排序接口，在这里调用
+  console.log('拖拽排序功能待对接后端排序接口')
 }
 
 // 触发封面上传
@@ -543,12 +711,14 @@ const editItem = (item: VideoItem) => {
   formData.value = {
     id: item.id,
     title: item.title,
-    host: '',
+    host: item.host || '', // 修复：使用实际的主持人姓名
     series: item.series,
     unit: item.unit,
     description: item.description,
     cover: item.cover || '',
+    coverFile: null, // 编辑时清空文件对象
     videoFile: item.videoFile || null,
+    videoRawFile: null, // 编辑时清空文件对象
     isActive: item.status === 'active',
     displayOrder: item.sort,
     publishTime: item.publishTime
@@ -600,30 +770,68 @@ const saveItem = async () => {
       alert('请选择所在单位')
       return
     }
-    if (!formData.value.videoFile && !showEditDialog.value) {
+    // 新增时必须上传视频，编辑时如果没有videoFile说明没有修改
+    if (!showEditDialog.value && !formData.value.videoFile) {
       alert('请上传优秀视频')
       return
     }
 
     if (showEditDialog.value) {
-      // 编辑功能暂时保持原逻辑（可后续对接编辑接口）
-      const index = items.value.findIndex(item => item.id === formData.value.id)
-      if (index > -1) {
-        items.value[index] = {
-          ...items.value[index],
-          title: formData.value.title,
-          series: formData.value.series,
-          unit: formData.value.unit,
-          description: formData.value.description,
-          status: formData.value.isActive ? 'active' : 'inactive',
-          publishTime: formData.value.publishTime,
-          cover: formData.value.cover,
-          videoFile: formData.value.videoFile || items.value[index].videoFile,
-          sort: formData.value.displayOrder
-        }
+      // 编辑 - 调用真实 API
+      console.log('========== 开始编辑视频展播 ==========')
+      
+      // 获取原始数据
+      const originalItem = items.value.find(item => item.id === formData.value.id)
+      if (!originalItem) {
+        alert('未找到原始数据')
+        return
       }
-      alert('编辑成功')
+      
+      // 1. 处理封面图片（如果上传了新的封面）
+      let coverUrl = originalItem.cover || ''
+      if (formData.value.coverFile) {
+        console.log('正在上传新的封面图片...')
+        const coverResult = await uploadFile(formData.value.coverFile)
+        console.log('封面上传成功:', coverResult.url)
+        coverUrl = coverResult.url
+      } else {
+        console.log('使用原封面URL:', coverUrl)
+      }
+      
+      // 2. 处理视频文件（如果上传了新的视频）
+      let videoUrl = originalItem.videoFile?.url || ''
+      if (formData.value.videoRawFile) {
+        console.log('正在上传新的视频文件...')
+        const videoResult = await uploadFile(formData.value.videoRawFile)
+        console.log('视频上传成功:', videoResult.url)
+        videoUrl = videoResult.url
+      } else {
+        console.log('使用原视频URL:', videoUrl)
+      }
+      
+      // 3. 调用编辑接口
+      const editData: VideoExpoEditItem = {
+        id: parseInt(formData.value.id),
+        title: formData.value.title,
+        coverUrl: coverUrl,
+        expoType: formData.value.series, // 展播类型：教师岗 或 管理岗
+        college: formData.value.unit,
+        presenter: formData.value.host,
+        content: formData.value.description || '',
+        videoUrl: videoUrl,
+        showFront: formData.value.isActive ? 1 : 0
+      }
+      
+      console.log('正在保存编辑数据:', editData)
+      await editVideoExpo(editData)
+      console.log('编辑成功')
+      console.log('========================================')
+      
+      alert('编辑成功！')
       closeDialog()
+      
+      // 重新加载列表
+      fetchList()
     } else {
       // 新增 - 调用真实 API
       console.log('========== 开始新增视频展播 ==========')
@@ -663,23 +871,11 @@ const saveItem = async () => {
       console.log('保存成功，ID:', result.id)
       console.log('========================================')
       
-      // 更新本地列表（用于前端展示）
-      const newItem: VideoItem = {
-        id: result.id.toString(),
-        title: formData.value.title,
-        series: formData.value.series,
-        unit: formData.value.unit,
-        description: formData.value.description,
-        status: formData.value.isActive ? 'active' : 'inactive',
-        publishTime: formData.value.publishTime,
-        cover: coverResult.url,
-        videoFile: { name: formData.value.videoRawFile.name, url: videoResult.url },
-        sort: formData.value.displayOrder || items.value.length + 1
-      }
-      items.value.push(newItem)
-      
       alert('新增成功！')
       closeDialog()
+      
+      // 重新加载列表
+      fetchList()
     }
   } catch (error: any) {
     console.error('保存失败:', error)
@@ -707,6 +903,11 @@ const closeDialog = () => {
     publishTime: new Date().toISOString().split('T')[0]
   }
 }
+
+// 组件挂载时加载数据
+onMounted(() => {
+  fetchList()
+})
 </script>
 
 <style scoped>
@@ -762,7 +963,7 @@ const closeDialog = () => {
   background: white;
   border: 1px solid #d9d9d9;
   border-radius: 4px;
-  min-width: 240px;
+  min-width: 300px;
 }
 
 .search-input {
@@ -770,6 +971,22 @@ const closeDialog = () => {
   border: none;
   outline: none;
   font-size: 14px;
+}
+
+.btn-search {
+  padding: 4px 12px;
+  background: #e31e24;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-search:hover {
+  background: #c71b20;
 }
 
 .filter-select {
@@ -1365,6 +1582,126 @@ textarea.form-input {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #e31e24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+/* 分页 */
+.pagination-wrapper {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  background: white;
+  color: #333;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: #e31e24;
+  border-color: #e31e24;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 4px;
+}
+
+.pagination-page {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  background: white;
+  color: #333;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-page:hover {
+  color: #e31e24;
+  border-color: #e31e24;
+}
+
+.pagination-page.active {
+  background: #e31e24;
+  color: white;
+  border-color: #e31e24;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-info .divider {
+  color: #d9d9d9;
+}
+
+.page-size-select {
+  padding: 4px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  background: white;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #e31e24;
 }
 </style>
 

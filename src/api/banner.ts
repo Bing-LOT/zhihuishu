@@ -266,3 +266,71 @@ export function addVideoExpo(data: VideoExpoItem): Promise<{ id: number }> {
     data
   })
 }
+
+/**
+ * 习思想优秀视频展播列表查询参数
+ */
+export interface VideoExpoListParams {
+  pageIndex: number
+  pageSize: number
+  keyword?: string
+  showFront?: number
+}
+
+/**
+ * 习思想优秀视频展播列表项
+ */
+export interface VideoExpoListItem {
+  id: number
+  title: string
+  coverUrl: string
+  expoType: string
+  college: string
+  presenter: string
+  content: string
+  videoUrl: string
+  showFront: number
+  createTime?: string
+  updateTime?: string
+}
+
+/**
+ * 习思想优秀视频展播列表响应
+ */
+export interface VideoExpoListResponse {
+  list: VideoExpoListItem[]
+  total: number
+  pageIndex: number
+  pageSize: number
+}
+
+/**
+ * 获取习思想优秀视频展播列表（分页）
+ * @param params 查询参数
+ */
+export function getVideoExpoList(params: VideoExpoListParams): Promise<VideoExpoListResponse> {
+  return request({
+    url: '/xiThought/videoExpo/page/list',
+    method: 'POST',
+    data: params
+  })
+}
+
+/**
+ * 编辑习思想优秀视频展播数据结构
+ */
+export interface VideoExpoEditItem extends VideoExpoItem {
+  id: number
+}
+
+/**
+ * 编辑习思想优秀视频展播
+ * @param data 视频展播数据（包含id）
+ */
+export function editVideoExpo(data: VideoExpoEditItem): Promise<void> {
+  return request({
+    url: '/xiThought/videoExpo/edit',
+    method: 'PUT',
+    data
+  })
+}

@@ -122,12 +122,13 @@
             </div>
           </div>
           <div class="form-group">
-            <label>跳转链接（可选）</label>
+            <label>排序序号</label>
             <input
-              v-model="formData.link"
-              type="text"
-              placeholder="请输入跳转链接"
+              v-model.number="formData.sort"
+              type="number"
+              placeholder="请输入排序序号"
               class="form-input"
+              min="0"
             />
           </div>
         </div>
@@ -148,7 +149,6 @@ interface Banner {
   id: string
   title: string
   image: string
-  link?: string
   sort: number
 }
 
@@ -171,7 +171,7 @@ const formData = ref({
   id: '',
   title: '',
   image: '',
-  link: ''
+  sort: 0
 })
 
 // 当前编辑的Banner
@@ -256,7 +256,7 @@ const editBanner = (banner: Banner) => {
     id: banner.id,
     title: banner.title,
     image: banner.image,
-    link: banner.link || ''
+    sort: banner.sort || 0
   }
   showEditDialog.value = true
 }
@@ -346,7 +346,7 @@ const saveBanner = async () => {
           ...banners.value[index],
           title: formData.value.title,
           image: picUrl,
-          link: formData.value.link
+          sort: formData.value.sort
         }
       }
       console.log('Banner编辑成功')
@@ -382,7 +382,7 @@ const closeDialog = () => {
     id: '',
     title: '',
     image: '',
-    link: ''
+    sort: 0
   }
   currentBanner.value = null
   selectedFile.value = null

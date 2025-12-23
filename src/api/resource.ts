@@ -307,3 +307,15 @@ export function deleteCourseExpo(id: string | number): Promise<any> {
   })
 }
 
+/**
+ * 编辑核心文稿
+ * @param content 核心文稿内容
+ */
+export function editCoreText(content: string): Promise<any> {
+  return request({
+    url: '/xiThought/achievement/coreText/edit',
+    method: 'PUT',
+    data: { content }
+  })
+}
+

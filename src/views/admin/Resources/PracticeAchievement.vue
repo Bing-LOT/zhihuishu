@@ -24,13 +24,13 @@
       </div>
 
       <div class="form-actions">
-        <button class="btn-cancel" @click="handleCancel">取消</button>
-        <button class="btn-save" @click="handleSave">
+        <button class="btn-cancel" @click="handleCancel" :disabled="loading">取消</button>
+        <button class="btn-save" @click="handleSave" :disabled="loading">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          保存
+          {{ loading ? '保存中...' : '保存' }}
         </button>
       </div>
     </div>
@@ -39,39 +39,52 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { editCoreText } from '@/api/resource'
 
 // 内容数据
 const content = ref('')
+const loading = ref(false)
+const originalContent = ref('')
 
 // 加载已保存的内容
 onMounted(() => {
-  // TODO: 从后端API加载内容
+  // TODO: 如果需要从后端加载已有内容，可以添加对应的API
   const saved = localStorage.getItem('practice_achievement_content')
   if (saved) {
     content.value = saved
+    originalContent.value = saved
   }
 })
 
 // 取消操作
 const handleCancel = () => {
-  if (content.value && confirm('确定要取消吗？未保存的更改将丢失。')) {
-    // 重新加载
-    const saved = localStorage.getItem('practice_achievement_content')
-    content.value = saved || ''
+  if (content.value !== originalContent.value && confirm('确定要取消吗？未保存的更改将丢失。')) {
+    content.value = originalContent.value
   }
 }
 
 // 保存操作
-const handleSave = () => {
+const handleSave = async () => {
   if (!content.value.trim()) {
     alert('请输入核心文稿内容')
     return
   }
 
-  // TODO: 调用后端API保存
-  localStorage.setItem('practice_achievement_content', content.value)
-  
-  alert('保存成功！')
+  try {
+    loading.value = true
+    await editCoreText(content.value)
+    
+    // 保存成功后更新本地备份和原始内容
+    localStorage.setItem('practice_achievement_content', content.value)
+    originalContent.value = content.value
+    
+    alert('保存成功！')
+  } catch (error: any) {
+    console.error('保存失败:', error)
+    alert(error.message || '保存失败，请重试')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -192,6 +205,12 @@ const handleSave = () => {
 
 .btn-save:hover {
   background: #c71b20;
+}
+
+.btn-save:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
 

@@ -226,7 +226,7 @@ export function editPoliticalCourse(data: PoliticalCourseItem): Promise<void> {
  */
 export function deletePoliticalCourse(id: number): Promise<void> {
   return request({
-    url: `/politicalCourse/delete/${id}`,
+    url: `/politicalCourse/remove/${id}`,
     method: 'DELETE'
   })
 }

@@ -240,3 +240,29 @@ export function getPoliticalCourseList(): Promise<PoliticalCourseItem[]> {
     method: 'GET'
   })
 }
+
+/**
+ * 习思想优秀视频展播数据结构
+ */
+export interface VideoExpoItem {
+  title: string
+  coverUrl: string
+  expoType: string
+  college: string
+  presenter: string
+  content: string
+  videoUrl: string
+  showFront: number
+}
+
+/**
+ * 新增习思想优秀视频展播
+ * @param data 视频展播数据
+ */
+export function addVideoExpo(data: VideoExpoItem): Promise<{ id: number }> {
+  return request({
+    url: '/xiThought/videoExpo/add',
+    method: 'POST',
+    data
+  })
+}

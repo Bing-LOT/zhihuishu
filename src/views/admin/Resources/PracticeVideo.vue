@@ -29,10 +29,9 @@
         </div>
         
         <select v-model="seriesFilter" class="filter-select" @change="handleFilter">
-          <option value="all">全部系列</option>
-          <option value="series1">系列一</option>
-          <option value="series2">系列二</option>
-          <option value="series3">系列三</option>
+          <option value="all">全部类型</option>
+          <option value="教师岗">教师岗</option>
+          <option value="管理岗">管理岗</option>
         </select>
 
         <select v-model="unitFilter" class="filter-select" @change="handleFilter">
@@ -210,12 +209,11 @@
           </div>
 
           <div class="form-group">
-            <label>展播系列 <span class="required">*</span></label>
+            <label>展播类型 <span class="required">*</span></label>
             <select v-model="formData.series" class="form-input">
-              <option value="">请选择展播系列</option>
-              <option value="series1">系列一</option>
-              <option value="series2">系列二</option>
-              <option value="series3">系列三</option>
+              <option value="">请选择展播类型</option>
+              <option value="教师岗">教师岗</option>
+              <option value="管理岗">管理岗</option>
             </select>
             <small class="field-hint">用于前台筛选</small>
           </div>
@@ -332,7 +330,7 @@
             </div>
             <h2>{{ previewData.title }}</h2>
             <div class="preview-meta">
-              <span>系列：{{ previewData.series }}</span>
+              <span>展播类型：{{ previewData.series }}</span>
               <span>单位：{{ previewData.unit }}</span>
             </div>
             <p class="preview-description">{{ previewData.description }}</p>
@@ -346,6 +344,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { uploadFile, addVideoExpo } from '@/api/banner'
+import type { VideoExpoItem } from '@/api/banner'
 
 interface VideoItem {
   id: string
@@ -365,7 +365,7 @@ const items = ref<VideoItem[]>([
   {
     id: '1',
     title: '新时代中国特色社会主义思想融入专业课程实践',
-    series: 'series1',
+    series: '教师岗',
     unit: '计算机学院',
     description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
     status: 'active',
@@ -376,7 +376,7 @@ const items = ref<VideoItem[]>([
   {
     id: '2',
     title: '工程伦理与职业道德',
-    series: 'series1',
+    series: '管理岗',
     unit: '机械学院',
     description: '通过案例教学，引导学生树立正确的工程伦理观。',
     status: 'active',
@@ -408,7 +408,9 @@ const formData = ref({
   unit: '',
   description: '',
   cover: '',
+  coverFile: null as File | null, // 保存原始封面文件
   videoFile: null as { name: string; url: string } | null,
+  videoRawFile: null as File | null, // 保存原始视频文件
   isActive: true,
   displayOrder: 1,
   publishTime: new Date().toISOString().split('T')[0]
@@ -479,6 +481,9 @@ const handleCoverChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    // 保存原始文件对象
+    formData.value.coverFile = file
+    // 生成预览
     const reader = new FileReader()
     reader.onload = (e) => {
       formData.value.cover = e.target?.result as string
@@ -490,6 +495,7 @@ const handleCoverChange = (event: Event) => {
 // 移除封面
 const removeCover = () => {
   formData.value.cover = ''
+  formData.value.coverFile = null
   if (coverInput.value) {
     coverInput.value.value = ''
   }
@@ -513,6 +519,9 @@ const handleVideoChange = (event: Event) => {
       alert('视频文件不能超过 500MB')
       return
     }
+    // 保存原始文件对象
+    formData.value.videoRawFile = file
+    // 生成预览信息
     formData.value.videoFile = {
       name: file.name,
       url: URL.createObjectURL(file)
@@ -523,6 +532,7 @@ const handleVideoChange = (event: Event) => {
 // 移除视频
 const removeVideo = () => {
   formData.value.videoFile = null
+  formData.value.videoRawFile = null
   if (videoInput.value) {
     videoInput.value.value = ''
   }
@@ -567,68 +577,114 @@ const deleteItem = (id: string) => {
 }
 
 // 保存项目
-const saveItem = () => {
-  // 验证必填项
-  if (!formData.value.cover) {
-    alert('请上传封面图片')
-    return
-  }
-  if (!formData.value.title) {
-    alert('请输入视频主题')
-    return
-  }
-  if (!formData.value.host) {
-    alert('请输入主持人姓名')
-    return
-  }
-  if (!formData.value.series) {
-    alert('请选择展播系列')
-    return
-  }
-  if (!formData.value.unit) {
-    alert('请选择所在单位')
-    return
-  }
-  if (!formData.value.videoFile && !showEditDialog.value) {
-    alert('请上传优秀视频')
-    return
-  }
+const saveItem = async () => {
+  try {
+    // 验证必填项
+    if (!formData.value.cover) {
+      alert('请上传封面图片')
+      return
+    }
+    if (!formData.value.title) {
+      alert('请输入视频主题')
+      return
+    }
+    if (!formData.value.host) {
+      alert('请输入主持人姓名')
+      return
+    }
+    if (!formData.value.series) {
+      alert('请选择展播类型')
+      return
+    }
+    if (!formData.value.unit) {
+      alert('请选择所在单位')
+      return
+    }
+    if (!formData.value.videoFile && !showEditDialog.value) {
+      alert('请上传优秀视频')
+      return
+    }
 
-  if (showEditDialog.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
+    if (showEditDialog.value) {
+      // 编辑功能暂时保持原逻辑（可后续对接编辑接口）
+      const index = items.value.findIndex(item => item.id === formData.value.id)
+      if (index > -1) {
+        items.value[index] = {
+          ...items.value[index],
+          title: formData.value.title,
+          series: formData.value.series,
+          unit: formData.value.unit,
+          description: formData.value.description,
+          status: formData.value.isActive ? 'active' : 'inactive',
+          publishTime: formData.value.publishTime,
+          cover: formData.value.cover,
+          videoFile: formData.value.videoFile || items.value[index].videoFile,
+          sort: formData.value.displayOrder
+        }
+      }
+      alert('编辑成功')
+      closeDialog()
+    } else {
+      // 新增 - 调用真实 API
+      console.log('========== 开始新增视频展播 ==========')
+      
+      // 1. 上传封面图片
+      if (!formData.value.coverFile) {
+        alert('请选择封面图片文件')
+        return
+      }
+      console.log('正在上传封面图片...')
+      const coverResult = await uploadFile(formData.value.coverFile)
+      console.log('封面上传成功:', coverResult.url)
+      
+      // 2. 上传视频文件
+      if (!formData.value.videoRawFile) {
+        alert('请选择视频文件')
+        return
+      }
+      console.log('正在上传视频文件...')
+      const videoResult = await uploadFile(formData.value.videoRawFile)
+      console.log('视频上传成功:', videoResult.url)
+      
+      // 3. 调用新增接口
+      const videoData: VideoExpoItem = {
+        title: formData.value.title,
+        coverUrl: coverResult.url,
+        expoType: formData.value.series, // 展播类型：教师岗 或 管理岗
+        college: formData.value.unit,
+        presenter: formData.value.host,
+        content: formData.value.description || '',
+        videoUrl: videoResult.url,
+        showFront: formData.value.isActive ? 1 : 0
+      }
+      
+      console.log('正在保存视频数据:', videoData)
+      const result = await addVideoExpo(videoData)
+      console.log('保存成功，ID:', result.id)
+      console.log('========================================')
+      
+      // 更新本地列表（用于前端展示）
+      const newItem: VideoItem = {
+        id: result.id.toString(),
         title: formData.value.title,
         series: formData.value.series,
         unit: formData.value.unit,
         description: formData.value.description,
         status: formData.value.isActive ? 'active' : 'inactive',
         publishTime: formData.value.publishTime,
-        cover: formData.value.cover,
-        videoFile: formData.value.videoFile || items.value[index].videoFile,
-        sort: formData.value.displayOrder
+        cover: coverResult.url,
+        videoFile: { name: formData.value.videoRawFile.name, url: videoResult.url },
+        sort: formData.value.displayOrder || items.value.length + 1
       }
+      items.value.push(newItem)
+      
+      alert('新增成功！')
+      closeDialog()
     }
-  } else {
-    // 新增
-    const newItem: VideoItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      series: formData.value.series,
-      unit: formData.value.unit,
-      description: formData.value.description,
-      status: formData.value.isActive ? 'active' : 'inactive',
-      publishTime: formData.value.publishTime,
-      cover: formData.value.cover,
-      videoFile: formData.value.videoFile || undefined,
-      sort: formData.value.displayOrder || items.value.length + 1
-    }
-    items.value.push(newItem)
+  } catch (error: any) {
+    console.error('保存失败:', error)
+    alert(`保存失败：${error.message || '未知错误'}`)
   }
-
-  closeDialog()
 }
 
 // 关闭对话框
@@ -643,7 +699,9 @@ const closeDialog = () => {
     unit: '',
     description: '',
     cover: '',
+    coverFile: null,
     videoFile: null,
+    videoRawFile: null,
     isActive: true,
     displayOrder: 1,
     publishTime: new Date().toISOString().split('T')[0]

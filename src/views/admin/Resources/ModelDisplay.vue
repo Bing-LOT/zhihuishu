@@ -77,7 +77,10 @@
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.title }}</h3>
+          <h3 class="item-title">
+            {{ item.title }}
+            <span v-if="item.status === 'inactive'" class="hidden-tag">前台隐藏</span>
+          </h3>
           
           <div class="item-meta">
             <div class="meta-item">
@@ -115,10 +118,22 @@
               <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="action-btn action-btn--preview" @click="previewItem(item)" title="预览">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <button 
+            class="action-btn" 
+            :class="item.status === 'active' ? 'action-btn--hide' : 'action-btn--show'"
+            @click="toggleVisibility(item)" 
+            :title="item.status === 'active' ? '隐藏' : '显示'"
+          >
+            <svg v-if="item.status === 'active'" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛开启图标 -->
               <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛关闭图标 -->
+              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+              <line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </button>
           <button class="action-btn action-btn--delete" @click="deleteItem(item.id)" title="删除">
@@ -860,6 +875,48 @@ const previewItem = (item: DisplayItem) => {
   showPreviewDialog.value = true
 }
 
+// 切换显示/隐藏状态
+const toggleVisibility = async (item: DisplayItem) => {
+  try {
+    const newStatus = item.status === 'active' ? 'inactive' : 'active'
+    const statusText = newStatus === 'active' ? '显示' : '隐藏'
+    
+    if (!confirm(`确定要将此课程设置为${statusText}状态吗？`)) {
+      return
+    }
+    
+    console.log('切换显示状态，课程ID:', item.id, '目标状态:', statusText)
+    
+    // 准备编辑参数
+    const params: CourseExpoEditParams = {
+      id: item.id,
+      name: item.title,
+      coverUrl: item.cover || '',
+      levelName: item.levelName || '',
+      property: item.category,
+      college: item.college,
+      brief: item.description,
+      docUrl: item.docUrl || '',
+      videoUrl: item.videoUrl || '',
+      showStatPv: item.showStatPv || 0,
+      showFront: newStatus === 'active' ? 1 : 0,  // 切换显示状态
+      teachers: item.teachers || []
+    }
+    
+    console.log('调用编辑API，参数:', params)
+    await editCourseExpo(params)
+    console.log('状态切换成功')
+    
+    alert(`已设置为${statusText}状态`)
+    
+    // 重新加载数据
+    await loadData()
+  } catch (error: any) {
+    console.error('状态切换失败:', error)
+    alert(error.message || '操作失败，请重试')
+  }
+}
+
 // 删除项目
 const deleteItem = async (id: string) => {
   if (confirm('确定要删除这条内容吗？')) {
@@ -1223,6 +1280,20 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 500;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hidden-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #ff4d4f;
+  color: white;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: 2px;
 }
 
 .item-meta {
@@ -1299,12 +1370,20 @@ onMounted(() => {
   background: #e6f7ff;
 }
 
-.action-btn--preview {
-  color: #666;
+.action-btn--hide {
+  color: #52c41a;
 }
 
-.action-btn--preview:hover {
-  background: #f5f5f5;
+.action-btn--hide:hover {
+  background: #f6ffed;
+}
+
+.action-btn--show {
+  color: #ff9800;
+}
+
+.action-btn--show:hover {
+  background: #fff7e6;
 }
 
 .action-btn--delete {

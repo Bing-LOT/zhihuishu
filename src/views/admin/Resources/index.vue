@@ -141,7 +141,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getBannerList, addBanner, deleteBanner as deleteBannerApi, uploadFile } from '@/api/banner'
 
 interface Banner {
   id: string
@@ -152,20 +153,13 @@ interface Banner {
 }
 
 // Banner列表
-const banners = ref<Banner[]>([
-  {
-    id: '1',
-    title: 'Banner 1',
-    image: '/images/home/video-1.jpg',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: 'Banner 2',
-    image: '/images/home/video-2.jpg',
-    sort: 2
-  }
-])
+const banners = ref<Banner[]>([])
+
+// 加载状态
+const loading = ref(false)
+
+// 选中的文件
+const selectedFile = ref<File | null>(null)
 
 // 对话框状态
 const showAddDialog = ref(false)
@@ -183,6 +177,35 @@ const formData = ref({
 // 当前编辑的Banner
 const currentBanner = ref<Banner | null>(null)
 
+// 加载Banner列表
+const loadBannerList = async () => {
+  try {
+    loading.value = true
+    const result = await getBannerList()
+    // 转换API返回的数据格式到前端格式
+    banners.value = (result as any[]).map((item: any, index: number) => ({
+      id: String(item.id),
+      title: `Banner ${index + 1}`,
+      image: item.picUrl,
+      link: '',
+      sort: item.sort || index + 1
+    }))
+    console.log('Banner列表加载成功:', banners.value)
+  } catch (error: any) {
+    console.error('加载Banner列表失败:', error)
+    if (error.response?.data?.msg) {
+      alert(`加载失败: ${error.response.data.msg}`)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// 页面加载时获取列表
+onMounted(() => {
+  loadBannerList()
+})
+
 // 触发文件上传
 const triggerUpload = () => {
   fileInput.value?.click()
@@ -193,6 +216,22 @@ const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      alert('请上传图片文件')
+      return
+    }
+    
+    // 验证文件大小（最大5MB）
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过5MB')
+      return
+    }
+    
+    // 保存文件对象
+    selectedFile.value = file
+    
+    // 本地预览
     const reader = new FileReader()
     reader.onload = (e) => {
       formData.value.image = e.target?.result as string
@@ -204,6 +243,7 @@ const handleFileChange = (event: Event) => {
 // 移除图片
 const removeImage = () => {
   formData.value.image = ''
+  selectedFile.value = null
   if (fileInput.value) {
     fileInput.value.value = ''
   }
@@ -222,16 +262,24 @@ const editBanner = (banner: Banner) => {
 }
 
 // 删除Banner
-const deleteBanner = (id: string) => {
-  if (confirm('确定要删除这个Banner吗？')) {
-    const index = banners.value.findIndex(b => b.id === id)
-    if (index > -1) {
-      banners.value.splice(index, 1)
-      // 更新排序
-      banners.value.forEach((banner, idx) => {
-        banner.sort = idx + 1
-      })
-    }
+const deleteBanner = async (id: string) => {
+  if (!confirm('确定要删除这个Banner吗？')) {
+    return
+  }
+  
+  try {
+    loading.value = true
+    await deleteBannerApi(Number(id))
+    console.log('Banner删除成功')
+    alert('删除成功')
+    // 重新加载列表
+    await loadBannerList()
+  } catch (error: any) {
+    console.error('删除Banner失败:', error)
+    const errorMsg = error.response?.data?.msg || error.message || '删除失败'
+    alert(`删除失败: ${errorMsg}`)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -250,36 +298,71 @@ const moveBanner = (index: number, direction: number) => {
 }
 
 // 保存Banner
-const saveBanner = () => {
+const saveBanner = async () => {
   if (!formData.value.image) {
     alert('请上传Banner图片')
     return
   }
 
-  if (showEditDialog.value && currentBanner.value) {
-    // 编辑
-    const index = banners.value.findIndex(b => b.id === formData.value.id)
-    if (index > -1) {
-      banners.value[index] = {
-        ...banners.value[index],
-        title: formData.value.title,
-        image: formData.value.image,
-        link: formData.value.link
-      }
-    }
-  } else {
-    // 新增
-    const newBanner: Banner = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      image: formData.value.image,
-      link: formData.value.link,
-      sort: banners.value.length + 1
-    }
-    banners.value.push(newBanner)
+  if (!selectedFile.value && !showEditDialog.value) {
+    alert('请选择图片文件')
+    return
   }
 
-  closeDialog()
+  try {
+    loading.value = true
+    let picUrl = formData.value.image
+
+    // 如果是新上传的文件，先上传图片
+    if (selectedFile.value) {
+      try {
+        console.log('开始上传图片到 /upload...')
+        const uploadRes = await uploadFile(selectedFile.value)
+        picUrl = uploadRes.url
+        console.log('图片上传成功，URL:', picUrl)
+      } catch (uploadError: any) {
+        console.error('上传图片失败:', uploadError)
+        const errorMsg = uploadError.response?.data?.msg || uploadError.message || '上传失败'
+        alert(`上传图片失败: ${errorMsg}`)
+        loading.value = false
+        return
+      }
+    }
+
+    if (showEditDialog.value && currentBanner.value) {
+      // 编辑（本地更新）
+      const index = banners.value.findIndex(b => b.id === formData.value.id)
+      if (index > -1) {
+        banners.value[index] = {
+          ...banners.value[index],
+          title: formData.value.title,
+          image: picUrl,
+          link: formData.value.link
+        }
+      }
+      console.log('Banner编辑成功')
+      alert('更新成功')
+    } else {
+      // 新增 - 调用API
+      const sort = banners.value.length + 1
+      console.log('调用 /banner/add API，参数:', { picUrl, sort })
+      
+      const result = await addBanner(picUrl, sort)
+      console.log('Banner添加成功，返回ID:', result.id)
+      alert('添加成功')
+      
+      // 重新加载列表
+      await loadBannerList()
+    }
+
+    closeDialog()
+  } catch (error: any) {
+    console.error('保存Banner失败:', error)
+    const errorMsg = error.response?.data?.msg || error.message || '保存失败'
+    alert(`操作失败: ${errorMsg}`)
+  } finally {
+    loading.value = false
+  }
 }
 
 // 关闭对话框
@@ -293,6 +376,10 @@ const closeDialog = () => {
     link: ''
   }
   currentBanner.value = null
+  selectedFile.value = null
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
 </script>
 

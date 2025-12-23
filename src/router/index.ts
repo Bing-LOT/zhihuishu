@@ -8,7 +8,6 @@ import portalRoutes from './modules/portal'
 import adminRoutes from './modules/admin'
 import { authGuard } from './guards/authGuard'
 import { roleGuard } from './guards/roleGuard'
-import { useUserStore } from '@/stores/user'
 
 // 认证相关路由
 const authRoutes: RouteRecordRaw[] = [
@@ -84,25 +83,6 @@ router.beforeEach((to, from, next) => {
   // 设置页面标题
   if (to.meta.title) {
     document.title = `${to.meta.title} - 大思政课数智化平台`
-  }
-  
-  // 处理URL参数中的AuthToken
-  const authTokenParam = to.query.AuthToken as string
-  if (authTokenParam) {
-    const userStore = useUserStore()
-    userStore.setAuthToken(authTokenParam)
-    console.log('从URL获取AuthToken并存储:', authTokenParam)
-    
-    // 移除URL中的AuthToken参数（保持URL整洁）
-    const newQuery = { ...to.query }
-    delete newQuery.AuthToken
-    
-    next({
-      path: to.path,
-      query: newQuery,
-      replace: true
-    })
-    return
   }
   
   // 认证守卫

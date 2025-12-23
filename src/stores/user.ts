@@ -20,7 +20,6 @@ export const useUserStore = defineStore('user', () => {
   const userName = computed(() => user.value?.name || '')
   const userAvatar = computed(() => user.value?.avatar || '')
   const permissions = computed(() => user.value?.permissions || [])
-  const hasAuthToken = computed(() => !!authToken.value)
 
   // Actions
   
@@ -80,22 +79,6 @@ export const useUserStore = defineStore('user', () => {
     return false
   }
 
-  /**
-   * 设置 AuthToken（从URL参数获取）
-   * @param tokenValue AuthToken值
-   */
-  function setAuthToken(tokenValue: string) {
-    authToken.value = tokenValue
-    console.log('AuthToken已设置:', tokenValue)
-  }
-
-  /**
-   * 清除 AuthToken
-   */
-  function clearAuthToken() {
-    authToken.value = ''
-  }
-
   return {
     // State
     user,
@@ -110,7 +93,6 @@ export const useUserStore = defineStore('user', () => {
     userName,
     userAvatar,
     permissions,
-    hasAuthToken,
     
     // Actions
     login,
@@ -119,20 +101,7 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     fetchUserStats,
     hasPermission,
-    hasRole,
-    setAuthToken,
-    clearAuthToken
-  }
-}, {
-  persist: {
-    enabled: true,
-    strategies: [
-      {
-        key: 'user',
-        storage: localStorage,
-        paths: ['user', 'token', 'refreshToken', 'authToken']
-      }
-    ]
+    hasRole
   }
 })
 

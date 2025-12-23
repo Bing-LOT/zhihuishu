@@ -116,6 +116,24 @@ export interface PoliticalResourceAddParams {
   showFront: 0 | 1
 }
 
+/** 思政资源编辑请求参数 */
+export interface PoliticalResourceEditParams {
+  /** 业务id */
+  id: number
+  /** 标题 */
+  title: string
+  /** 分类：0=政策文件；1=思政素材 */
+  category: 0 | 1
+  /** 内容类型：0=富文本内容（内部详情）；1=URL地址（外部跳转） */
+  contentType: 0 | 1
+  /** 内容配置，配置富文本详情或URL跳转地址 */
+  content: string
+  /** 是否置顶：1=置顶；0=不置顶 */
+  pinTop: 0 | 1
+  /** 前台显示：1=显示；0=不显示 */
+  showFront: 0 | 1
+}
+
 /** 思政资源列表查询参数 */
 export interface PoliticalResourceListParams {
   /** 页码，默认1 */

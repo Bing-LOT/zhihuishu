@@ -9,6 +9,7 @@ import type {
   ResourceFormData,
   ResourceStats,
   PoliticalResourceAddParams,
+  PoliticalResourceEditParams,
   PoliticalResourceListParams,
   PoliticalResourceListResponse,
   PaginationResponse 
@@ -166,6 +167,18 @@ export function getPoliticalResourceList(params: PoliticalResourceListParams): P
     url: '/politicalResource/page/list',
     method: 'POST',
     data: params
+  })
+}
+
+/**
+ * 编辑思政资源
+ * @param data 编辑数据
+ */
+export function editPoliticalResource(data: PoliticalResourceEditParams): Promise<any> {
+  return request({
+    url: '/politicalResource/edit',
+    method: 'PUT',
+    data
   })
 }
 

@@ -273,8 +273,8 @@ import { ref, computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import type { IEditorConfig } from '@wangeditor/editor'
-import { addPoliticalResource, getPoliticalResourceList } from '@/api/resource'
-import type { PoliticalResourceAddParams, PoliticalResourceItem } from '@/types'
+import { addPoliticalResource, editPoliticalResource, getPoliticalResourceList } from '@/api/resource'
+import type { PoliticalResourceAddParams, PoliticalResourceEditParams, PoliticalResourceItem } from '@/types'
 import Pagination from '@/components/common/Pagination/index.vue'
 
 // 数据列表
@@ -299,7 +299,7 @@ const showPreviewDialog = ref(false)
 
 // 表单数据
 const formData = ref({
-  id: '',
+  id: 0,
   title: '',
   category: 1 as 0 | 1, // 0=政策文件；1=思政素材
   contentType: 0 as 0 | 1, // 0=富文本内容；1=URL地址
@@ -442,7 +442,7 @@ const handleDrop = (targetIndex: number, event: DragEvent) => {
 // 编辑项目
 const editItem = (item: PoliticalResourceItem) => {
   formData.value = {
-    id: String(item.id),
+    id: typeof item.id === 'number' ? item.id : parseInt(String(item.id)),
     title: item.title,
     category: item.category,
     contentType: item.contentType,
@@ -452,6 +452,13 @@ const editItem = (item: PoliticalResourceItem) => {
     displayOrder: 1
   }
   showEditDialog.value = true
+  
+  // 如果是富文本内容，需要等编辑器加载后再设置内容
+  if (item.contentType === 0 && editorRef.value) {
+    setTimeout(() => {
+      editorRef.value?.setHtml(item.content)
+    }, 100)
+  }
 }
 
 // 预览项目
@@ -494,15 +501,31 @@ const saveItem = async () => {
     return
   }
 
-  if (showEditDialog.value) {
-    // 编辑模式 - TODO: 调用后端编辑接口
-    alert('编辑功能待实现')
-    closeDialog()
-  } else {
-    // 新增模式 - 调用接口
-    try {
-      isSaving.value = true
+  try {
+    isSaving.value = true
+
+    if (showEditDialog.value) {
+      // 编辑模式 - 调用编辑接口
+      const params: PoliticalResourceEditParams = {
+        id: formData.value.id,
+        title: formData.value.title,
+        category: formData.value.category,
+        contentType: formData.value.contentType,
+        content: formData.value.content,
+        pinTop: formData.value.pinTop,
+        showFront: formData.value.showFront
+      }
       
+      console.log('📝 编辑参数:', params)
+      await editPoliticalResource(params)
+      
+      alert('编辑成功！')
+      closeDialog()
+      
+      // 重新加载当前页
+      await loadList()
+    } else {
+      // 新增模式 - 调用新增接口
       const params: PoliticalResourceAddParams = {
         title: formData.value.title,
         category: formData.value.category,
@@ -512,20 +535,21 @@ const saveItem = async () => {
         showFront: formData.value.showFront
       }
       
+      console.log('➕ 新增参数:', params)
       await addPoliticalResource(params)
       
       alert('新增成功！')
       closeDialog()
       
-      // 重新加载列表
+      // 重新加载列表，跳转到第一页
       currentPage.value = 1
       await loadList()
-    } catch (error: any) {
-      console.error('新增失败:', error)
-      alert(`新增失败：${error.message || '网络错误'}`)
-    } finally {
-      isSaving.value = false
     }
+  } catch (error: any) {
+    console.error(`❌ ${showEditDialog.value ? '编辑' : '新增'}失败:`, error)
+    alert(`${showEditDialog.value ? '编辑' : '新增'}失败：${error.message || '网络错误'}`)
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -534,7 +558,7 @@ const closeDialog = () => {
   showAddDialog.value = false
   showEditDialog.value = false
   formData.value = {
-    id: '',
+    id: 0,
     title: '',
     category: 1,
     contentType: 0,
@@ -542,6 +566,11 @@ const closeDialog = () => {
     pinTop: 0,
     showFront: 1,
     displayOrder: 1
+  }
+  
+  // 清空富文本编辑器内容
+  if (editorRef.value) {
+    editorRef.value.clear()
   }
 }
 </script>

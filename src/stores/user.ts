@@ -11,6 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
   const token = ref<string>('')
   const refreshToken = ref<string>('')
+  const authToken = ref<string>('e568ff77ee9e45f488a6faff3c827366')
   const userStats = ref<UserStats | null>(null)
 
   // Getters
@@ -19,6 +20,7 @@ export const useUserStore = defineStore('user', () => {
   const userName = computed(() => user.value?.name || '')
   const userAvatar = computed(() => user.value?.avatar || '')
   const permissions = computed(() => user.value?.permissions || [])
+  const hasAuthToken = computed(() => !!authToken.value)
 
   // Actions
   
@@ -78,11 +80,28 @@ export const useUserStore = defineStore('user', () => {
     return false
   }
 
+  /**
+   * 设置 AuthToken（从URL参数获取）
+   * @param tokenValue AuthToken值
+   */
+  function setAuthToken(tokenValue: string) {
+    authToken.value = tokenValue
+    console.log('AuthToken已设置:', tokenValue)
+  }
+
+  /**
+   * 清除 AuthToken
+   */
+  function clearAuthToken() {
+    authToken.value = ''
+  }
+
   return {
     // State
     user,
     token,
     refreshToken,
+    authToken,
     userStats,
     
     // Getters
@@ -91,6 +110,7 @@ export const useUserStore = defineStore('user', () => {
     userName,
     userAvatar,
     permissions,
+    hasAuthToken,
     
     // Actions
     login,
@@ -99,7 +119,9 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     fetchUserStats,
     hasPermission,
-    hasRole
+    hasRole,
+    setAuthToken,
+    clearAuthToken
   }
 }, {
   persist: {
@@ -108,7 +130,7 @@ export const useUserStore = defineStore('user', () => {
       {
         key: 'user',
         storage: localStorage,
-        paths: ['user', 'token', 'refreshToken']
+        paths: ['user', 'token', 'refreshToken', 'authToken']
       }
     ]
   }

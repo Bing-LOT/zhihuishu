@@ -5,27 +5,41 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import type { ApiResponse } from '@/types'
+import { useUserStore } from '@/stores/user'
+import { API_CONFIG, TIMEOUT, AUTH_TOKEN_HEADER } from '@/config/api'
 
 // 创建 Axios 实例
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 30000,
+  baseURL: API_CONFIG.baseURL,
+  timeout: TIMEOUT,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
+// 打印当前API地址（便于调试）
+console.log('API Base URL:', API_CONFIG.baseURL)
+
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    // TODO: 添加 Token 到请求头
-    // const token = localStorage.getItem('token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    const userStore = useUserStore()
+    
+    // 添加 AuthToken 到请求头（优先级最高）
+    if (userStore.authToken) {
+      config.headers[AUTH_TOKEN_HEADER] = userStore.authToken
+      console.log('携带 AuthToken:', userStore.authToken)
+    }
+    
+    // 添加普通 Token 到请求头
+    if (userStore.token) {
+      config.headers.Authorization = `Bearer ${userStore.token}`
+    }
+    
     return config
   },
   (error) => {
+    console.error('请求拦截器错误:', error)
     return Promise.reject(error)
   }
 )

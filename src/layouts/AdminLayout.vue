@@ -34,8 +34,8 @@
 
     <!-- 内容区域 -->
     <div class="admin-content">
-      <!-- 左侧菜单 -->
-      <aside class="admin-sidebar">
+      <!-- 左侧菜单（仅在资源管理模块显示） -->
+      <aside v-if="showSidebar" class="admin-sidebar">
         <div
           v-for="menu in sideMenus"
           :key="menu.key"
@@ -71,7 +71,7 @@
       </aside>
 
       <!-- 主内容区 -->
-      <main class="admin-main">
+      <main class="admin-main" :class="{ 'admin-main--full': !showSidebar }">
         <router-view />
       </main>
     </div>
@@ -148,7 +148,7 @@ const sideMenus = ref([
 const switchTab = (tabKey: string) => {
   currentTab.value = tabKey
   const tabRoutes: Record<string, string> = {
-    resources: '/admin/resources',
+    resources: '/admin/resources/home',
     questions: '/admin/questions',
     analysis: '/admin/analysis',
     ai: '/admin/ai',
@@ -173,6 +173,11 @@ const selectMenu = (key: string, path: string) => {
     router.push(path)
   }
 }
+
+// 是否显示侧边栏（只在资源管理模块显示）
+const showSidebar = computed(() => {
+  return route.path.startsWith('/admin/resources')
+})
 
 // 监听路由变化
 watch(
@@ -385,5 +390,9 @@ watch(
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+}
+
+.admin-main--full {
+  padding: 0;
 }
 </style>

@@ -142,6 +142,8 @@ export interface PoliticalResourceItem {
   content: string
   /** 是否置顶：1=置顶；0=不置顶 */
   pinTop: 0 | 1
+  /** 浏览量 */
+  statPv?: number
   /** 前台显示：1=显示；0=不显示 */
   showFront: 0 | 1
   /** 创建时间 */
@@ -150,17 +152,19 @@ export interface PoliticalResourceItem {
   updateTime?: string
 }
 
-/** 思政资源列表响应 */
+/** 思政资源列表响应（经过响应拦截器处理后的数据结构） */
 export interface PoliticalResourceListResponse {
-  /** 数据列表 */
-  list: PoliticalResourceItem[]
-  /** 总条数 */
+  /** 业务数据记录集合 */
+  records: PoliticalResourceItem[]
+  /** 总数 */
   total: number
-  /** 当前页码 */
-  pageIndex: number
   /** 每页大小 */
-  pageSize: number
+  size: number
+  /** 当前页码 */
+  current: number
   /** 总页数 */
-  totalPages?: number
+  pages: number
+  /** 其他字段 */
+  [key: string]: any
 }
 

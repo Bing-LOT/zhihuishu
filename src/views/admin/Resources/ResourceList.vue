@@ -81,18 +81,19 @@
         <div class="item-content">
           <h3 class="item-title">
             {{ item.title }}
-            <span v-if="item.pinTop === 1" class="pin-badge">置顶</span>
+            <span v-if="item.pinTop === 1 || item.pinTop === 32" class="pin-badge">置顶</span>
             <span v-if="item.category === 0" class="category-badge">政策文件</span>
-            <span v-else class="category-badge category-badge--material">思政素材</span>
+            <span v-else-if="item.category === 1 || item.category === 2" class="category-badge category-badge--material">思政素材</span>
           </h3>
-          <p class="item-description">{{ item.content.substring(0, 100) }}{{ item.content.length > 100 ? '...' : '' }}</p>
+          <p class="item-description">{{ item.content ? (item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '')) : '-' }}</p>
 
           <div class="item-footer">
             <div class="footer-info">
               <span class="sort-info">第 {{ (currentPage - 1) * pageSize + index + 1 }} 位</span>
               <span class="time-info">创建时间：{{ item.createTime || '-' }}</span>
-              <span class="status-info" :class="{ 'status-info--active': item.showFront === 1 }">
-                {{ item.showFront === 1 ? '前台显示' : '已隐藏' }}
+              <span class="view-info">浏览量：{{ item.statPv || 0 }}</span>
+              <span class="status-info" :class="{ 'status-info--active': item.showFront === 1 || item.showFront === 64 }">
+                {{ (item.showFront === 1 || item.showFront === 64) ? '前台显示' : '已隐藏' }}
               </span>
             </div>
           </div>
@@ -348,16 +349,35 @@ const loadList = async () => {
       // showFront 不传，显示所有
     }
     
+    console.log('📤 请求参数:', params)
     const response = await getPoliticalResourceList(params)
-    items.value = response.list || []
-    total.value = response.total || 0
+    console.log('📥 API 返回数据:', response)
     
-    console.log('列表加载成功:', response)
+    // 响应拦截器已经提取了 data，response 就是数据对象本身
+    if (response && response.records) {
+      items.value = response.records || []
+      total.value = response.total || 0
+      currentPage.value = response.current || currentPage.value
+      pageSize.value = response.size || pageSize.value
+      
+      console.log('✅ 数据加载成功!')
+      console.log('  - records 数量:', items.value.length)
+      console.log('  - total:', total.value)
+      console.log('  - 列表数据:', items.value)
+    } else {
+      items.value = []
+      total.value = 0
+      console.warn('⚠️ 数据格式异常:', response)
+    }
   } catch (error: any) {
-    console.error('列表加载失败:', error)
+    console.error('❌ 列表加载失败:', error)
     alert(`加载失败：${error.message || '网络错误'}`)
+    items.value = []
+    total.value = 0
   } finally {
     isLoading.value = false
+    console.log('🔄 isLoading:', isLoading.value)
+    console.log('📊 items 数量:', items.value.length)
   }
 }
 

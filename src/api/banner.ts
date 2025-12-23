@@ -3,6 +3,7 @@
  */
 
 import request from './request'
+import { useUserStore } from '@/stores/user'
 
 /**
  * Banner数据结构
@@ -20,9 +21,19 @@ export interface BannerItem {
  */
 /**
  * 上传文件（通过Vite代理，避免CORS）
+ * 
+ * 对应 API 文档的 curl 命令:
+ * curl --location --request POST 'https://dszk.fzu.edu.cn/dszk-api/upload' \
+ * --header 'AuthToken: 269e7eccac95435dbb626fce47c182c3' \
+ * --form 'file=@"文件路径"'
+ * 
+ * 本地开发环境通过 Vite 代理:
+ * POST http://localhost:5173/upload → https://dszk.fzu.edu.cn/dszk-api/upload
  */
 export function uploadFile(file: File): Promise<{ url: string }> {
   return new Promise((resolve, reject) => {
+    const userStore = useUserStore()
+    
     console.log('========== 上传文件（走Vite代理） ==========')
     console.log('文件信息:', {
       name: file.name,
@@ -30,16 +41,19 @@ export function uploadFile(file: File): Promise<{ url: string }> {
       type: file.type
     })
     
-    // 创建Headers对象
-    const myHeaders = new Headers()
-    myHeaders.append("AuthToken", "e568ff77ee9e45f488a6faff3c827366")
-    
-    // 创建FormData
+    // 创建FormData（必须先创建，再设置Headers）
     const formdata = new FormData()
     formdata.append("file", file)
     
-    console.log('✅ Headers已设置: AuthToken')
-    console.log('✅ FormData已创建: file字段')
+    // 创建Headers对象 - 使用 AuthToken（注意大小写，与 API 文档一致）
+    const myHeaders = new Headers()
+    if (userStore.authToken) {
+      myHeaders.append("AuthToken", userStore.authToken)
+    }
+    
+    console.log('✅ FormData已创建: file 字段')
+    console.log('✅ Headers已设置: AuthToken =', userStore.authToken)
+    console.log('   (与 API 文档一致: 269e7eccac95435dbb626fce47c182c3)')
     
     // 请求配置
     const requestOptions: RequestInit = {

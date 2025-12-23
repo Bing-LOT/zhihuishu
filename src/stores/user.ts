@@ -11,6 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
   const token = ref<string>('')
   const refreshToken = ref<string>('')
+  // API 文档要求的 AuthToken
   const authToken = ref<string>('e568ff77ee9e45f488a6faff3c827366')
   const userStats = ref<UserStats | null>(null)
 

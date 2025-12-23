@@ -3,16 +3,16 @@
  */
 
 import axios from 'axios'
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosInstance, AxiosResponse } from 'axios'
 import type { ApiResponse } from '@/types'
 import { useUserStore } from '@/stores/user'
 
 // API基础地址配置
-// 开发环境：空字符串（直接使用 /upload 等路径，走Vite代理）
-// 生产环境：使用完整URL
+// 开发环境：空字符串（使用相对路径，通过 Vite 代理转发到 VITE_APP_BASE_URL_DEV）
+// 生产环境：使用 VITE_APP_BASE_API 完整URL
 const API_BASE_URL = import.meta.env.MODE === 'production' 
-  ? (import.meta.env.VITE_API_BASE_URL || 'http://prod-cn.your-api-server.com')
-  : ''
+  ? (import.meta.env.VITE_APP_BASE_API || 'http://prod-cn.your-api-server.com')
+  : '' // 开发环境使用空字符串，走 Vite 代理
 
 // 创建 Axios 实例
 const request: AxiosInstance = axios.create({
@@ -23,9 +23,9 @@ const request: AxiosInstance = axios.create({
 
 console.log('================== API配置 ==================')
 console.log('当前环境:', import.meta.env.MODE)
-console.log('API Base URL:', API_BASE_URL || '(空，直接使用路径)')
-console.log('开发环境: 请求/upload等路径，通过Vite代理转发')
-console.log('生产环境: 使用完整URL', import.meta.env.VITE_API_BASE_URL || 'http://prod-cn.your-api-server.com')
+console.log('API Base URL:', API_BASE_URL || '(空，使用 Vite 代理)')
+console.log('开发环境代理目标 (VITE_APP_BASE_URL_DEV):', import.meta.env.VITE_APP_BASE_URL_DEV || 'https://dszk.fzu.edu.cn/dszk-api')
+console.log('生产环境地址 (VITE_APP_BASE_API):', import.meta.env.VITE_APP_BASE_API || 'http://prod-cn.your-api-server.com')
 console.log('=============================================')
 
 // 请求拦截器

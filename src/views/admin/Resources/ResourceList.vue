@@ -141,15 +141,21 @@
 
           <div class="form-group">
             <label>详情内容 <span class="required">*</span></label>
-            <textarea
-              v-model="formData.content"
-              rows="10"
-              placeholder="请输入详情内容（支持富文本）"
-              class="form-textarea"
-            ></textarea>
-            <small class="field-hint">
-              提示：实际使用时可集成富文本编辑器
-            </small>
+            <div class="editor-container">
+              <Toolbar
+                :editor="editorRef"
+                :defaultConfig="{}"
+                mode="default"
+                class="editor-toolbar"
+              />
+              <Editor
+                v-model="formData.content"
+                :defaultConfig="editorConfig"
+                mode="default"
+                class="editor-content"
+                @onCreated="handleCreated"
+              />
+            </div>
           </div>
 
           <div class="form-group">
@@ -209,7 +215,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount, shallowRef } from 'vue'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import '@wangeditor/editor/dist/css/style.css'
+import type { IEditorConfig } from '@wangeditor/editor'
 
 interface ResourceItem {
   id: string
@@ -256,6 +265,25 @@ const formData = ref({
   content: '',
   showOnFrontend: true,
   displayOrder: 1
+})
+
+// 富文本编辑器
+const editorRef = shallowRef()
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '请输入详情内容...',
+  MENU_CONF: {}
+}
+
+const handleCreated = (editor: any) => {
+  editorRef.value = editor
+}
+
+// 组件销毁前，销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor) {
+    editor.destroy()
+  }
 })
 
 // 预览数据
@@ -758,6 +786,36 @@ const closeDialog = () => {
   margin-top: 6px;
   font-size: 12px;
   color: #999;
+}
+
+/* 富文本编辑器 */
+.editor-container {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.editor-container:focus-within {
+  border-color: #e31e24;
+}
+
+.editor-toolbar {
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.editor-content {
+  min-height: 300px;
+  overflow-y: auto;
+}
+
+.editor-content :deep(.w-e-text-container) {
+  background-color: #fff;
+}
+
+.editor-content :deep(.w-e-text-placeholder) {
+  font-style: normal;
+  color: #bfbfbf;
 }
 
 .dialog__footer {

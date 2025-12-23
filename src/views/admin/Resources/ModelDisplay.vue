@@ -35,7 +35,7 @@
         </select>
 
         <div class="data-count">
-          共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+          共 {{ totalCount }} 条数据
         </div>
       </div>
 
@@ -131,12 +131,64 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="filteredItems.length === 0 && !isLoading" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <p>暂无数据</p>
+      </div>
+
+      <!-- 加载状态 -->
+      <div v-if="isLoading" class="loading-state">
+        <svg class="loading-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" stroke="#e31e24" stroke-width="3" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60" />
+        </svg>
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <!-- 分页 -->
+    <div v-if="totalCount > 0" class="pagination-wrapper">
+      <div class="pagination-info">
+        显示 {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalCount) }} 条，共 {{ totalCount }} 条
+      </div>
+      <div class="pagination">
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+        >
+          上一页
+        </button>
+        
+        <button
+          v-for="page in visiblePages"
+          :key="page"
+          class="pagination-btn"
+          :class="{ active: page === currentPage }"
+          @click="handlePageChange(page)"
+        >
+          {{ page }}
+        </button>
+        
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage >= Math.ceil(totalCount / pageSize)"
+          @click="handlePageChange(currentPage + 1)"
+        >
+          下一页
+        </button>
+        
+        <select 
+          v-model="pageSize" 
+          class="page-size-select"
+          @change="handlePageSizeChange(pageSize)"
+        >
+          <option :value="10">10条/页</option>
+          <option :value="20">20条/页</option>
+          <option :value="50">50条/页</option>
+        </select>
       </div>
     </div>
 
@@ -418,54 +470,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { uploadFile } from '@/api/banner'
-import { addCourseExpo, type CourseExpoAddParams } from '@/api/resource'
+import { 
+  addCourseExpo, 
+  editCourseExpo, 
+  getCourseExpoPageList,
+  deleteCourseExpo,
+  type CourseExpoAddParams, 
+  type CourseExpoEditParams,
+  type CourseExpoItem
+} from '@/api/resource'
 
 interface DisplayItem {
   id: string
   title: string
+  levelName?: string   // 示范等级
   teacher: string
+  teachers?: Array<{ name: string; title: string }>  // 完整教师信息
   college: string
   category: string
   description: string
   status: 'active' | 'inactive'
   publishTime: string
   cover?: string
+  docUrl?: string      // 教学设计文档URL
+  videoUrl?: string    // 教学视频URL
+  showStatPv?: number  // 显示学习统计
   sort: number
 }
 
 // 数据列表
-const items = ref<DisplayItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    teacher: '张教授',
-    college: '计算机学院',
-    category: '专业必修课程',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    status: 'active',
-    publishTime: '2024-11-20',
-    cover: '/images/home/video-1.jpg',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    teacher: '王教授',
-    college: '机械学院',
-    category: '通识教育课程',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    status: 'active',
-    publishTime: '2024-11-18',
-    cover: '/images/home/video-2.jpg',
-    sort: 2
-  }
-])
+const items = ref<DisplayItem[]>([])
 
 // 搜索和筛选
 const searchKeyword = ref('')
 const statusFilter = ref('all')
+
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalCount = ref(0)
+const isLoading = ref(false)
 
 // 对话框状态
 const showAddDialog = ref(false)
@@ -487,8 +533,11 @@ const formData = ref({
   ],
   description: '',
   cover: '',
+  coverUrl: '',  // 保存原有的封面URL
   pdfFile: null as { name: string; url: string } | null,
   videoFile: null as { name: string; url: string } | null,
+  docUrl: '',    // 保存原有的PDF文档URL
+  videoUrl: '',  // 保存原有的视频URL
   showStats: false,
   isActive: true,
   status: 'active' as 'active' | 'inactive',
@@ -614,25 +663,115 @@ const removeVideo = () => {
 }
 
 // 计算属性
-const totalCount = computed(() => items.value.length)
-
 const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
+  return items.value.sort((a, b) => a.sort - b.sort)
 })
+
+// 可见页码列表
+const visiblePages = computed(() => {
+  const total = Math.ceil(totalCount.value / pageSize.value)
+  const current = currentPage.value
+  const pages: number[] = []
+  
+  // 显示当前页前后各2页
+  let start = Math.max(1, current - 2)
+  let end = Math.min(total, current + 2)
+  
+  // 确保至少显示5页
+  if (end - start < 4) {
+    if (start === 1) {
+      end = Math.min(total, start + 4)
+    } else if (end === total) {
+      start = Math.max(1, end - 4)
+    }
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+  
+  return pages
+})
+
+// 转换API数据到显示数据
+const convertToDisplayItem = (item: CourseExpoItem, index: number): DisplayItem => {
+  const teacherNames = item.teachers.map(t => t.name).join('、')
+  return {
+    id: String(item.id),
+    title: item.name,
+    levelName: item.levelName,
+    teacher: teacherNames,
+    teachers: item.teachers,           // 保存完整教师信息
+    college: item.college,
+    category: item.property,
+    description: item.brief,
+    status: item.showFront === 1 ? 'active' : 'inactive',
+    publishTime: item.createTime || item.updateTime || new Date().toISOString().split('T')[0],
+    cover: item.coverUrl,
+    docUrl: item.docUrl,
+    videoUrl: item.videoUrl,
+    showStatPv: item.showStatPv,       // 保存统计显示状态
+    sort: index + 1
+  }
+}
+
+// 加载数据
+const loadData = async () => {
+  try {
+    isLoading.value = true
+    console.log('加载课程展播列表数据...')
+    
+    // 组装查询参数
+    const params = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value,
+      keyword: searchKeyword.value || undefined,
+      showFront: statusFilter.value === 'all' ? undefined : 
+                 statusFilter.value === 'active' ? 1 : 0
+    }
+    
+    console.log('查询参数:', params)
+    
+    const response = await getCourseExpoPageList(params)
+    console.log('查询结果:', response)
+    
+    // 转换数据格式
+    items.value = response.records.map((item, index) => 
+      convertToDisplayItem(item, (currentPage.value - 1) * pageSize.value + index)
+    )
+    totalCount.value = response.total
+    
+    console.log('数据加载成功，共', totalCount.value, '条')
+  } catch (error: any) {
+    console.error('加载数据失败:', error)
+    alert(error.message || '加载数据失败，请重试')
+  } finally {
+    isLoading.value = false
+  }
+}
 
 // 搜索处理
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  currentPage.value = 1  // 搜索时重置到第一页
+  loadData()
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  currentPage.value = 1  // 筛选时重置到第一页
+  loadData()
+}
+
+// 分页处理
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  loadData()
+}
+
+const handlePageSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1
+  loadData()
 }
 
 // 拖拽开始
@@ -659,23 +798,55 @@ const handleDrop = (targetIndex: number, event: DragEvent) => {
   draggedIndex.value = null
 }
 
+// 从URL提取文件名
+const getFileNameFromUrl = (url: string, defaultName: string): string => {
+  if (!url) return defaultName
+  try {
+    const urlObj = new URL(url)
+    const pathname = urlObj.pathname
+    const fileName = pathname.substring(pathname.lastIndexOf('/') + 1)
+    return fileName || defaultName
+  } catch {
+    // 如果不是完整URL，尝试从路径中提取
+    const parts = url.split('/')
+    return parts[parts.length - 1] || defaultName
+  }
+}
+
 // 编辑项目
 const editItem = (item: DisplayItem) => {
-  const teacherNames = item.teacher.split('、')
-  const teachersArray = teacherNames.map(name => ({ name, title: '' }))
+  // 使用完整的教师信息（包括职称），如果没有则从名字解析
+  const teachersArray = item.teachers && item.teachers.length > 0 
+    ? item.teachers 
+    : item.teacher.split('、').map(name => ({ name, title: '' }))
+  
+  // 如果有文档URL，显示文件信息
+  const pdfFileInfo = item.docUrl ? {
+    name: getFileNameFromUrl(item.docUrl, '教学设计.pdf'),
+    url: item.docUrl
+  } : null
+  
+  // 如果有视频URL，显示文件信息
+  const videoFileInfo = item.videoUrl ? {
+    name: getFileNameFromUrl(item.videoUrl, '教学视频.mp4'),
+    url: item.videoUrl
+  } : null
   
   formData.value = {
     id: item.id,
     title: item.title,
-    level: '',
+    level: item.levelName || '',          // 回显示范等级
     college: item.college,
     category: item.category,
     teachers: teachersArray.length > 0 ? teachersArray : [{ name: '', title: '' }],
     description: item.description,
     cover: item.cover || '',
-    pdfFile: null,
-    videoFile: null,
-    showStats: false,
+    coverUrl: item.cover || '',           // 保存原有封面URL
+    pdfFile: pdfFileInfo,                 // 回显PDF文件信息
+    videoFile: videoFileInfo,             // 回显视频文件信息
+    docUrl: item.docUrl || '',            // 保存原有PDF文档URL
+    videoUrl: item.videoUrl || '',        // 保存原有视频URL
+    showStats: item.showStatPv === 1,     // 回显统计显示状态
     isActive: item.status === 'active',
     status: item.status,
     publishTime: item.publishTime
@@ -690,15 +861,19 @@ const previewItem = (item: DisplayItem) => {
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
+const deleteItem = async (id: string) => {
   if (confirm('确定要删除这条内容吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
+    try {
+      console.log('删除课程展播，ID:', id)
+      await deleteCourseExpo(id)
+      console.log('删除成功')
+      alert('删除成功')
+      
+      // 重新加载数据
+      await loadData()
+    } catch (error: any) {
+      console.error('删除失败:', error)
+      alert(error.message || '删除失败，请重试')
     }
   }
 }
@@ -748,6 +923,16 @@ const saveItem = async () => {
       alert('请上传教学视频')
       return
     }
+  } else {
+    // 编辑时的验证：如果移除了原文件，必须重新上传
+    if (!actualPdfFile.value && !formData.value.docUrl) {
+      alert('请上传教学设计文档')
+      return
+    }
+    if (!actualVideoFile.value && !formData.value.videoUrl) {
+      alert('请上传教学视频')
+      return
+    }
   }
 
   try {
@@ -783,22 +968,35 @@ const saveItem = async () => {
     const teacherNames = validTeachers.map(t => t.name).join('、')
 
     if (showEditDialog.value) {
-      // 编辑 - 暂时更新本地数据
-      const index = items.value.findIndex(item => item.id === formData.value.id)
-      if (index > -1) {
-        items.value[index] = {
-          ...items.value[index],
-          title: formData.value.title,
-          teacher: teacherNames,
-          college: formData.value.college,
-          category: formData.value.category,
-          description: formData.value.description,
-          status: formData.value.isActive ? 'active' : 'inactive',
-          publishTime: formData.value.publishTime,
-          cover: coverUrl
-        }
+      // 编辑 - 调用编辑API
+      // 如果没有上传新文件，使用原有的URL
+      const finalDocUrl = docUrl || formData.value.docUrl
+      const finalVideoUrl = videoUrl || formData.value.videoUrl
+      
+      const params: CourseExpoEditParams = {
+        id: formData.value.id,
+        name: formData.value.title,
+        coverUrl: coverUrl,
+        levelName: formData.value.level,
+        property: formData.value.category,
+        college: formData.value.college,
+        brief: formData.value.description,
+        docUrl: finalDocUrl,
+        videoUrl: finalVideoUrl,
+        showStatPv: formData.value.showStats ? 1 : 0,
+        showFront: formData.value.isActive ? 1 : 0,
+        teachers: validTeachers
       }
+      
+      console.log('调用编辑API，参数:', params)
+      await editCourseExpo(params)
+      console.log('编辑成功')
+      
       alert('编辑成功')
+      closeDialog()
+      
+      // 重新加载数据
+      await loadData()
     } else {
       // 新增 - 调用API
       const params: CourseExpoAddParams = {
@@ -819,25 +1017,13 @@ const saveItem = async () => {
       await addCourseExpo(params)
       console.log('新增成功')
       
-      // 更新本地列表
-      const newItem: DisplayItem = {
-        id: Date.now().toString(),
-        title: formData.value.title,
-        teacher: teacherNames,
-        college: formData.value.college,
-        category: formData.value.category,
-        description: formData.value.description,
-        status: formData.value.isActive ? 'active' : 'inactive',
-        publishTime: formData.value.publishTime,
-        cover: coverUrl,
-        sort: items.value.length + 1
-      }
-      items.value.push(newItem)
-      
       alert('新增成功')
+      closeDialog()
+      
+      // 重新加载数据
+      currentPage.value = 1  // 新增后回到第一页
+      await loadData()
     }
-
-    closeDialog()
   } catch (error: any) {
     console.error('保存失败:', error)
     alert(error.message || '保存失败，请重试')
@@ -859,8 +1045,11 @@ const closeDialog = () => {
     teachers: [{ name: '', title: '' }],
     description: '',
     cover: '',
+    coverUrl: '',
     pdfFile: null,
     videoFile: null,
+    docUrl: '',
+    videoUrl: '',
     showStats: false,
     isActive: true,
     status: 'active',
@@ -871,6 +1060,11 @@ const closeDialog = () => {
   actualPdfFile.value = null
   actualVideoFile.value = null
 }
+
+// 初始化加载数据
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>
@@ -1615,6 +1809,105 @@ textarea.form-input {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #666;
+}
+
+.loading-state p {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+.loading-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 分页 */
+.pagination-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding: 16px 0;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.pagination-btn.active {
+  background: #e31e24;
+  border-color: #e31e24;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+  color: #bbb;
+  cursor: not-allowed;
+}
+
+.page-size-select {
+  margin-left: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.page-size-select:hover {
+  border-color: #e31e24;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #e31e24;
 }
 </style>
 

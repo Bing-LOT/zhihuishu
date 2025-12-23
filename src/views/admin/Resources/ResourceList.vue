@@ -376,12 +376,20 @@ const loadList = async () => {
   try {
     isLoading.value = true
     
-    const params = {
+    // 构建请求参数
+    const params: any = {
       pageIndex: currentPage.value,
       pageSize: pageSize.value,
       keyword: searchKeyword.value || undefined
-      // showFront 不传，显示所有
     }
+    
+    // 根据筛选状态添加 showFront 参数
+    if (statusFilter.value === 'active') {
+      params.showFront = 1 // 显示中
+    } else if (statusFilter.value === 'inactive') {
+      params.showFront = 0 // 已隐藏
+    }
+    // statusFilter.value === 'all' 时不传 showFront，显示所有
     
     console.log('📤 请求参数:', params)
     const response = await getPoliticalResourceList(params)

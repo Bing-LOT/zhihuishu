@@ -205,3 +205,32 @@ export function editPoliticalResourcePageTitle(content: string): Promise<any> {
   })
 }
 
+/**
+ * 新增课程展播
+ * @param data 课程展播数据
+ */
+export interface CourseExpoAddParams {
+  name: string                    // 课程名称
+  coverUrl: string                // 课程封面
+  levelName: string               // 示范等级
+  property: string                // 课程性质
+  college: string                 // 所在学院
+  brief: string                   // 课程简介
+  docUrl: string                  // 教学设计文档
+  videoUrl: string                // 教学视频
+  showStatPv: number              // 显示学习统计：1=显示；0=不显示
+  showFront: number               // 是否前台显示：1=显示；0=不显示
+  teachers: Array<{               // 教师信息
+    name: string                  // 教师姓名
+    title: string                 // 职称
+  }>
+}
+
+export function addCourseExpo(data: CourseExpoAddParams): Promise<any> {
+  return request({
+    url: '/courseExpo/add',
+    method: 'POST',
+    data
+  })
+}
+

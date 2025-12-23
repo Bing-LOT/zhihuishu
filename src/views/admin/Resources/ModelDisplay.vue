@@ -144,7 +144,7 @@
     <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
       <div class="dialog">
         <div class="dialog__header">
-          <h3>{{ showEditDialog ? '编辑示范展播' : '新增示范展播' }}</h3>
+          <h3>{{ showEditDialog ? '编辑' : '新增' }}</h3>
           <button class="dialog__close" @click="closeDialog">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
@@ -155,6 +155,7 @@
         <div class="dialog__body">
           <!-- 封面图片上传 -->
           <div class="form-group">
+            <label>课程封面 <span class="required">*</span></label>
             <div class="cover-upload-area">
               <input
                 ref="coverInput"
@@ -171,9 +172,15 @@
                   </svg>
                 </button>
               </div>
-              <button v-else class="btn-select-cover" @click="triggerCoverUpload">
-                选择图片
-              </button>
+              <div v-else class="cover-upload-trigger">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <rect x="8" y="8" width="32" height="32" rx="2" stroke="#d9d9d9" stroke-width="2"/>
+                  <path d="M16 28L20 24L24 28L30 22L32 24V32H16V28Z" fill="#d9d9d9"/>
+                  <circle cx="20" cy="18" r="2" fill="#d9d9d9"/>
+                </svg>
+                <p class="upload-text">用于前台卡片列表的图</p>
+                <button class="btn-select-cover" type="button" @click="triggerCoverUpload">选择图片</button>
+              </div>
             </div>
           </div>
 
@@ -297,14 +304,14 @@
                   </svg>
                 </button>
               </div>
-              <div v-else class="file-upload-trigger" @click="triggerPdfUpload">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                  <path d="M20 12V28M12 20H28" stroke="#999" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M20 8L20 4M16 6L20 2L24 6" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <div v-else class="file-upload-trigger">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <path d="M24 16V32M16 24H32" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="24" cy="24" r="20" stroke="#d9d9d9" stroke-width="2" stroke-dasharray="3 3"/>
                 </svg>
-                <p>上传教学设计文档</p>
-                <span class="file-hint">仅支持上传 1 个 PDF 文档</span>
-                <button class="btn-select-file" type="button" @click.stop="triggerPdfUpload">选择 PDF 文件</button>
+                <p class="upload-text">上传教学设计文档</p>
+                <p class="upload-hint">仅支持上传 1 个 PDF 文档</p>
+                <button class="btn-select-file" type="button" @click="triggerPdfUpload">选择 PDF 文件</button>
               </div>
             </div>
           </div>
@@ -331,15 +338,15 @@
                   </svg>
                 </button>
               </div>
-              <div v-else class="file-upload-trigger" @click="triggerVideoUpload">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                  <path d="M20 12V28M12 20H28" stroke="#999" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M20 8L20 4M16 6L20 2L24 6" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <div v-else class="file-upload-trigger">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <path d="M24 16V32M16 24H32" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="24" cy="24" r="20" stroke="#d9d9d9" stroke-width="2" stroke-dasharray="3 3"/>
                 </svg>
-                <p>上传教学视频</p>
-                <span class="file-hint">仅支持上传 1 个视频文件</span>
-                <span class="file-hint">支持 MP4 格式，最大 500MB</span>
-                <button class="btn-select-file" type="button" @click.stop="triggerVideoUpload">选择视频文件</button>
+                <p class="upload-text">上传教学视频</p>
+                <p class="upload-hint">仅支持上传 1 个视频文件</p>
+                <p class="upload-hint">支持 MP4 格式，最大 500MB</p>
+                <button class="btn-select-file" type="button" @click="triggerVideoUpload">选择视频文件</button>
               </div>
             </div>
           </div>
@@ -372,8 +379,10 @@
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveItem">保存</button>
+          <button class="btn-cancel" @click="closeDialog" :disabled="isSaving">取消</button>
+          <button class="btn-confirm" @click="saveItem" :disabled="isSaving">
+            {{ isSaving ? '保存中...' : '保存' }}
+          </button>
         </div>
       </div>
     </div>
@@ -410,6 +419,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { uploadFile } from '@/api/banner'
+import { addCourseExpo, type CourseExpoAddParams } from '@/api/resource'
 
 interface DisplayItem {
   id: string
@@ -490,6 +501,14 @@ const previewData = ref<DisplayItem | null>(null)
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
 
+// 保存加载状态
+const isSaving = ref(false)
+
+// 实际文件对象（用于上传）
+const actualPdfFile = ref<File | null>(null)
+const actualVideoFile = ref<File | null>(null)
+const actualCoverFile = ref<File | null>(null)
+
 // 添加教师
 const addTeacher = () => {
   formData.value.teachers.push({ name: '', title: '' })
@@ -510,6 +529,7 @@ const handleCoverChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    actualCoverFile.value = file
     const reader = new FileReader()
     reader.onload = (e) => {
       formData.value.cover = e.target?.result as string
@@ -521,6 +541,7 @@ const handleCoverChange = (event: Event) => {
 // 移除封面
 const removeCover = () => {
   formData.value.cover = ''
+  actualCoverFile.value = null
   if (coverInput.value) {
     coverInput.value.value = ''
   }
@@ -540,6 +561,7 @@ const handlePdfChange = (event: Event) => {
       alert('仅支持 PDF 文件')
       return
     }
+    actualPdfFile.value = file
     formData.value.pdfFile = {
       name: file.name,
       url: URL.createObjectURL(file)
@@ -550,6 +572,7 @@ const handlePdfChange = (event: Event) => {
 // 移除PDF
 const removePdf = () => {
   formData.value.pdfFile = null
+  actualPdfFile.value = null
   if (pdfInput.value) {
     pdfInput.value.value = ''
   }
@@ -573,6 +596,7 @@ const handleVideoChange = (event: Event) => {
       alert('视频文件不能超过 500MB')
       return
     }
+    actualVideoFile.value = file
     formData.value.videoFile = {
       name: file.name,
       url: URL.createObjectURL(file)
@@ -583,6 +607,7 @@ const handleVideoChange = (event: Event) => {
 // 移除视频
 const removeVideo = () => {
   formData.value.videoFile = null
+  actualVideoFile.value = null
   if (videoInput.value) {
     videoInput.value.value = ''
   }
@@ -679,7 +704,7 @@ const deleteItem = (id: string) => {
 }
 
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
   // 验证必填项
   if (!formData.value.title) {
     alert('请输入课程名称')
@@ -708,23 +733,95 @@ const saveItem = () => {
     alert('请输入课程简介')
     return
   }
-  if (!formData.value.pdfFile && !showEditDialog.value) {
-    alert('请上传教学设计文档')
-    return
-  }
-  if (!formData.value.videoFile && !showEditDialog.value) {
-    alert('请上传教学视频')
-    return
+  
+  if (!showEditDialog.value) {
+    // 新增时的验证
+    if (!actualCoverFile.value) {
+      alert('请上传课程封面')
+      return
+    }
+    if (!actualPdfFile.value) {
+      alert('请上传教学设计文档')
+      return
+    }
+    if (!actualVideoFile.value) {
+      alert('请上传教学视频')
+      return
+    }
   }
 
-  const teacherNames = validTeachers.map(t => t.name).join('、')
+  try {
+    isSaving.value = true
+    
+    // 上传封面图片
+    let coverUrl = formData.value.cover
+    if (actualCoverFile.value) {
+      console.log('开始上传封面...')
+      const coverResult = await uploadFile(actualCoverFile.value)
+      coverUrl = coverResult.url
+      console.log('封面上传成功:', coverUrl)
+    }
+    
+    // 上传PDF文件
+    let docUrl = ''
+    if (actualPdfFile.value) {
+      console.log('开始上传PDF文件...')
+      const pdfResult = await uploadFile(actualPdfFile.value)
+      docUrl = pdfResult.url
+      console.log('PDF上传成功:', docUrl)
+    }
+    
+    // 上传视频文件
+    let videoUrl = ''
+    if (actualVideoFile.value) {
+      console.log('开始上传视频文件...')
+      const videoResult = await uploadFile(actualVideoFile.value)
+      videoUrl = videoResult.url
+      console.log('视频上传成功:', videoUrl)
+    }
 
-  if (showEditDialog.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
+    const teacherNames = validTeachers.map(t => t.name).join('、')
+
+    if (showEditDialog.value) {
+      // 编辑 - 暂时更新本地数据
+      const index = items.value.findIndex(item => item.id === formData.value.id)
+      if (index > -1) {
+        items.value[index] = {
+          ...items.value[index],
+          title: formData.value.title,
+          teacher: teacherNames,
+          college: formData.value.college,
+          category: formData.value.category,
+          description: formData.value.description,
+          status: formData.value.isActive ? 'active' : 'inactive',
+          publishTime: formData.value.publishTime,
+          cover: coverUrl
+        }
+      }
+      alert('编辑成功')
+    } else {
+      // 新增 - 调用API
+      const params: CourseExpoAddParams = {
+        name: formData.value.title,
+        coverUrl: coverUrl,
+        levelName: formData.value.level,
+        property: formData.value.category,
+        college: formData.value.college,
+        brief: formData.value.description,
+        docUrl: docUrl,
+        videoUrl: videoUrl,
+        showStatPv: formData.value.showStats ? 1 : 0,
+        showFront: formData.value.isActive ? 1 : 0,
+        teachers: validTeachers
+      }
+      
+      console.log('调用新增API，参数:', params)
+      await addCourseExpo(params)
+      console.log('新增成功')
+      
+      // 更新本地列表
+      const newItem: DisplayItem = {
+        id: Date.now().toString(),
         title: formData.value.title,
         teacher: teacherNames,
         college: formData.value.college,
@@ -732,27 +829,21 @@ const saveItem = () => {
         description: formData.value.description,
         status: formData.value.isActive ? 'active' : 'inactive',
         publishTime: formData.value.publishTime,
-        cover: formData.value.cover
+        cover: coverUrl,
+        sort: items.value.length + 1
       }
+      items.value.push(newItem)
+      
+      alert('新增成功')
     }
-  } else {
-    // 新增
-    const newItem: DisplayItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      teacher: teacherNames,
-      college: formData.value.college,
-      category: formData.value.category,
-      description: formData.value.description,
-      status: formData.value.isActive ? 'active' : 'inactive',
-      publishTime: formData.value.publishTime,
-      cover: formData.value.cover,
-      sort: items.value.length + 1
-    }
-    items.value.push(newItem)
-  }
 
-  closeDialog()
+    closeDialog()
+  } catch (error: any) {
+    console.error('保存失败:', error)
+    alert(error.message || '保存失败，请重试')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 // 关闭对话框
@@ -775,6 +866,10 @@ const closeDialog = () => {
     status: 'active',
     publishTime: new Date().toISOString().split('T')[0]
   }
+  // 清空文件引用
+  actualCoverFile.value = null
+  actualPdfFile.value = null
+  actualVideoFile.value = null
 }
 </script>
 
@@ -1166,9 +1261,23 @@ textarea.form-input {
 /* 封面上传区域 */
 .cover-upload-area {
   border: 2px dashed #d9d9d9;
-  border-radius: 4px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 24px;
   text-align: center;
+  background: #fafafa;
+}
+
+.cover-upload-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-text {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .cover-preview {
@@ -1181,6 +1290,7 @@ textarea.form-input {
   width: 100%;
   max-height: 200px;
   object-fit: contain;
+  border-radius: 4px;
 }
 
 .cover-remove {
@@ -1278,8 +1388,9 @@ textarea.form-input {
 /* 文件上传区域 */
 .file-upload-area {
   border: 2px dashed #d9d9d9;
-  border-radius: 4px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 32px 24px;
+  background: #fafafa;
 }
 
 .file-upload-trigger {
@@ -1295,14 +1406,14 @@ textarea.form-input {
   color: #333;
 }
 
-.file-hint {
+.upload-hint {
+  margin: 0;
   font-size: 12px;
   color: #999;
-  display: block;
 }
 
 .btn-select-file {
-  margin-top: 12px;
+  margin-top: 8px;
   padding: 8px 24px;
   background: #1890ff;
   color: white;

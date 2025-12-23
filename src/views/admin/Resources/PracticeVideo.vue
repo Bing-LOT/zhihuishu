@@ -100,7 +100,10 @@
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="item-title-row">
+            <h3 class="item-title">{{ item.title }}</h3>
+            <span v-if="item.status === 'inactive'" class="status-tag status-tag--hidden">前台隐藏</span>
+          </div>
           
           <div class="item-meta">
             <div class="meta-item">
@@ -128,10 +131,22 @@
               <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="action-btn action-btn--preview" @click="previewItem(item)" title="预览">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <button 
+            class="action-btn" 
+            :class="item.status === 'active' ? 'action-btn--hide' : 'action-btn--show'" 
+            @click="toggleShowFront(item)" 
+            :title="item.status === 'active' ? '隐藏' : '显示'"
+          >
+            <svg v-if="item.status === 'active'" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛图标 - 显示状态 -->
               <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛划线图标 - 隐藏状态 -->
+              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+              <path d="M2 2L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </button>
           <button class="action-btn action-btn--delete" @click="deleteItem(item.id)" title="删除">
@@ -365,34 +380,6 @@
       </div>
     </div>
 
-    <!-- 预览对话框 -->
-    <div v-if="showPreviewDialog" class="dialog-overlay" @click.self="showPreviewDialog = false">
-      <div class="dialog dialog--large">
-        <div class="dialog__header">
-          <h3>视频预览</h3>
-          <button class="dialog__close" @click="showPreviewDialog = false">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="dialog__body">
-          <div v-if="previewData" class="preview-content">
-            <div v-if="previewData.cover" class="preview-cover">
-              <img :src="previewData.cover" alt="封面" />
-            </div>
-            <h2>{{ previewData.title }}</h2>
-            <div class="preview-meta">
-              <span>展播类型：{{ previewData.series }}</span>
-              <span>单位：{{ previewData.unit }}</span>
-            </div>
-            <p class="preview-description">{{ previewData.description }}</p>
-            <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -433,7 +420,6 @@ const loading = ref(false)
 // 对话框状态
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
-const showPreviewDialog = ref(false)
 const coverInput = ref<HTMLInputElement | null>(null)
 const videoInput = ref<HTMLInputElement | null>(null)
 
@@ -453,9 +439,6 @@ const formData = ref({
   displayOrder: 1,
   publishTime: new Date().toISOString().split('T')[0]
 })
-
-// 预览数据
-const previewData = ref<VideoItem | null>(null)
 
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
@@ -726,10 +709,47 @@ const editItem = (item: VideoItem) => {
   showEditDialog.value = true
 }
 
-// 预览项目
-const previewItem = (item: VideoItem) => {
-  previewData.value = item
-  showPreviewDialog.value = true
+// 切换显示/隐藏状态
+const toggleShowFront = async (item: VideoItem) => {
+  try {
+    const newStatus = item.status === 'active' ? 'inactive' : 'active'
+    const newShowFront = newStatus === 'active' ? 1 : 0
+    
+    console.log('========== 切换显示/隐藏状态 ==========')
+    console.log('视频ID:', item.id)
+    console.log('当前状态:', item.status, '→ 新状态:', newStatus)
+    
+    // 构建编辑数据
+    const editData: VideoExpoEditItem = {
+      id: parseInt(item.id),
+      title: item.title,
+      coverUrl: item.cover || '',
+      expoType: item.series,
+      college: item.unit,
+      presenter: item.host || '',
+      content: item.description,
+      videoUrl: item.videoFile?.url || '',
+      showFront: newShowFront
+    }
+    
+    console.log('正在更新状态...')
+    await editVideoExpo(editData)
+    console.log('✅ 状态更新成功')
+    console.log('========================================')
+    
+    // 更新本地状态
+    item.status = newStatus
+    
+    // 提示用户
+    if (newStatus === 'active') {
+      alert('已设置为前台显示')
+    } else {
+      alert('已设置为前台隐藏')
+    }
+  } catch (error: any) {
+    console.error('❌ 状态切换失败:', error)
+    alert(`操作失败：${error.message || '未知错误'}`)
+  }
 }
 
 // 删除项目
@@ -1080,11 +1100,32 @@ onMounted(() => {
   min-width: 0;
 }
 
+.item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
 .item-title {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 16px;
   font-weight: 500;
   color: #333;
+}
+
+.status-tag {
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.status-tag--hidden {
+  background: #fff1f0;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
 }
 
 .item-meta {
@@ -1152,12 +1193,20 @@ onMounted(() => {
   background: #e6f7ff;
 }
 
-.action-btn--preview {
-  color: #666;
+.action-btn--hide {
+  color: #52c41a;
 }
 
-.action-btn--preview:hover {
-  background: #f5f5f5;
+.action-btn--hide:hover {
+  background: #f6ffed;
+}
+
+.action-btn--show {
+  color: #faad14;
+}
+
+.action-btn--show:hover {
+  background: #fffbe6;
 }
 
 .action-btn--delete {
@@ -1539,49 +1588,6 @@ textarea.form-input {
 
 .btn-confirm:hover {
   background: #c71b20;
-}
-
-/* 预览内容 */
-.preview-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.preview-cover {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.preview-cover img {
-  width: 100%;
-  max-height: 400px;
-  object-fit: cover;
-}
-
-.preview-content h2 {
-  margin: 0;
-  font-size: 24px;
-  color: #333;
-}
-
-.preview-meta {
-  display: flex;
-  gap: 24px;
-  font-size: 14px;
-  color: #666;
-}
-
-.preview-description {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #333;
-}
-
-.preview-time {
-  font-size: 14px;
-  color: #999;
 }
 
 /* 加载状态 */

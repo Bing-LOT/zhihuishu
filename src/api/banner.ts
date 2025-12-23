@@ -334,3 +334,14 @@ export function editVideoExpo(data: VideoExpoEditItem): Promise<void> {
     data
   })
 }
+
+/**
+ * 删除习思想优秀视频展播
+ * @param id 视频ID
+ */
+export function deleteVideoExpo(id: number): Promise<void> {
+  return request({
+    url: `/xiThought/videoExpo/remove/${id}`,
+    method: 'DELETE'
+  })
+}

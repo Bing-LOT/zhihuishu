@@ -385,7 +385,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { uploadFile, addVideoExpo, getVideoExpoList, editVideoExpo } from '@/api/banner'
+import { uploadFile, addVideoExpo, getVideoExpoList, editVideoExpo, deleteVideoExpo } from '@/api/banner'
 import type { VideoExpoItem, VideoExpoListItem, VideoExpoEditItem } from '@/api/banner'
 
 interface VideoItem {
@@ -753,16 +753,33 @@ const toggleShowFront = async (item: VideoItem) => {
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
-  if (confirm('确定要删除这个视频吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
+const deleteItem = async (id: string) => {
+  if (!confirm('确定要删除这个视频吗？删除后无法恢复！')) {
+    return
+  }
+
+  try {
+    console.log('========== 开始删除视频展播 ==========')
+    console.log('视频ID:', id)
+    
+    const videoId = parseInt(id)
+    if (isNaN(videoId)) {
+      alert('无效的视频ID')
+      return
     }
+    
+    console.log('正在调用删除API...')
+    await deleteVideoExpo(videoId)
+    console.log('✅ 删除成功')
+    console.log('========================================')
+    
+    alert('删除成功！')
+    
+    // 重新加载列表
+    fetchList()
+  } catch (error: any) {
+    console.error('❌ 删除失败:', error)
+    alert(`删除失败：${error.message || '未知错误'}`)
   }
 }
 

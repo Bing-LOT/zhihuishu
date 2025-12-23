@@ -53,7 +53,7 @@
     <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
       <div class="dialog">
         <div class="dialog__header">
-          <h3>{{ showEditDialog ? '编辑内容' : '新增内容' }}</h3>
+          <h3>{{ showEditDialog ? '编辑' : '新增' }}</h3>
           <button class="dialog__close" @click="closeDialog">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
@@ -67,86 +67,81 @@
             <input
               v-model="formData.title"
               type="text"
-              placeholder="请输入标题"
+              placeholder="请输入标题（限制6字）"
+              maxlength="6"
               class="form-input"
             />
-          </div>
-
-          <div class="form-group">
-            <label>内容描述</label>
-            <textarea
-              v-model="formData.description"
-              rows="4"
-              placeholder="请输入内容描述"
-              class="form-input"
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>状态</label>
-            <div class="radio-group">
-              <label class="radio-label">
-                <input
-                  v-model="formData.status"
-                  type="radio"
-                  value="active"
-                  name="status"
-                />
-                <span>显示中</span>
-              </label>
-              <label class="radio-label">
-                <input
-                  v-model="formData.status"
-                  type="radio"
-                  value="inactive"
-                  name="status"
-                />
-                <span>已隐藏</span>
-              </label>
+            <div class="form-hint">
+              <span class="char-count">{{ formData.title.length }}/6 字</span>
+              <span class="hint-text">（备注：顶层设计、特色亮点、建设成效）</span>
             </div>
           </div>
 
           <div class="form-group">
-            <label>发布时间</label>
-            <input
-              v-model="formData.publishTime"
-              type="date"
+            <label>正文内容 <span class="required">*</span></label>
+            <textarea
+              v-model="formData.content"
+              rows="6"
+              placeholder="核心文稿输入，用于承载主要的文字信息"
               class="form-input"
-            />
+            ></textarea>
+            <div class="form-hint">
+              <span class="hint-text">请输入核心文稿内容</span>
+            </div>
           </div>
 
           <div class="form-group">
-            <label>封面图片</label>
-            <div class="upload-area">
+            <label>优秀视频 <span class="required">*</span></label>
+            <div class="upload-area video-upload">
               <input
-                ref="fileInput"
+                ref="videoInput"
                 type="file"
-                accept="image/*"
+                accept="video/mp4"
                 style="display: none"
-                @change="handleFileChange"
+                @change="handleVideoChange"
               />
-              <div v-if="formData.cover" class="upload-preview">
-                <img :src="formData.cover" alt="预览" />
-                <button class="upload-remove" @click="removeCover">
+              <div v-if="formData.video" class="video-preview">
+                <video :src="formData.video" controls></video>
+                <button class="upload-remove" @click="removeVideo">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
                   </svg>
                 </button>
               </div>
-              <div v-else class="upload-trigger" @click="triggerUpload">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <path d="M16 6V26M6 16H26" stroke="#999" stroke-width="2" stroke-linecap="round"/>
+              <div v-else class="upload-trigger-video">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <path d="M24 10V38M10 24H38" stroke="#999" stroke-width="3" stroke-linecap="round"/>
                 </svg>
-                <p>点击上传图片</p>
-                <span>建议尺寸：800x600px</span>
+                <p class="upload-title">上传优秀视频</p>
+                <p class="upload-desc">仅支持上传 1 个视频</p>
+                <p class="upload-desc">支持 MP4 格式，最大 500MB</p>
+                <button type="button" class="btn-select-file" @click="triggerVideoUpload">
+                  选择视频文件
+                </button>
               </div>
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                v-model="formData.showInFrontend"
+                type="checkbox"
+                class="checkbox-input"
+              />
+              <span>前台显示</span>
+            </label>
           </div>
         </div>
 
         <div class="dialog__footer">
           <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveItem">保存</button>
+          <button class="btn-confirm" @click="saveItem">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 4px;">
+              <path d="M13 4L6 11L3 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            保存
+          </button>
         </div>
       </div>
     </div>
@@ -159,10 +154,11 @@ import { ref } from 'vue'
 interface ContentItem {
   id: string
   title: string
-  description?: string
+  content: string
+  video?: string
+  showInFrontend: boolean
   status: 'active' | 'inactive'
   publishTime: string
-  cover?: string
 }
 
 // 数据列表
@@ -170,42 +166,46 @@ const items = ref<ContentItem[]>([
   {
     id: '1',
     title: '顶层设计',
-    description: '党建+课程思政顶层设计相关内容',
+    content: '党建+课程思政顶层设计相关内容',
     status: 'active',
     publishTime: '2024-12-15',
-    cover: ''
+    video: '',
+    showInFrontend: true
   },
   {
     id: '2',
     title: '特色亮点',
-    description: '党建+课程思政特色亮点展示',
+    content: '党建+课程思政特色亮点展示',
     status: 'active',
     publishTime: '2024-12-14',
-    cover: ''
+    video: '',
+    showInFrontend: true
   },
   {
     id: '3',
     title: '建设成效',
-    description: '党建+课程思政建设成效总结',
+    content: '党建+课程思政建设成效总结',
     status: 'active',
     publishTime: '2024-12-13',
-    cover: ''
+    video: '',
+    showInFrontend: true
   }
 ])
 
 // 对话框状态
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
-const fileInput = ref<HTMLInputElement | null>(null)
+const videoInput = ref<HTMLInputElement | null>(null)
 
 // 表单数据
 const formData = ref({
   id: '',
   title: '',
-  description: '',
+  content: '',
   status: 'active' as 'active' | 'inactive',
   publishTime: new Date().toISOString().split('T')[0],
-  cover: ''
+  video: '',
+  showInFrontend: true
 })
 
 // 当前编辑项
@@ -216,29 +216,42 @@ const getStatusText = (status: string) => {
   return status === 'active' ? '显示中' : '已隐藏'
 }
 
-// 触发文件上传
-const triggerUpload = () => {
-  fileInput.value?.click()
+// 触发视频上传
+const triggerVideoUpload = () => {
+  videoInput.value?.click()
 }
 
-// 处理文件选择
-const handleFileChange = (event: Event) => {
+// 处理视频选择
+const handleVideoChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    // 检查文件大小（500MB = 500 * 1024 * 1024 bytes）
+    const maxSize = 500 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert('视频文件大小不能超过 500MB')
+      return
+    }
+    
+    // 检查文件类型
+    if (!file.type.startsWith('video/mp4')) {
+      alert('仅支持 MP4 格式的视频文件')
+      return
+    }
+    
     const reader = new FileReader()
     reader.onload = (e) => {
-      formData.value.cover = e.target?.result as string
+      formData.value.video = e.target?.result as string
     }
     reader.readAsDataURL(file)
   }
 }
 
-// 移除封面
-const removeCover = () => {
-  formData.value.cover = ''
-  if (fileInput.value) {
-    fileInput.value.value = ''
+// 移除视频
+const removeVideo = () => {
+  formData.value.video = ''
+  if (videoInput.value) {
+    videoInput.value.value = ''
   }
 }
 
@@ -248,10 +261,11 @@ const editItem = (item: ContentItem) => {
   formData.value = {
     id: item.id,
     title: item.title,
-    description: item.description || '',
+    content: item.content || '',
     status: item.status,
     publishTime: item.publishTime,
-    cover: item.cover || ''
+    video: item.video || '',
+    showInFrontend: item.showInFrontend
   }
   showEditDialog.value = true
 }
@@ -273,6 +287,16 @@ const saveItem = () => {
     return
   }
 
+  if (!formData.value.content) {
+    alert('请输入正文内容')
+    return
+  }
+
+  if (!formData.value.video) {
+    alert('请上传优秀视频')
+    return
+  }
+
   if (showEditDialog.value && currentItem.value) {
     // 编辑
     const index = items.value.findIndex(item => item.id === formData.value.id)
@@ -280,10 +304,11 @@ const saveItem = () => {
       items.value[index] = {
         ...items.value[index],
         title: formData.value.title,
-        description: formData.value.description,
+        content: formData.value.content,
         status: formData.value.status,
         publishTime: formData.value.publishTime,
-        cover: formData.value.cover
+        video: formData.value.video,
+        showInFrontend: formData.value.showInFrontend
       }
     }
   } else {
@@ -291,10 +316,11 @@ const saveItem = () => {
     const newItem: ContentItem = {
       id: Date.now().toString(),
       title: formData.value.title,
-      description: formData.value.description,
-      status: formData.value.status,
-      publishTime: formData.value.publishTime,
-      cover: formData.value.cover
+      content: formData.value.content,
+      status: 'active',
+      publishTime: new Date().toISOString().split('T')[0],
+      video: formData.value.video,
+      showInFrontend: formData.value.showInFrontend
     }
     items.value.unshift(newItem)
   }
@@ -309,10 +335,11 @@ const closeDialog = () => {
   formData.value = {
     id: '',
     title: '',
-    description: '',
+    content: '',
     status: 'active',
     publishTime: new Date().toISOString().split('T')[0],
-    cover: ''
+    video: '',
+    showInFrontend: true
   }
   currentItem.value = null
 }
@@ -573,25 +600,40 @@ const closeDialog = () => {
 
 textarea.form-input {
   resize: vertical;
-  min-height: 80px;
+  min-height: 120px;
 }
 
-.radio-group {
-  display: flex;
-  gap: 24px;
-}
-
-.radio-label {
+.form-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.char-count {
+  color: #333;
+}
+
+.hint-text {
+  color: #999;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
   color: #333;
   cursor: pointer;
 }
 
-.radio-label input {
+.checkbox-input {
+  width: 16px;
+  height: 16px;
   cursor: pointer;
+  accent-color: #1890ff;
 }
 
 .upload-area {
@@ -600,41 +642,64 @@ textarea.form-input {
   overflow: hidden;
 }
 
-.upload-trigger {
-  padding: 32px;
+.video-upload {
+  background: #fafafa;
+}
+
+.upload-trigger-video {
+  padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: border-color 0.3s;
+  text-align: center;
 }
 
-.upload-trigger:hover {
-  border-color: #e31e24;
+.upload-trigger-video svg {
+  margin-bottom: 16px;
 }
 
-.upload-trigger p {
-  margin: 12px 0 4px;
-  font-size: 14px;
+.upload-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
   color: #333;
 }
 
-.upload-trigger span {
-  font-size: 12px;
-  color: #999;
+.upload-desc {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #666;
 }
 
-.upload-preview {
+.btn-select-file {
+  margin-top: 20px;
+  padding: 10px 32px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-select-file:hover {
+  background: #0f7cdd;
+}
+
+.video-preview {
   position: relative;
   width: 100%;
-  height: 240px;
+  min-height: 300px;
+  background: #000;
 }
 
-.upload-preview img {
+.video-preview video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 400px;
+  object-fit: contain;
 }
 
 .upload-remove {
@@ -688,6 +753,8 @@ textarea.form-input {
 }
 
 .btn-confirm {
+  display: inline-flex;
+  align-items: center;
   background: #e31e24;
   color: white;
   border: none;
@@ -695,6 +762,10 @@ textarea.form-input {
 
 .btn-confirm:hover {
   background: #c71b20;
+}
+
+.btn-confirm svg {
+  flex-shrink: 0;
 }
 </style>
 

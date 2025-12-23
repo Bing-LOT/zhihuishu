@@ -45,13 +45,19 @@
 
     <!-- 数据统计 -->
     <div class="data-stats">
-      共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+      共 {{ totalCount }} 条
+    </div>
+
+    <!-- 加载状态 -->
+    <div v-if="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>加载中...</p>
     </div>
 
     <!-- 列表内容 -->
-    <div class="content-list">
+    <div v-else class="content-list">
       <div
-        v-for="(item, index) in filteredItems"
+        v-for="(item, index) in items"
         :key="item.id"
         class="content-item"
         :draggable="true"
@@ -73,13 +79,21 @@
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.title }}</h3>
-          <p class="item-description">{{ item.description }}</p>
+          <h3 class="item-title">
+            {{ item.title }}
+            <span v-if="item.pinTop === 1" class="pin-badge">置顶</span>
+            <span v-if="item.category === 0" class="category-badge">政策文件</span>
+            <span v-else class="category-badge category-badge--material">思政素材</span>
+          </h3>
+          <p class="item-description">{{ item.content.substring(0, 100) }}{{ item.content.length > 100 ? '...' : '' }}</p>
 
           <div class="item-footer">
             <div class="footer-info">
-              <span class="sort-info">排序：第 {{ index + 1 }} 位</span>
-              <span class="time-info">发布时间：{{ item.publishTime }}</span>
+              <span class="sort-info">第 {{ (currentPage - 1) * pageSize + index + 1 }} 位</span>
+              <span class="time-info">创建时间：{{ item.createTime || '-' }}</span>
+              <span class="status-info" :class="{ 'status-info--active': item.showFront === 1 }">
+                {{ item.showFront === 1 ? '前台显示' : '已隐藏' }}
+              </span>
             </div>
           </div>
         </div>
@@ -107,7 +121,7 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="items.length === 0" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
@@ -115,6 +129,16 @@
         <p>暂无数据</p>
       </div>
     </div>
+
+    <!-- 分页组件 -->
+    <Pagination
+      v-if="!isLoading && items.length > 0"
+      :page="currentPage"
+      :pageSize="pageSize"
+      :total="total"
+      @pageChange="handlePageChange"
+      @sizeChange="handleSizeChange"
+    />
 
     <!-- 新增/编辑对话框 -->
     <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
@@ -140,8 +164,24 @@
           </div>
 
           <div class="form-group">
+            <label>分类 <span class="required">*</span></label>
+            <select v-model.number="formData.category" class="form-select">
+              <option :value="0">政策文件</option>
+              <option :value="1">思政素材</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>内容类型 <span class="required">*</span></label>
+            <select v-model.number="formData.contentType" class="form-select">
+              <option :value="0">富文本内容（内部详情）</option>
+              <option :value="1">URL地址（外部跳转）</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label>详情内容 <span class="required">*</span></label>
-            <div class="editor-container">
+            <div v-if="formData.contentType === 0" class="editor-container">
               <Toolbar
                 :editor="editorRef"
                 :defaultConfig="{}"
@@ -156,6 +196,13 @@
                 @onCreated="handleCreated"
               />
             </div>
+            <input
+              v-else
+              v-model="formData.content"
+              type="text"
+              placeholder="请输入URL地址"
+              class="form-input"
+            />
           </div>
 
           <div class="form-group">
@@ -169,22 +216,28 @@
             />
           </div>
 
-          <div class="form-group">
+          <div class="form-group form-group--inline">
             <label class="checkbox-label">
-              <input v-model="formData.showOnFrontend" type="checkbox" />
+              <input v-model="formData.pinTop" type="checkbox" :true-value="1" :false-value="0" />
+              <span>置顶显示</span>
+            </label>
+            
+            <label class="checkbox-label">
+              <input v-model="formData.showFront" type="checkbox" :true-value="1" :false-value="0" />
               <span>前台显示</span>
             </label>
           </div>
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveItem">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <button class="btn-cancel" @click="closeDialog" :disabled="isSaving">取消</button>
+          <button class="btn-confirm" @click="saveItem" :disabled="isSaving">
+            <svg v-if="!isSaving" width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            保存
+            <span v-if="isSaving">保存中...</span>
+            <span v-else>保存</span>
           </button>
         </div>
       </div>
@@ -215,39 +268,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, shallowRef } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import type { IEditorConfig } from '@wangeditor/editor'
-
-interface ResourceItem {
-  id: string
-  title: string
-  description: string
-  status: 'active' | 'inactive'
-  publishTime: string
-  sort: number
-}
+import { addPoliticalResource, getPoliticalResourceList } from '@/api/resource'
+import type { PoliticalResourceAddParams, PoliticalResourceItem } from '@/types'
+import Pagination from '@/components/common/Pagination/index.vue'
 
 // 数据列表
-const items = ref<ResourceItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    status: 'active',
-    publishTime: '2024-11-20',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    status: 'active',
-    publishTime: '2024-11-18',
-    sort: 2
-  }
-])
+const items = ref<PoliticalResourceItem[]>([])
+
+// 分页状态
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
+// 加载状态
+const isLoading = ref(false)
 
 // 搜索和筛选
 const searchKeyword = ref('')
@@ -262,8 +300,11 @@ const showPreviewDialog = ref(false)
 const formData = ref({
   id: '',
   title: '',
+  category: 1 as 0 | 1, // 0=政策文件；1=思政素材
+  contentType: 0 as 0 | 1, // 0=富文本内容；1=URL地址
   content: '',
-  showOnFrontend: true,
+  pinTop: 0 as 0 | 1, // 0=不置顶；1=置顶
+  showFront: 1 as 0 | 1, // 0=不显示；1=显示
   displayOrder: 1
 })
 
@@ -293,26 +334,65 @@ const previewData = ref<ResourceItem | null>(null)
 const draggedIndex = ref<number | null>(null)
 
 // 计算属性
-const totalCount = computed(() => items.value.length)
+const totalCount = computed(() => total.value)
 
-const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
+// 加载列表数据
+const loadList = async () => {
+  try {
+    isLoading.value = true
+    
+    const params = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value,
+      keyword: searchKeyword.value || undefined
+      // showFront 不传，显示所有
+    }
+    
+    const response = await getPoliticalResourceList(params)
+    items.value = response.list || []
+    total.value = response.total || 0
+    
+    console.log('列表加载成功:', response)
+  } catch (error: any) {
+    console.error('列表加载失败:', error)
+    alert(`加载失败：${error.message || '网络错误'}`)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 分页改变
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  loadList()
+}
+
+// 每页数量改变
+const handleSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1 // 重置到第一页
+  loadList()
+}
+
+// 组件挂载时加载数据
+onMounted(() => {
+  loadList()
 })
 
-// 搜索处理
+// 搜索处理（防抖）
+let searchTimer: ReturnType<typeof setTimeout> | null = null
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    currentPage.value = 1 // 重置到第一页
+    loadList()
+  }, 500) // 500ms 防抖
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  currentPage.value = 1 // 重置到第一页
+  loadList()
 }
 
 // 拖拽开始
@@ -328,50 +408,63 @@ const handleDrop = (targetIndex: number, event: DragEvent) => {
   event.preventDefault()
   if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
 
-  const draggedItem = filteredItems.value[draggedIndex.value]
-  const targetItem = filteredItems.value[targetIndex]
+  const draggedItem = items.value[draggedIndex.value]
+  const targetItem = items.value[targetIndex]
   
-  const tempSort = draggedItem.sort
-  draggedItem.sort = targetItem.sort
-  targetItem.sort = tempSort
+  // TODO: 调用后端接口更新排序
+  const temp = items.value[draggedIndex.value]
+  items.value[draggedIndex.value] = items.value[targetIndex]
+  items.value[targetIndex] = temp
 
   draggedIndex.value = null
 }
 
 // 编辑项目
-const editItem = (item: ResourceItem) => {
+const editItem = (item: PoliticalResourceItem) => {
   formData.value = {
-    id: item.id,
+    id: String(item.id),
     title: item.title,
-    content: item.description,
-    showOnFrontend: item.status === 'active',
-    displayOrder: item.sort
+    category: item.category,
+    contentType: item.contentType,
+    content: item.content,
+    pinTop: item.pinTop,
+    showFront: item.showFront,
+    displayOrder: 1
   }
   showEditDialog.value = true
 }
 
 // 预览项目
-const previewItem = (item: ResourceItem) => {
-  previewData.value = item
+const previewItem = (item: PoliticalResourceItem) => {
+  previewData.value = {
+    id: String(item.id),
+    title: item.title,
+    description: item.content,
+    status: item.showFront === 1 ? 'active' : 'inactive',
+    publishTime: item.createTime || new Date().toISOString().split('T')[0],
+    sort: 1
+  }
   showPreviewDialog.value = true
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
+const deleteItem = (id: string | number) => {
   if (confirm('确定要删除这条资源吗？')) {
+    // TODO: 调用后端删除接口
     const index = items.value.findIndex(item => item.id === id)
     if (index > -1) {
       items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
+      total.value--
+      alert('删除成功！')
     }
   }
 }
 
+// 保存加载状态
+const isSaving = ref(false)
+
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
   if (!formData.value.title) {
     alert('请输入标题')
     return
@@ -382,29 +475,38 @@ const saveItem = () => {
   }
 
   if (showEditDialog.value) {
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        description: formData.value.content,
-        status: formData.value.showOnFrontend ? 'active' : 'inactive',
-        sort: formData.value.displayOrder
-      }
-    }
+    // 编辑模式 - TODO: 调用后端编辑接口
+    alert('编辑功能待实现')
+    closeDialog()
   } else {
-    const newItem: ResourceItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      description: formData.value.content,
-      status: formData.value.showOnFrontend ? 'active' : 'inactive',
-      publishTime: new Date().toISOString().split('T')[0],
-      sort: formData.value.displayOrder || items.value.length + 1
+    // 新增模式 - 调用接口
+    try {
+      isSaving.value = true
+      
+      const params: PoliticalResourceAddParams = {
+        title: formData.value.title,
+        category: formData.value.category,
+        contentType: formData.value.contentType,
+        content: formData.value.content,
+        pinTop: formData.value.pinTop,
+        showFront: formData.value.showFront
+      }
+      
+      await addPoliticalResource(params)
+      
+      alert('新增成功！')
+      closeDialog()
+      
+      // 重新加载列表
+      currentPage.value = 1
+      await loadList()
+    } catch (error: any) {
+      console.error('新增失败:', error)
+      alert(`新增失败：${error.message || '网络错误'}`)
+    } finally {
+      isSaving.value = false
     }
-    items.value.push(newItem)
   }
-
-  closeDialog()
 }
 
 // 关闭对话框
@@ -414,8 +516,11 @@ const closeDialog = () => {
   formData.value = {
     id: '',
     title: '',
+    category: 1,
+    contentType: 0,
     content: '',
-    showOnFrontend: true,
+    pinTop: 0,
+    showFront: 1,
     displayOrder: 1
   }
 }
@@ -718,6 +823,12 @@ const closeDialog = () => {
   margin-bottom: 0;
 }
 
+.form-group--inline {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -730,7 +841,8 @@ const closeDialog = () => {
   color: #ff4d4f;
 }
 
-.form-input {
+.form-input,
+.form-select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #d9d9d9;
@@ -740,9 +852,15 @@ const closeDialog = () => {
   transition: border-color 0.3s;
 }
 
-.form-input:focus {
+.form-input:focus,
+.form-select:focus {
   outline: none;
   border-color: #e31e24;
+}
+
+.form-select {
+  cursor: pointer;
+  background-color: white;
 }
 
 .form-textarea {
@@ -861,6 +979,12 @@ const closeDialog = () => {
   background: #c71b20;
 }
 
+.btn-confirm:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 预览内容 */
 .preview-content {
   display: flex;
@@ -884,6 +1008,65 @@ const closeDialog = () => {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #e31e24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 徽章样式 */
+.pin-badge,
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-left: 8px;
+  font-size: 12px;
+  border-radius: 3px;
+  font-weight: normal;
+}
+
+.pin-badge {
+  background: #ff4d4f;
+  color: white;
+}
+
+.category-badge {
+  background: #1890ff;
+  color: white;
+}
+
+.category-badge--material {
+  background: #52c41a;
+}
+
+.status-info {
+  color: #999;
+}
+
+.status-info--active {
+  color: #52c41a;
 }
 </style>
 

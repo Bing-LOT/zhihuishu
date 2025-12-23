@@ -8,6 +8,9 @@ import type {
   ResourceQueryParams, 
   ResourceFormData,
   ResourceStats,
+  PoliticalResourceAddParams,
+  PoliticalResourceListParams,
+  PoliticalResourceListResponse,
   PaginationResponse 
 } from '@/types'
 
@@ -139,6 +142,30 @@ export function getResourceStats(): Promise<ResourceStats> {
   return request({
     url: '/resources/stats',
     method: 'GET'
+  })
+}
+
+/**
+ * 新增思政资源
+ * @param data 思政资源数据
+ */
+export function addPoliticalResource(data: PoliticalResourceAddParams): Promise<any> {
+  return request({
+    url: '/politicalResource/add',
+    method: 'POST',
+    data
+  })
+}
+
+/**
+ * 获取思政资源列表（分页）
+ * @param params 查询参数
+ */
+export function getPoliticalResourceList(params: PoliticalResourceListParams): Promise<PoliticalResourceListResponse> {
+  return request({
+    url: '/politicalResource/page/list',
+    method: 'POST',
+    data: params
   })
 }
 

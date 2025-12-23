@@ -100,3 +100,67 @@ export interface ResourceStats {
   weeklyViews: number
 }
 
+/** 思政资源新增请求参数 */
+export interface PoliticalResourceAddParams {
+  /** 标题 */
+  title: string
+  /** 分类：0=政策文件；1=思政素材 */
+  category: 0 | 1
+  /** 内容类型：0=富文本内容（内部详情）；1=URL地址（外部跳转） */
+  contentType: 0 | 1
+  /** 内容配置，配置富文本详情或URL跳转地址 */
+  content: string
+  /** 是否置顶：1=置顶；0=不置顶 */
+  pinTop: 0 | 1
+  /** 前台显示：1=显示；0=不显示 */
+  showFront: 0 | 1
+}
+
+/** 思政资源列表查询参数 */
+export interface PoliticalResourceListParams {
+  /** 页码，默认1 */
+  pageIndex: number
+  /** 每页大小，默认10条 */
+  pageSize: number
+  /** 搜索关键词（可选） */
+  keyword?: string
+  /** 显示状态：1=显示；0=隐藏；不传显示所有（可选） */
+  showFront?: 0 | 1
+}
+
+/** 思政资源列表项 */
+export interface PoliticalResourceItem {
+  /** 资源ID */
+  id: string | number
+  /** 标题 */
+  title: string
+  /** 分类：0=政策文件；1=思政素材 */
+  category: 0 | 1
+  /** 内容类型：0=富文本内容；1=URL地址 */
+  contentType: 0 | 1
+  /** 内容 */
+  content: string
+  /** 是否置顶：1=置顶；0=不置顶 */
+  pinTop: 0 | 1
+  /** 前台显示：1=显示；0=不显示 */
+  showFront: 0 | 1
+  /** 创建时间 */
+  createTime?: string
+  /** 更新时间 */
+  updateTime?: string
+}
+
+/** 思政资源列表响应 */
+export interface PoliticalResourceListResponse {
+  /** 数据列表 */
+  list: PoliticalResourceItem[]
+  /** 总条数 */
+  total: number
+  /** 当前页码 */
+  pageIndex: number
+  /** 每页大小 */
+  pageSize: number
+  /** 总页数 */
+  totalPages?: number
+}
+

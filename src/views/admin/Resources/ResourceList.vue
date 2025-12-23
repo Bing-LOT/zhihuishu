@@ -273,7 +273,7 @@ import { ref, computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import type { IEditorConfig } from '@wangeditor/editor'
-import { addPoliticalResource, editPoliticalResource, getPoliticalResourceList } from '@/api/resource'
+import { addPoliticalResource, editPoliticalResource, getPoliticalResourceList, deletePoliticalResource } from '@/api/resource'
 import type { PoliticalResourceAddParams, PoliticalResourceEditParams, PoliticalResourceItem } from '@/types'
 import Pagination from '@/components/common/Pagination/index.vue'
 
@@ -475,15 +475,24 @@ const previewItem = (item: PoliticalResourceItem) => {
 }
 
 // 删除项目
-const deleteItem = (id: string | number) => {
-  if (confirm('确定要删除这条资源吗？')) {
-    // TODO: 调用后端删除接口
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      total.value--
-      alert('删除成功！')
-    }
+const deleteItem = async (id: string | number) => {
+  if (!confirm('确定要删除这条资源吗？')) {
+    return
+  }
+
+  try {
+    const numericId = typeof id === 'number' ? id : parseInt(String(id))
+    console.log('🗑️ 删除参数:', { id: numericId })
+    
+    await deletePoliticalResource(numericId)
+    
+    alert('删除成功！')
+    
+    // 重新加载列表
+    await loadList()
+  } catch (error: any) {
+    console.error('❌ 删除失败:', error)
+    alert(`删除失败：${error.message || '网络错误'}`)
   }
 }
 

@@ -182,3 +182,14 @@ export function editPoliticalResource(data: PoliticalResourceEditParams): Promis
   })
 }
 
+/**
+ * 删除思政资源
+ * @param id 资源ID
+ */
+export function deletePoliticalResource(id: number): Promise<any> {
+  return request({
+    url: `/politicalResource/remove/${id}`,
+    method: 'DELETE'
+  })
+}
+

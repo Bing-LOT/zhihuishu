@@ -123,6 +123,20 @@
           </div>
 
           <div class="form-group">
+            <label>排序序号 <span class="required">*</span></label>
+            <input
+              v-model.number="formData.sort"
+              type="number"
+              min="1"
+              placeholder="请输入排序序号"
+              class="form-input"
+            />
+            <div class="form-hint">
+              <span class="hint-text">数字越小排序越靠前</span>
+            </div>
+          </div>
+
+          <div class="form-group">
             <label class="checkbox-label">
               <input
                 v-model="formData.showInFrontend"
@@ -135,12 +149,13 @@
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveItem">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 4px;">
+          <button class="btn-cancel" @click="closeDialog" :disabled="isUploading">取消</button>
+          <button class="btn-confirm" @click="saveItem" :disabled="isUploading">
+            <svg v-if="!isUploading" width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 4px;">
               <path d="M13 4L6 11L3 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            保存
+            <span v-if="isUploading" class="loading-spinner"></span>
+            {{ isUploading ? '上传中...' : '保存' }}
           </button>
         </div>
       </div>
@@ -149,64 +164,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { uploadFile, addPoliticalCourse, editPoliticalCourse, deletePoliticalCourse, getPoliticalCourseList, type PoliticalCourseItem } from '@/api/banner'
 
 interface ContentItem {
-  id: string
+  id: number
   title: string
   content: string
+  videoUrl: string
   video?: string
   showInFrontend: boolean
+  sort: number
   status: 'active' | 'inactive'
   publishTime: string
 }
 
 // 数据列表
-const items = ref<ContentItem[]>([
-  {
-    id: '1',
-    title: '顶层设计',
-    content: '党建+课程思政顶层设计相关内容',
-    status: 'active',
-    publishTime: '2024-12-15',
-    video: '',
-    showInFrontend: true
-  },
-  {
-    id: '2',
-    title: '特色亮点',
-    content: '党建+课程思政特色亮点展示',
-    status: 'active',
-    publishTime: '2024-12-14',
-    video: '',
-    showInFrontend: true
-  },
-  {
-    id: '3',
-    title: '建设成效',
-    content: '党建+课程思政建设成效总结',
-    status: 'active',
-    publishTime: '2024-12-13',
-    video: '',
-    showInFrontend: true
-  }
-])
+const items = ref<ContentItem[]>([])
 
 // 对话框状态
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
 const videoInput = ref<HTMLInputElement | null>(null)
+const isUploading = ref(false)
 
 // 表单数据
 const formData = ref({
-  id: '',
+  id: 0,
   title: '',
   content: '',
   status: 'active' as 'active' | 'inactive',
   publishTime: new Date().toISOString().split('T')[0],
   video: '',
+  videoUrl: '',
+  sort: 1,
   showInFrontend: true
 })
+
+// 视频文件对象
+const videoFile = ref<File | null>(null)
 
 // 当前编辑项
 const currentItem = ref<ContentItem | null>(null)
@@ -239,6 +235,10 @@ const handleVideoChange = (event: Event) => {
       return
     }
     
+    // 保存文件对象供上传使用
+    videoFile.value = file
+    
+    // 生成预览
     const reader = new FileReader()
     reader.onload = (e) => {
       formData.value.video = e.target?.result as string
@@ -250,6 +250,8 @@ const handleVideoChange = (event: Event) => {
 // 移除视频
 const removeVideo = () => {
   formData.value.video = ''
+  formData.value.videoUrl = ''
+  videoFile.value = null
   if (videoInput.value) {
     videoInput.value.value = ''
   }
@@ -265,23 +267,35 @@ const editItem = (item: ContentItem) => {
     status: item.status,
     publishTime: item.publishTime,
     video: item.video || '',
+    videoUrl: item.videoUrl || '',
+    sort: item.sort,
     showInFrontend: item.showInFrontend
   }
+  // 清空文件对象（编辑时如果不重新选择视频，则使用已有的 videoUrl）
+  videoFile.value = null
   showEditDialog.value = true
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
-  if (confirm('确定要删除这条内容吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-    }
+const deleteItem = async (id: number) => {
+  if (!confirm('确定要删除这条内容吗？')) {
+    return
+  }
+  
+  try {
+    await deletePoliticalCourse(id)
+    alert('删除成功')
+    // 重新加载列表
+    await loadList()
+  } catch (error: any) {
+    console.error('删除失败:', error)
+    alert(error.message || '删除失败，请重试')
   }
 }
 
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
+  // 表单验证
   if (!formData.value.title) {
     alert('请输入标题')
     return
@@ -292,40 +306,58 @@ const saveItem = () => {
     return
   }
 
-  if (!formData.value.video) {
+  // 新增时必须上传视频，编辑时如果有新视频文件则需要上传
+  if (!showEditDialog.value && !videoFile.value) {
     alert('请上传优秀视频')
     return
   }
 
-  if (showEditDialog.value && currentItem.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        content: formData.value.content,
-        status: formData.value.status,
-        publishTime: formData.value.publishTime,
-        video: formData.value.video,
-        showInFrontend: formData.value.showInFrontend
-      }
-    }
-  } else {
-    // 新增
-    const newItem: ContentItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      content: formData.value.content,
-      status: 'active',
-      publishTime: new Date().toISOString().split('T')[0],
-      video: formData.value.video,
-      showInFrontend: formData.value.showInFrontend
-    }
-    items.value.unshift(newItem)
+  if (showEditDialog.value && !videoFile.value && !formData.value.videoUrl) {
+    alert('请上传优秀视频')
+    return
   }
 
-  closeDialog()
+  try {
+    isUploading.value = true
+    
+    let videoUrl = formData.value.videoUrl
+
+    // 如果选择了新视频文件，先上传
+    if (videoFile.value) {
+      console.log('开始上传视频文件...')
+      const uploadResult = await uploadFile(videoFile.value)
+      videoUrl = uploadResult.url
+      console.log('视频上传成功:', videoUrl)
+    }
+
+    // 准备提交数据
+    const submitData: PoliticalCourseItem = {
+      title: formData.value.title,
+      content: formData.value.content,
+      videoUrl: videoUrl,
+      sort: formData.value.sort
+    }
+
+    if (showEditDialog.value && currentItem.value) {
+      // 编辑
+      submitData.id = formData.value.id
+      await editPoliticalCourse(submitData)
+      alert('编辑成功')
+    } else {
+      // 新增
+      await addPoliticalCourse(submitData)
+      alert('添加成功')
+    }
+
+    // 重新加载列表
+    await loadList()
+    closeDialog()
+  } catch (error: any) {
+    console.error('保存失败:', error)
+    alert(error.message || '保存失败，请重试')
+  } finally {
+    isUploading.value = false
+  }
 }
 
 // 关闭对话框
@@ -333,16 +365,42 @@ const closeDialog = () => {
   showAddDialog.value = false
   showEditDialog.value = false
   formData.value = {
-    id: '',
+    id: 0,
     title: '',
     content: '',
     status: 'active',
     publishTime: new Date().toISOString().split('T')[0],
     video: '',
+    videoUrl: '',
+    sort: 1,
     showInFrontend: true
   }
+  videoFile.value = null
   currentItem.value = null
 }
+
+// 加载列表
+const loadList = async () => {
+  try {
+    const list = await getPoliticalCourseList()
+    items.value = list.map(item => ({
+      ...item,
+      id: item.id || 0,
+      video: item.videoUrl,
+      showInFrontend: true,
+      status: 'active' as const,
+      publishTime: new Date().toISOString().split('T')[0]
+    }))
+  } catch (error: any) {
+    console.error('加载列表失败:', error)
+    // 不影响页面展示，静默失败
+  }
+}
+
+// 组件挂载时加载列表
+onMounted(() => {
+  loadList()
+})
 </script>
 
 <style scoped>
@@ -766,6 +824,29 @@ textarea.form-input {
 
 .btn-confirm svg {
   flex-shrink: 0;
+}
+
+.btn-cancel:disabled,
+.btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
 

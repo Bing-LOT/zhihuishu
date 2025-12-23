@@ -184,3 +184,59 @@ export function removeBanner(id: number): Promise<void> {
     method: 'DELETE'
   })
 }
+
+/**
+ * 党建课程数据结构
+ */
+export interface PoliticalCourseItem {
+  id?: number
+  title: string
+  content: string
+  videoUrl: string
+  sort: number
+}
+
+/**
+ * 添加党建课程
+ * @param data 党建课程数据
+ */
+export function addPoliticalCourse(data: PoliticalCourseItem): Promise<{ id: number }> {
+  return request({
+    url: '/politicalCourse/add',
+    method: 'POST',
+    data
+  })
+}
+
+/**
+ * 编辑党建课程
+ * @param data 党建课程数据
+ */
+export function editPoliticalCourse(data: PoliticalCourseItem): Promise<void> {
+  return request({
+    url: '/politicalCourse/edit',
+    method: 'PUT',
+    data
+  })
+}
+
+/**
+ * 删除党建课程
+ * @param id 课程ID
+ */
+export function deletePoliticalCourse(id: number): Promise<void> {
+  return request({
+    url: `/politicalCourse/delete/${id}`,
+    method: 'DELETE'
+  })
+}
+
+/**
+ * 获取党建课程列表
+ */
+export function getPoliticalCourseList(): Promise<PoliticalCourseItem[]> {
+  return request({
+    url: '/politicalCourse/list',
+    method: 'GET'
+  })
+}

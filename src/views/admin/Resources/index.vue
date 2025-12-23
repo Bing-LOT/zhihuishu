@@ -143,7 +143,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getBannerList, addBanner, editBanner as editBannerApi, deleteBanner as deleteBannerApi, uploadFile } from '@/api/banner'
+import { getBannerList, addBanner, editBanner as editBannerApi, removeBanner as removeBannerApi, uploadFile } from '@/api/banner'
 
 interface Banner {
   id: string
@@ -268,7 +268,7 @@ const deleteBanner = async (id: string) => {
   
   try {
     loading.value = true
-    await deleteBannerApi(Number(id))
+    await removeBannerApi(Number(id))
     console.log('Banner删除成功')
     alert('删除成功')
     // 重新加载列表

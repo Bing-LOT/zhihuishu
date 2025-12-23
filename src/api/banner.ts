@@ -174,3 +174,13 @@ export function deleteBanner(id: number): Promise<void> {
   })
 }
 
+/**
+ * 删除Banner (新接口)
+ * @param id Banner ID
+ */
+export function removeBanner(id: number): Promise<void> {
+  return request({
+    url: `/banner/remove/${id}`,
+    method: 'DELETE'
+  })
+}

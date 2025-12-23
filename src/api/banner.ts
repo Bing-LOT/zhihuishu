@@ -142,6 +142,28 @@ export function updateBanner(id: number, picUrl: string, sort: number): Promise<
 }
 
 /**
+ * 编辑Banner (v2 - 已更新)
+ * @param id Banner ID
+ * @param picUrl 图片地址
+ * @param sort 排序序号
+ */
+export function editBanner(id: number, picUrl: string, sort: number): Promise<any> {
+  console.log('🔧🔧🔧 editBanner v2 函数被调用 🔧🔧🔧')
+  console.log('参数:', { id, picUrl, sort })
+  console.log('准备发送 PUT 请求到 /banner/edit')
+  
+  return request({
+    url: '/banner/edit',
+    method: 'PUT',
+    data: {
+      id,
+      picUrl,
+      sort
+    }
+  })
+}
+
+/**
  * 删除Banner
  * @param id Banner ID
  */

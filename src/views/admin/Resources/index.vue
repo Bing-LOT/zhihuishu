@@ -37,7 +37,7 @@
                 <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <!-- <button
+            <button
               class="banner-item__btn"
               :disabled="index === 0"
               @click="moveBanner(index, -1)"
@@ -54,7 +54,7 @@
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M4 6L8 10L12 6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-            </button> -->
+            </button>
           </div>
         </div>
         <div class="banner-item__info">
@@ -133,8 +133,8 @@
           </div>
         </div>
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveBanner">保存</button>
+          <button type="button" class="btn-cancel" @click="closeDialog">取消</button>
+          <button type="button" class="btn-confirm" @click="saveBanner">保存</button>
         </div>
       </div>
     </div>
@@ -143,7 +143,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getBannerList, addBanner, deleteBanner as deleteBannerApi, uploadFile } from '@/api/banner'
+import { getBannerList, addBanner, editBanner as editBannerApi, deleteBanner as deleteBannerApi, uploadFile } from '@/api/banner'
 
 interface Banner {
   id: string
@@ -185,9 +185,8 @@ const loadBannerList = async () => {
     // 转换API返回的数据格式到前端格式
     banners.value = (result as any[]).map((item: any, index: number) => ({
       id: String(item.id),
-      title: `Banner ${index + 1}`,
+      title: `Banner ${item.sort || index + 1}`,
       image: item.picUrl,
-      link: '',
       sort: item.sort || index + 1
     }))
     console.log('Banner列表加载成功:', banners.value)
@@ -284,21 +283,58 @@ const deleteBanner = async (id: string) => {
 }
 
 // 移动Banner
-const moveBanner = (index: number, direction: number) => {
+const moveBanner = async (index: number, direction: number) => {
   const newIndex = index + direction
   if (newIndex >= 0 && newIndex < banners.value.length) {
-    const temp = banners.value[index]
-    banners.value[index] = banners.value[newIndex]
-    banners.value[newIndex] = temp
-    // 更新排序
-    banners.value.forEach((banner, idx) => {
-      banner.sort = idx + 1
-    })
+    try {
+      loading.value = true
+      
+      // 获取要交换的两个 Banner
+      const banner1 = banners.value[index]
+      const banner2 = banners.value[newIndex]
+      
+      // 交换它们的 sort 值
+      const tempSort = banner1.sort
+      banner1.sort = banner2.sort
+      banner2.sort = tempSort
+      
+      console.log('移动 Banner，更新排序:', {
+        banner1: { id: banner1.id, oldSort: tempSort, newSort: banner1.sort },
+        banner2: { id: banner2.id, oldSort: banner2.sort, newSort: tempSort }
+      })
+      
+      // 调用 API 更新两个 Banner 的 sort 值
+      await Promise.all([
+        editBannerApi(Number(banner1.id), banner1.image, banner1.sort),
+        editBannerApi(Number(banner2.id), banner2.image, banner2.sort)
+      ])
+      
+      console.log('✅ Banner 排序更新成功')
+      
+      // 交换位置
+      const temp = banners.value[index]
+      banners.value[index] = banners.value[newIndex]
+      banners.value[newIndex] = temp
+      
+      // 重新加载列表以确保数据一致
+      await loadBannerList()
+    } catch (error: any) {
+      console.error('移动 Banner 失败:', error)
+      const errorMsg = error.response?.data?.msg || error.message || '移动失败'
+      alert(`移动失败: ${errorMsg}`)
+    } finally {
+      loading.value = false
+    }
   }
 }
 
 // 保存Banner
 const saveBanner = async () => {
+  console.log('====== 开始保存Banner ======')
+  console.log('showEditDialog:', showEditDialog.value)
+  console.log('formData:', formData.value)
+  console.log('selectedFile:', selectedFile.value)
+  
   if (!formData.value.image) {
     alert('请上传Banner图片')
     return
@@ -312,6 +348,7 @@ const saveBanner = async () => {
   try {
     loading.value = true
     let picUrl = formData.value.image
+    console.log('初始 picUrl:', picUrl)
 
     // 如果是新上传的文件，先上传图片
     if (selectedFile.value) {
@@ -338,22 +375,36 @@ const saveBanner = async () => {
       }
     }
 
+    console.log('====== 准备调用API ======')
+    console.log('是否编辑模式:', showEditDialog.value)
+    console.log('最终 picUrl:', picUrl)
+    
     if (showEditDialog.value && currentBanner.value) {
-      // 编辑（本地更新）
-      const index = banners.value.findIndex(b => b.id === formData.value.id)
-      if (index > -1) {
-        banners.value[index] = {
-          ...banners.value[index],
-          title: formData.value.title,
-          image: picUrl,
-          sort: formData.value.sort
-        }
-      }
-      console.log('Banner编辑成功')
+      // 编辑 - 调用API
+      const bannerId = Number(formData.value.id)
+      const bannerSort = formData.value.sort
+      
+      console.log('🚀🚀🚀 调用 /banner/edit API (V2) 🚀🚀🚀')
+      console.log('参数:', { 
+        id: bannerId, 
+        picUrl, 
+        sort: bannerSort 
+      })
+      console.log('editBannerApi 函数类型:', typeof editBannerApi)
+      
+      console.log('⏳ 开始调用 editBannerApi V2...')
+      const result = await editBannerApi(bannerId, picUrl, bannerSort)
+      console.log('✅ editBannerApi 调用完成，返回值:', result)
+      console.log('✅ Banner编辑成功')
       alert('更新成功')
+      
+      // 重新加载列表
+      console.log('⏳ 开始重新加载列表...')
+      await loadBannerList()
+      console.log('✅ 列表加载完成')
     } else {
       // 新增 - 调用API
-      const sort = banners.value.length + 1
+      const sort = formData.value.sort || banners.value.length + 1
       console.log('调用 /banner/add API，参数:', { picUrl, sort })
       
       const result = await addBanner(picUrl, sort)

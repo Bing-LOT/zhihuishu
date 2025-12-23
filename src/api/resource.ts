@@ -193,3 +193,15 @@ export function deletePoliticalResource(id: number): Promise<any> {
   })
 }
 
+/**
+ * 编辑思政资源页面标题
+ * @param content 标题内容
+ */
+export function editPoliticalResourcePageTitle(content: string): Promise<any> {
+  return request({
+    url: '/politicalResource/title/edit',
+    method: 'PUT',
+    data: { content }
+  })
+}
+

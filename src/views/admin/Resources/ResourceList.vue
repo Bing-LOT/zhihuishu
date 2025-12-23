@@ -3,10 +3,27 @@
     <!-- 页面标题 -->
     <div class="page-header">
       <div class="page-title">
-        <h2>思政资源</h2>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-left: 8px;">
-          <path d="M12 5.33333L6.66667 10.6667L4 8" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <!-- 非编辑状态 -->
+        <template v-if="!isEditingPageTitle">
+          <h2>{{ pageTitle }}</h2>
+          <button class="page-title-edit-btn" @click="startEditPageTitle" title="编辑标题">
+            <img src="/images/bianji.svg" alt="编辑" width="16" height="16" />
+          </button>
+        </template>
+        <!-- 编辑状态 -->
+        <template v-else>
+          <div class="page-title-edit-group">
+            <input 
+              v-model="editingPageTitle" 
+              type="text" 
+              class="page-title-edit-input"
+              @keyup.enter="savePageTitleEdit"
+              @keyup.esc="cancelPageTitleEdit"
+            />
+            <button class="page-title-save-btn" @click="savePageTitleEdit">保存</button>
+            <button class="page-title-cancel-btn" @click="cancelPageTitleEdit">取消</button>
+          </div>
+        </template>
       </div>
       <p class="page-desc">管理课程思政资源设施内容</p>
     </div>
@@ -285,9 +302,14 @@ import { ref, computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import type { IEditorConfig } from '@wangeditor/editor'
-import { addPoliticalResource, editPoliticalResource, getPoliticalResourceList, deletePoliticalResource } from '@/api/resource'
+import { addPoliticalResource, editPoliticalResource, getPoliticalResourceList, deletePoliticalResource, editPoliticalResourcePageTitle } from '@/api/resource'
 import type { PoliticalResourceAddParams, PoliticalResourceEditParams, PoliticalResourceItem } from '@/types'
 import Pagination from '@/components/common/Pagination/index.vue'
+
+// 页面标题编辑状态
+const pageTitle = ref('思政资源')
+const isEditingPageTitle = ref(false)
+const editingPageTitle = ref('')
 
 // 数据列表
 const items = ref<PoliticalResourceItem[]>([])
@@ -425,6 +447,41 @@ const handleSearch = () => {
 const handleFilter = () => {
   currentPage.value = 1 // 重置到第一页
   loadList()
+}
+
+// 开始编辑页面标题
+const startEditPageTitle = () => {
+  isEditingPageTitle.value = true
+  editingPageTitle.value = pageTitle.value
+}
+
+// 取消编辑页面标题
+const cancelPageTitleEdit = () => {
+  isEditingPageTitle.value = false
+  editingPageTitle.value = ''
+}
+
+// 保存页面标题编辑
+const savePageTitleEdit = async () => {
+  if (!editingPageTitle.value.trim()) {
+    alert('标题不能为空')
+    return
+  }
+
+  try {
+    console.log('📝 编辑页面标题参数:', { content: editingPageTitle.value })
+    await editPoliticalResourcePageTitle(editingPageTitle.value)
+    
+    // 更新成功
+    pageTitle.value = editingPageTitle.value
+    alert('标题修改成功！')
+    
+    // 清除编辑状态
+    cancelPageTitleEdit()
+  } catch (error: any) {
+    console.error('❌ 标题编辑失败:', error)
+    alert(`标题编辑失败：${error.message || '网络错误'}`)
+  }
 }
 
 // 拖拽开始
@@ -647,6 +704,85 @@ const closeDialog = () => {
   font-size: 18px;
   font-weight: 400;
   color: #e31e24;
+}
+
+/* 页面标题编辑按钮 */
+.page-title-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  margin-left: 8px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.3s;
+}
+
+.page-title-edit-btn:hover {
+  opacity: 1;
+  background: #f5f5f5;
+}
+
+.page-title-edit-btn img {
+  display: block;
+}
+
+/* 页面标题编辑组 */
+.page-title-edit-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-title-edit-input {
+  padding: 6px 12px;
+  border: 1px solid #e31e24;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #e31e24;
+  font-weight: 400;
+  outline: none;
+  min-width: 200px;
+  transition: border-color 0.3s;
+}
+
+.page-title-edit-input:focus {
+  border-color: #e31e24;
+  box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.1);
+}
+
+.page-title-save-btn,
+.page-title-cancel-btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.page-title-save-btn {
+  background: #e31e24;
+  color: white;
+}
+
+.page-title-save-btn:hover {
+  background: #c71b20;
+}
+
+.page-title-cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.page-title-cancel-btn:hover {
+  background: #e8e8e8;
 }
 
 .page-desc {

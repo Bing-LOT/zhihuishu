@@ -278,3 +278,26 @@ export function getXiThoughtExampleDetail(id: string | number): Promise<XiThough
   })
 }
 
+/**
+ * 足迹列表数据结构
+ */
+export interface FootprintItem {
+  id: number          // 业务id
+  title: string       // 标题
+  createTime: string  // 发布时间
+  footprintType: number  // 足迹内容类型：0=富文本内容（内部详情），1=URL地址（外部跳转）
+  content: string     // 内容配置，富文本或URL地址
+  statPv: number      // 浏览量
+}
+
+/**
+ * 获取足迹Top列表
+ * @returns 足迹列表
+ */
+export function getFootprintTopList(): Promise<FootprintItem[]> {
+  return request({
+    url: '/api/xiThought/footprint/top/list',
+    method: 'get'
+  })
+}
+

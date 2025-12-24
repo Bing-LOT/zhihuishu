@@ -226,8 +226,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
-import { getXiThoughtTitles, getXiThoughtVideoTopList, getXiThoughtExampleTopList } from '@/api/redCulture'
-import type { XiThoughtTitle, XiThoughtVideo, XiThoughtExampleVideo } from '@/api/redCulture'
+import { getXiThoughtTitles, getXiThoughtVideoTopList, getXiThoughtExampleTopList, getFootprintTopList } from '@/api/redCulture'
+import type { XiThoughtTitle, XiThoughtVideo, XiThoughtExampleVideo, FootprintItem } from '@/api/redCulture'
 import type { Course } from '@/types'
 
 const router = useRouter()
@@ -376,23 +376,31 @@ const generateList = (count: number, prefix: string) => {
 list3.value = generateList(8, 's3')
 
 // 足迹目录数据
-const footprintList = ref([
-  { title: '奥迪在中国为什么掉队了？被大众拖入深渊', date: '2025-09-03' },
-  { title: '重磅会议利好！要活跃资本市场，提振投资者信心！', date: '2025-09-03' },
-  { title: '我国高速电力线载波技术获重大突破', date: '2025-09-03' },
-  { title: '同甘不共苦， "消失"的房企合伙人', date: '2025-09-03' },
-  { title: '银行业危机风波未完：仍有一颗定时炸弹滴滴作响！', date: '2025-09-03' },
-  { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
-  { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
-  { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
-  { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
-])
+const footprintList = ref<Array<{ title: string; date: string }>>([])
+
+// 获取足迹列表
+const fetchFootprintList = async () => {
+  try {
+    const response = await getFootprintTopList()
+    console.log('获取足迹列表成功：', response)
+    if (response && Array.isArray(response)) {
+      // 将返回的数据转换为组件需要的格式
+      footprintList.value = response.map(item => ({
+        title: item.title,
+        date: item.createTime
+      }))
+    }
+  } catch (error) {
+    console.error('获取足迹列表失败：', error)
+  }
+}
 
 // 组件挂载时获取数据
 onMounted(() => {
   fetchTitles()
   fetchVideoList()
   fetchExampleList()
+  fetchFootprintList()
 })
 
 </script>

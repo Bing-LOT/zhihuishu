@@ -134,6 +134,7 @@
             :key="course.id"
             :course="course"
             :badge="course.badge as string"
+            @click="handleCourseClick(course)"
           />
         </div>
       </section>
@@ -143,9 +144,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import type { Course } from '@/types'
 import { getTitles, getPoliticalCourseList, getCourseExpoList, type PoliticalCourseItem, type CourseExpoItem } from '@/api/course'
+
+const router = useRouter()
 
 /**
  * 概览页面
@@ -236,6 +240,11 @@ const fetchCourseExpoList = async () => {
   } catch (error) {
     console.error('获取课程展播列表失败:', error)
   }
+}
+
+// 处理课程卡片点击
+const handleCourseClick = (course: CourseWithBadge) => {
+  router.push(`/study/video/${course.id}`)
 }
 
 onMounted(() => {

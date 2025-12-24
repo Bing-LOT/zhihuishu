@@ -210,3 +210,14 @@ export function getCourseExpoList(): Promise<CourseExpoItem[]> {
   })
 }
 
+/**
+ * 获取课程展播详情
+ * @param id 课程ID
+ */
+export function getCourseExpoDetail(id: string | number): Promise<CourseExpoItem> {
+  return request({
+    url: `/api/courseExpo/get/${id}`,
+    method: 'GET'
+  })
+}
+

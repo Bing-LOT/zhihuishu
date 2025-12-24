@@ -9,11 +9,11 @@
       <!-- 面包屑 -->
       <div class="course-detail__breadcrumb">
         <span class="label">您的位置：</span>
-        <router-link to="/overview" class="link">思政概览</router-link>
+        <router-link to="/study" class="link">学习中心</router-link>
         <span class="separator">>></span>
         <router-link to="/overview" class="link">党员教师课程思政示范课展播</router-link>
         <span class="separator">>></span>
-        <span class="current">{{ course.title }}</span>
+        <span class="current">{{ course.title || '课程详情' }}</span>
       </div>
 
       <div class="course-detail__content">
@@ -41,13 +41,13 @@
               <span class="label">主讲教师：</span>
               <div class="teachers highlight">
                 <span v-for="(teacher, index) in course.teacherList" :key="index" class="teacher-item">
-                  {{ teacher.name }}-{{ teacher.title }}
+                  {{ teacher.name }}
                 </span>
               </div>
             </div>
             <div class="course-info__row">
               <span class="label">学&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;院：</span>
-              <span class="highlight">信息学院</span>
+              <span class="highlight">{{ course.college || '暂无' }}</span>
             </div>
             <div class="course-info__row">
               <span class="label">累计观看学习：</span>
@@ -75,31 +75,38 @@
 
           <!-- 标签页内容 -->
           <div class="course-tab-content">
+            <!-- 课程简介 -->
             <div v-if="currentTab === 'intro'" class="course-intro text-content">
-              <p>课程是人才培养的最后一公里。随着大数据时代的来临，“概率论与数理统计”作为大数据的主要基础理论之一，受到专家学者的广泛关注，这一课程已成为高等院校理工科、经管类各专业重要的基础课程之一，大量应用于社会、经济、科学等领域。其中概率论以现代数学框架为基础研究随机现象的统计规律性，数理统计则以概率论为理论基础，研究怎样用有效的方法去收集、整理、分析受随机性影响的数据，并对所研究的问题作出统计推断和预测，同时为决策和行动提供依据和建议。</p>
-              <br>
-              <p>通过本课程的学习，学生能掌握概率论与数理统计的基本概念、基本理论和方法，从而理解随机现象的基本思想、训练数理逻辑思维，培养运用概率统计方法分析和解决实际问题的能力，为后续学习乃至工作奠定必备的数理基础。</p>
+              <div v-if="course.brief" v-html="course.brief"></div>
+              <p v-else style="text-indent: 0; opacity: 0.5;">暂无课程简介</p>
             </div>
             
+            <!-- 教学设计 -->
             <div v-else-if="currentTab === 'design'" class="course-design text-content">
-              <h3>教学设计理念</h3>
-              <p>本课程坚持以学生为中心，采用混合式教学模式...</p>
+              <div v-if="course.docUrl" class="doc-download">
+                <h3>教学设计文档</h3>
+                <a :href="course.docUrl" target="_blank" class="download-btn">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 13L6 9H8.5V4H11.5V9H14L10 13Z" fill="currentColor"/>
+                    <path d="M4 14H16V16H4V14Z" fill="currentColor"/>
+                  </svg>
+                  <span>下载教学设计文档</span>
+                </a>
+              </div>
+              <p v-else style="text-indent: 0; opacity: 0.5;">暂无教学设计文档</p>
             </div>
             
+            <!-- 教学视频 -->
             <div v-else-if="currentTab === 'video'" class="course-video">
-              <div class="video-list">
-                <!-- 模拟视频列表 -->
-                <div class="video-item" v-for="i in 3" :key="i">
-                  <div class="video-thumbnail">
-                    <img :src="course.cover" alt="" />
-                    <div class="play-icon">▶</div>
-                  </div>
-                  <div class="video-info">
-                    <h4>第一章 第{{ i }}节 随机事件与概率</h4>
-                    <span>时长：45:00</span>
-                  </div>
-                </div>
+              <div v-if="course.videoUrl" class="video-player">
+                <video 
+                  :src="course.videoUrl"
+                  controls
+                  class="video-content"
+                >
+                </video>
               </div>
+              <p v-else style="text-indent: 0; opacity: 0.5; text-align: center; padding: 40px 0;">暂无教学视频</p>
             </div>
           </div>
         </div>
@@ -109,27 +116,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { getCourseExpoDetail, type CourseExpoItem } from '@/api/course'
 
 /**
  * 课程详情页
  */
 const route = useRoute()
-const courseId = route.params.id
+const courseId = route.params.id as string
 
-// 模拟课程数据
+// 课程数据
 const course = ref({
-  id: courseId || '1',
-  title: '概率论与数理统计',
-  cover: '/images/home/video-1.jpg',
-  badge: '国家示范',
-  studentCount: 3456,
-  teacherList: [
-    { name: '薛美玉', title: '教授' },
-    { name: '张三', title: '副教授' }
-  ]
+  id: '',
+  title: '',
+  cover: '',
+  badge: '',
+  studentCount: 0,
+  college: '',
+  teacherList: [] as Array<{ name: string; title: string }>,
+  brief: '',
+  docUrl: '',
+  videoUrl: ''
 })
+
+// 获取课程详情
+const fetchCourseDetail = async () => {
+  try {
+    const data = await getCourseExpoDetail(courseId)
+    course.value = {
+      id: data.id.toString(),
+      title: data.name,
+      cover: data.coverUrl,
+      badge: data.levelName,
+      studentCount: data.statPv,
+      college: data.college,
+      teacherList: data.teachers.map(t => ({
+        name: t.name,
+        title: t.department || '教师'
+      })),
+      brief: data.brief,
+      docUrl: data.docUrl,
+      videoUrl: data.videoUrl
+    }
+  } catch (error) {
+    console.error('获取课程详情失败:', error)
+  }
+}
 
 // 标签页配置
 const tabs = [
@@ -139,6 +172,10 @@ const tabs = [
 ]
 
 const currentTab = ref('intro')
+
+onMounted(() => {
+  fetchCourseDetail()
+})
 </script>
 
 <style scoped>
@@ -422,5 +459,53 @@ const currentTab = ref('intro')
 .video-info span {
   font-size: 14px;
   color: #666;
+}
+
+/* 文档下载样式 */
+.doc-download {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.doc-download h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 0;
+}
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(270deg, #bc2220 0%, #bc7120 100%);
+  color: #fff;
+  font-size: 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(188, 34, 32, 0.3);
+}
+
+/* 视频播放器样式 */
+.video-player {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-content {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>

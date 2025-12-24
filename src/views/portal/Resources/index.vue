@@ -52,13 +52,13 @@
         <div class="resources-sidebar">
           <div class="sidebar-header">
             <div class="sidebar-header-bg">
-              <img src="/images/home/title-decoration.png" alt="" />
+              <!-- <img src="/images/home/title-decoration.png" alt="" /> -->
             </div>
             <div class="sidebar-icon">
-              <!-- <img src="/images/home/title-decoration-small.png" alt="" /> -->
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <img src="/images/xiaohui2.png" alt="" />
+              <!-- <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 0L12.2451 7.75491H20L13.8274 12.2451L16.1803 20L10 15.2451L3.81966 20L6.17257 12.2451L0 7.75491H7.75491L10 0Z" fill="#bc2220" fill-opacity="0.2"/>
-              </svg>
+              </svg> -->
             </div>
             <h2>思政资源</h2>
           </div>
@@ -297,6 +297,10 @@ const handleResourceClick = (item: any) => {
   width: 240px;
   flex-shrink: 0;
   background: #fff;
+  background-image: url('/images/Frame_1000015326.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   overflow: hidden;
@@ -382,6 +386,10 @@ const handleResourceClick = (item: any) => {
 .resources-main {
   flex: 1;
   background: #fff;
+  background-image: url('/images/Frame_1000015327.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;

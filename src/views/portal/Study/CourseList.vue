@@ -118,8 +118,8 @@
               <path d="M17.5 17.5L13.875 13.875" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <input type="text" placeholder="请输入" v-model="searchQuery" @keyup.enter="fetchCourseList" />
-          <button class="search-btn" @click="fetchCourseList">搜索</button>
+          <input type="text" placeholder="请输入课程名称" v-model="searchQuery" @keyup.enter="handleSearch" />
+          <button class="search-btn" @click="handleSearch">搜索</button>
         </div>
       </div>
 
@@ -199,6 +199,10 @@ const fetchCourseList = async () => {
     if (activeDepartment.value && activeDepartment.value !== '全部') {
       params.college = activeDepartment.value
     }
+    // 添加搜索关键字
+    if (searchQuery.value && searchQuery.value.trim()) {
+      params.name = searchQuery.value.trim()
+    }
 
     const response = await getCourseExpoPageList(params)
     courseList.value = response.records
@@ -224,7 +228,7 @@ onMounted(() => {
 
 // 转换课程数据为卡片所需格式
 const filteredCourseList = computed(() => {
-  let list = courseList.value.map(course => ({
+  return courseList.value.map(course => ({
     id: course.id.toString(),
     title: course.name,
     cover: course.coverUrl,
@@ -235,17 +239,14 @@ const filteredCourseList = computed(() => {
     level: course.levelName,
     type: course.property
   }))
-
-  // 搜索过滤
-  if (searchQuery.value) {
-    list = list.filter(course => 
-      course.title.includes(searchQuery.value) || 
-      course.teacherList.some((t: any) => t.name.includes(searchQuery.value))
-    )
-  }
-
-  return list
 })
+
+/**
+ * 处理搜索
+ */
+const handleSearch = () => {
+  fetchCourseList()
+}
 
 const handleCourseClick = (course: any) => {
   router.push(`/study/video/${course.id}`)

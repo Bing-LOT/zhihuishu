@@ -219,6 +219,7 @@ export interface CourseExpoPageParams {
   property?: string
   levelName?: string
   college?: string
+  name?: string
 }
 
 /**

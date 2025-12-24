@@ -78,7 +78,11 @@
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="item-title-wrapper">
+            <h3 class="item-title">{{ item.title }}</h3>
+            <span v-if="item.pinTop === 1" class="status-badge status-badge--top">置顶</span>
+            <span v-if="item.showFront === 0" class="status-badge status-badge--hidden">前台隐藏</span>
+          </div>
           <p class="item-description">{{ item.address }}</p>
           <div class="item-tags" v-if="item.tags && item.tags.length > 0">
             <span v-for="tag in item.tags" :key="tag" class="tag">{{ tag }}</span>
@@ -102,8 +106,20 @@
               <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="action-btn action-btn--preview" @click="previewItem(item)" title="预览">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <button 
+            class="action-btn" 
+            :class="item.showFront === 1 ? 'action-btn--hide' : 'action-btn--show'" 
+            @click="toggleStatus(item)" 
+            :title="item.showFront === 1 ? '隐藏' : '显示'"
+          >
+            <svg v-if="item.showFront === 1" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 隐藏图标：眼睛带斜线 -->
+              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 2L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 显示图标：眼睛 -->
               <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
             </svg>
@@ -832,6 +848,45 @@ const previewItem = (item: CultureItem) => {
   showPreviewDialog.value = true
 }
 
+// 切换显示/隐藏状态
+const toggleStatus = async (item: CultureItem) => {
+  const newStatus = item.showFront === 1 ? 0 : 1
+  const statusText = newStatus === 1 ? '显示' : '隐藏'
+  
+  if (confirm(`确定要将此资源设置为${statusText}状态吗？`)) {
+    try {
+      const params: EditRedCultureParams = {
+        id: item.id,
+        title: item.title,
+        coverUrl: item.coverUrl,
+        address: item.address,
+        tags: item.tags || [],
+        contentType: parseInt(item.contentType) || 0,
+        content: item.content || '',
+        pinTop: item.pinTop || 0,
+        showFront: newStatus
+      }
+      
+      // 如果有坐标，添加到参数中
+      if (item.lng && item.lat) {
+        params.lng = item.lng
+        params.lat = item.lat
+      }
+      
+      console.log('切换状态参数:', params)
+      
+      await editRedCulture(params)
+      alert(`已成功设置为${statusText}状态`)
+      
+      // 重新加载数据
+      await loadData()
+    } catch (error) {
+      console.error('切换状态失败:', error)
+      alert('切换状态失败：' + (error as Error).message)
+    }
+  }
+}
+
 // 删除项目
 const deleteItem = async (id: number) => {
   if (confirm('确定要删除这个资源吗？')) {
@@ -1114,11 +1169,41 @@ const closeDialog = () => {
   min-width: 0;
 }
 
+.item-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
 .item-title {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 16px;
   font-weight: 500;
   color: #333;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.status-badge--top {
+  background: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.status-badge--hidden {
+  background: #f5f5f5;
+  color: #8c8c8c;
+  border: 1px solid #d9d9d9;
 }
 
 .item-description {
@@ -1170,12 +1255,20 @@ const closeDialog = () => {
   background: #e6f7ff;
 }
 
-.action-btn--preview {
-  color: #666;
+.action-btn--show {
+  color: #52c41a;
 }
 
-.action-btn--preview:hover {
-  background: #f5f5f5;
+.action-btn--show:hover {
+  background: #f6ffed;
+}
+
+.action-btn--hide {
+  color: #faad14;
+}
+
+.action-btn--hide:hover {
+  background: #fffbe6;
 }
 
 .action-btn--delete {

@@ -142,3 +142,39 @@ export function leaveCourse(courseId: string): Promise<void> {
   })
 }
 
+/**
+ * 获取标题配置
+ */
+export interface TitleItem {
+  code: string
+  title: string
+}
+
+export function getTitles(): Promise<TitleItem[]> {
+  return request({
+    url: '/api/politicalCourse/titles/get',
+    method: 'GET'
+  })
+}
+
+/**
+ * 概览目录项
+ */
+export interface PoliticalCourseItem {
+  id: number
+  title: string
+  content: string
+  videoUrl: string
+  sort: number
+}
+
+/**
+ * 获取概览目录列表
+ */
+export function getPoliticalCourseList(): Promise<PoliticalCourseItem[]> {
+  return request({
+    url: '/api/politicalCourse/list',
+    method: 'GET'
+  })
+}
+

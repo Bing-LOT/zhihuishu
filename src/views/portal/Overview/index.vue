@@ -40,7 +40,7 @@
             </svg>
           </div>
           <div class="overview__title-content">
-            <h1 class="overview__title">“党建+课程思政”工作概览</h1>
+            <h1 class="overview__title">{{ pageTitle }}</h1>
             <div class="overview__title-icon">
               <img src="/images/xiaohui2.png" alt="" />
             </div>
@@ -73,7 +73,7 @@
           <div class="overview__menu-list">
             <div 
               v-for="(item, index) in menuItems" 
-              :key="index"
+              :key="item.id"
               class="overview__menu-item"
               :class="{ 'overview__menu-item--active': activeMenu === index }"
               @click="activeMenu = index"
@@ -92,7 +92,7 @@
                     </svg>
                   </div>
                 </div>
-                <p class="overview__menu-desc">{{ item.description }}</p>
+                <p class="overview__menu-desc">{{ item.content }}</p>
               </div>
             </div>
           </div>
@@ -102,11 +102,11 @@
         <div class="overview__video">
           <div class="overview__player">
             <video 
+              :key="currentVideoUrl"
               class="overview__video-content"
               controls
-              poster="/images/home/video-1.jpg"
+              :src="currentVideoUrl"
             >
-              <source src="/videos/hero-video.mp4" type="video/mp4">
             </video>
           </div>
         </div>
@@ -116,7 +116,7 @@
       <section class="overview__courses">
         <div class="overview__courses-header">
           <div class="overview__courses-title-wrapper">
-            <h2 class="overview__courses-title">党员教师课程思政示范课展播</h2>
+            <h2 class="overview__courses-title">{{ coursesTitle }}</h2>
             <img src="/images/xiaohui2.png" alt="" class="overview__courses-icon" />
           </div>
           
@@ -142,31 +142,66 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import type { Course } from '@/types'
+import { getTitles, getPoliticalCourseList, type PoliticalCourseItem } from '@/api/course'
 
 /**
  * 概览页面
  */
 
-// 目录数据
-const menuItems = [
-  {
-    title: '介绍',
-    description: '介绍党建引领、学校党委统筹-职能部门及院系党组织落实-党支部攻坚-党员教师带头”机制、思政课程与课程思政一体推进、习思想分学科有机融入各学科的构想设计、出台的规章制度等。'
-  },
-  {
-    title: '特色亮点',
-    description: '学校课程思政建设具有启动早、工作实、特色足的特色，梳理课程思政建设'
-  },
-  {
-    title: '建设成效',
-    description: '实现了三全育人、马院两项省教学成果、获批省级以上思政类教改项目数量、'
-  }
-]
+// 标题数据
+const pageTitle = ref('"党建+课程思政"工作概览')
+const coursesTitle = ref('党员教师课程思政示范课展播')
 
+// 获取标题
+const fetchTitles = async () => {
+  try {
+    const titles = await getTitles()
+    titles.forEach(item => {
+      if (item.code === 'political_course') {
+        pageTitle.value = item.title
+      } else if (item.code === 'course_expo') {
+        coursesTitle.value = item.title
+      }
+    })
+  } catch (error) {
+    console.error('获取标题失败:', error)
+  }
+}
+
+// 目录数据
+const menuItems = ref<PoliticalCourseItem[]>([])
 const activeMenu = ref(0)
+
+// 获取概览目录
+const fetchPoliticalCourseList = async () => {
+  try {
+    const data = await getPoliticalCourseList()
+    // 按 sort 字段排序
+    menuItems.value = data.sort((a, b) => a.sort - b.sort)
+    // 如果有数据，默认激活第一项
+    if (menuItems.value.length > 0) {
+      activeMenu.value = 0
+    }
+  } catch (error) {
+    console.error('获取概览目录失败:', error)
+  }
+}
+
+// 当前视频URL
+const currentVideoUrl = computed(() => {
+  if (menuItems.value.length > 0 && menuItems.value[activeMenu.value]) {
+    return menuItems.value[activeMenu.value].videoUrl
+  }
+  return '/videos/hero-video.mp4' // 默认视频
+})
+
+onMounted(() => {
+  fetchTitles()
+  fetchPoliticalCourseList()
+})
 
 // 模拟课程数据
 const courseList = ref<any[]>([

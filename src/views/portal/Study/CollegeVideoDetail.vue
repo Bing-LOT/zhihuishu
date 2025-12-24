@@ -547,7 +547,7 @@ onUnmounted(() => {
 .text-script-card {
   width: 364px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.9);
+  /* background: rgba(255, 255, 255, 0.1); */
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
@@ -565,7 +565,10 @@ onUnmounted(() => {
   border-radius: 16px;
   overflow: hidden;
   z-index: 0;
-  background: linear-gradient(135deg, rgba(236, 217, 186, 0.2) 0%, rgba(253, 212, 166, 0.2) 100%);
+  background-image: url('/images/Frame_1000015326.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .text-script-card__title {
@@ -601,7 +604,7 @@ onUnmounted(() => {
 /* 右侧视频主卡片 */
 .video-main-card {
   flex: 1;
-  background: rgba(255, 255, 255, 0.9);
+  /* background: rgba(255, 255, 255, 0.9); */
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
@@ -619,7 +622,10 @@ onUnmounted(() => {
   border-radius: 16px;
   overflow: hidden;
   z-index: 0;
-  background: linear-gradient(135deg, rgba(236, 217, 186, 0.2) 0%, rgba(253, 212, 166, 0.2) 100%);
+  background-image: url('/images/Frame_1000015327.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* 视频信息头部 */

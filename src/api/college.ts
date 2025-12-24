@@ -70,10 +70,24 @@ export function addCollege(data: AddCollegeParams) {
 }
 
 /**
- * 更新一院一品
+ * 编辑一院一品参数
  */
-export function updateCollege(data: Partial<CollegeItem>) {
-  return request.post('/college/update', data)
+export interface EditCollegeParams {
+  id: number // 业务id（必需）
+  coverUrl: string // 封面图片（必需）
+  name: string // 课程名称（必需）
+  college: string // 所在学院（必需）
+  teachers: string[] // 主讲教师，多个（必需）
+  types: string[] // 建设课程类型，多个（必需）
+  content: string // 课程详情内容（必需）
+  showFront: number // 前台显示：1=显示；0=隐藏（必需）
+}
+
+/**
+ * 编辑一院一品
+ */
+export function updateCollege(data: EditCollegeParams) {
+  return request.put('/college/edit', data)
 }
 
 /**

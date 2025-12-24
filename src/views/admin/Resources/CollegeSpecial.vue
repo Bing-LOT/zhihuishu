@@ -336,7 +336,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef } from 'vue'
-import { getCollegePageList, addCollege, type CollegeItem } from '@/api/college'
+import { getCollegePageList, addCollege, updateCollege, type CollegeItem } from '@/api/college'
 import { uploadFile } from '@/api/banner'
 import Pagination from '@/components/common/Pagination/index.vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
@@ -670,19 +670,24 @@ const saveItem = async () => {
     const typesArray = [formData.value.types] // 单选值转为数组
     
     if (showEditDialog.value) {
-      // TODO: 调用编辑API
-      // await updateCollege({
-      //   id: Number(formData.value.id),
-      //   name: formData.value.name,
-      //   coverUrl: coverUrl,
-      //   teachers: teachersArray,
-      //   college: formData.value.college,
-      //   types: typesArray,
-      //   content: formData.value.content,
-      //   showFront: formData.value.showOnFrontend ? 1 : 0
-      // })
-      alert('编辑功能暂未实现，需要调用API接口')
+      // 调用编辑API
+      await updateCollege({
+        id: Number(formData.value.id),
+        name: formData.value.name,
+        coverUrl: coverUrl,
+        teachers: teachersArray,
+        college: formData.value.college,
+        types: typesArray,
+        content: formData.value.content,
+        showFront: formData.value.showOnFrontend ? 1 : 0
+      })
+      
+      console.log('编辑成功')
+      alert('编辑成功！')
       closeDialog()
+      
+      // 保存成功后重新加载数据
+      await loadData()
     } else {
       // 调用新增API
       await addCollege({
@@ -715,6 +720,8 @@ const saveItem = async () => {
 const closeDialog = () => {
   showAddDialog.value = false
   showEditDialog.value = false
+  
+  // 重置表单数据
   formData.value = {
     id: '',
     name: '',
@@ -724,6 +731,11 @@ const closeDialog = () => {
     types: '',
     content: '',
     showOnFrontend: true
+  }
+  
+  // 清空富文本编辑器内容
+  if (editorRef.value) {
+    editorRef.value.clear()
   }
 }
 

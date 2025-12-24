@@ -102,7 +102,7 @@
 /* 面包屑 */
 .breadcrumb {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   font-size: 16px;
   margin-bottom: 32px;
   color: #333;

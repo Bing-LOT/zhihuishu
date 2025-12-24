@@ -427,6 +427,7 @@ import {
   getRedCultureList, 
   createRedCulture,
   editRedCulture,
+  deleteRedCulture,
   type RedCultureItem, 
   type RedCulturePageParams,
   type CreateRedCultureParams,
@@ -889,17 +890,17 @@ const toggleStatus = async (item: CultureItem) => {
 
 // 删除项目
 const deleteItem = async (id: number) => {
-  if (confirm('确定要删除这个资源吗？')) {
+  if (confirm('确定要删除这个资源吗？此操作不可恢复！')) {
     try {
-      // TODO: 调用删除API
-      // await deleteRedCulture(id)
+      console.log('删除资源 ID:', id)
+      await deleteRedCulture(id)
       alert('删除成功')
       
       // 重新加载数据
-      loadData()
+      await loadData()
     } catch (error) {
       console.error('删除失败:', error)
-      alert('删除失败，请稍后重试')
+      alert('删除失败：' + (error as Error).message)
     }
   }
 }

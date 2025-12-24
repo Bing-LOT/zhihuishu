@@ -136,7 +136,7 @@ export function updateRedCulture(id: number, data: Partial<RedCultureItem>): Pro
  */
 export function deleteRedCulture(id: number): Promise<any> {
   return request({
-    url: `/redCulture/delete/${id}`,
+    url: `/redCulture/remove/${id}`,
     method: 'delete'
   })
 }

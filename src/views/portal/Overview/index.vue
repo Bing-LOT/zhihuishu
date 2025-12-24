@@ -133,7 +133,7 @@
             v-for="course in courseList"
             :key="course.id"
             :course="course"
-            :badge="course.badge"
+            :badge="course.badge as string"
           />
         </div>
       </section>
@@ -145,7 +145,7 @@
 import { ref, onMounted, computed } from 'vue'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import type { Course } from '@/types'
-import { getTitles, getPoliticalCourseList, type PoliticalCourseItem } from '@/api/course'
+import { getTitles, getPoliticalCourseList, getCourseExpoList, type PoliticalCourseItem, type CourseExpoItem } from '@/api/course'
 
 /**
  * 概览页面
@@ -198,78 +198,51 @@ const currentVideoUrl = computed(() => {
   return '/videos/hero-video.mp4' // 默认视频
 })
 
+// 课程列表数据（包含 badge）
+interface CourseWithBadge extends Course {
+  badge?: string
+}
+const courseList = ref<CourseWithBadge[]>([])
+
+// 获取课程展播列表
+const fetchCourseExpoList = async () => {
+  try {
+    const data = await getCourseExpoList()
+    // 将 API 数据映射为 Course 格式
+    courseList.value = data.map((item: CourseExpoItem) => ({
+      id: item.id.toString(),
+      title: item.name,
+      cover: item.coverUrl,
+      description: item.brief,
+      level: 'national' as const,
+      teacherList: item.teachers.map(t => ({
+        id: '',
+        name: t.name,
+        title: '',
+        department: item.college
+      })),
+      video: item.videoUrl,
+      pdf: item.docUrl,
+      sort: 0,
+      status: 'published' as const,
+      studentCount: item.statPv,
+      chapterCount: 0,
+      totalDuration: 0,
+      tags: [],
+      createTime: item.createTime,
+      updateTime: item.createTime,
+      badge: item.levelName
+    }))
+  } catch (error) {
+    console.error('获取课程展播列表失败:', error)
+  }
+}
+
 onMounted(() => {
   fetchTitles()
   fetchPoliticalCourseList()
+  fetchCourseExpoList()
 })
-
-// 模拟课程数据
-const courseList = ref<any[]>([
-  {
-    id: '1',
-    title: '国产电车的遮羞布，被高温撕掉了',
-    cover: '/images/home/video-1.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '国家示范'
-  },
-  {
-    id: '2',
-    title: '纽约时报 | 没有中国，世界还能造动力电池吗',
-    cover: '/images/home/video-2.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '国家示范'
-  },
-  {
-    id: '3',
-    title: '一家三口吃瓜中毒！凌晨3点进医院…',
-    cover: '/images/home/video-3.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '国家示范'
-  },
-  {
-    id: '4',
-    title: '水果不甜也会高糖？山楂到底会不会让人长胖？',
-    cover: '/images/home/video-4.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '国家示范'
-  },
-  {
-    id: '5',
-    title: '10万吨级的“海上粮仓”，到底有多厉害？',
-    cover: '/images/home/video-1.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '省级示范'
-  },
-  {
-    id: '6',
-    title: '国产电车的遮羞布，被高温撕掉了',
-    cover: '/images/home/video-2.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '省级示范'
-  },
-  {
-    id: '7',
-    title: '长租公寓的风险应留意',
-    cover: '/images/home/video-3.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '省级示范'
-  },
-  {
-    id: '8',
-    title: '曾比恒大冲更猛，他比许家印更可惜',
-    cover: '/images/home/video-4.jpg',
-    teacherList: [{ name: '薛美玉', department: '电气工程与自动学院' }],
-    studentCount: 3456,
-    badge: '国家示范'
-  }
-])
 </script>
 
 <style scoped>

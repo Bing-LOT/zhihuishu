@@ -178,3 +178,35 @@ export function getPoliticalCourseList(): Promise<PoliticalCourseItem[]> {
   })
 }
 
+/**
+ * 课程展播项
+ */
+export interface CourseExpoItem {
+  id: number
+  createTime: string
+  coverUrl: string
+  name: string
+  levelName: string
+  property: string
+  college: string
+  teachers: Array<{
+    name: string
+    department?: string
+  }>
+  brief: string
+  docUrl: string
+  videoUrl: string
+  showStatPv: number
+  statPv: number
+}
+
+/**
+ * 获取课程展播列表
+ */
+export function getCourseExpoList(): Promise<CourseExpoItem[]> {
+  return request({
+    url: '/api/courseExpo/top/list',
+    method: 'GET'
+  })
+}
+

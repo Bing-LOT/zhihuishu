@@ -319,3 +319,99 @@ export function editCoreText(content: string): Promise<any> {
   })
 }
 
+/**
+ * 优秀思政课堂相关接口
+ */
+
+/**
+ * 查询优秀思政课堂列表（分页）
+ * @param params 查询参数
+ */
+export interface NiceCoursePageParams {
+  pageIndex: number               // 页码，默认1
+  pageSize: number                // 每页大小，默认10条
+  keyword?: string                // 搜索关键词（可选）
+  showFront?: number              // 显示状态：1=显示；0=隐藏；不传显示所有（可选）
+}
+
+export interface NiceCourseItem {
+  id: string | number
+  title: string                   // 标题
+  teacher: string                 // 教师姓名
+  college: string                 // 所属单位
+  category: string                // 课程分类
+  description: string             // 详情内容
+  cover?: string                  // 封面图片
+  showFront: number               // 是否前台显示
+  displayOrder?: number           // 显示顺序
+  publishTime?: string            // 发布时间
+  createTime?: string             // 创建时间
+  updateTime?: string             // 更新时间
+}
+
+export interface NiceCoursePageResponse {
+  records: NiceCourseItem[]       // 数据列表
+  total: number                   // 总记录数
+  size: number                    // 每页大小
+  current: number                 // 当前页码
+  pages: number                   // 总页数
+}
+
+export function getNiceCoursePageList(params: NiceCoursePageParams): Promise<NiceCoursePageResponse> {
+  return request({
+    url: '/niceCourse/page/list',
+    method: 'POST',
+    data: params
+  })
+}
+
+/**
+ * 新增优秀思政课堂
+ * @param data 课堂数据
+ */
+export interface NiceCourseAddParams {
+  title: string                   // 标题
+  cover: string                   // 封面图片
+  teacher: string                 // 教师姓名
+  college: string                 // 所属单位
+  category: string                // 课程分类
+  description: string             // 详情内容
+  displayOrder?: number           // 显示顺序
+  showFront: number               // 是否前台显示：1=显示；0=不显示
+}
+
+export function addNiceCourse(data: NiceCourseAddParams): Promise<any> {
+  return request({
+    url: '/niceCourse/add',
+    method: 'POST',
+    data
+  })
+}
+
+/**
+ * 编辑优秀思政课堂
+ * @param data 课堂数据（包含ID）
+ */
+export interface NiceCourseEditParams extends NiceCourseAddParams {
+  id: string | number             // 课堂ID
+}
+
+export function editNiceCourse(data: NiceCourseEditParams): Promise<any> {
+  return request({
+    url: '/niceCourse/edit',
+    method: 'PUT',
+    data
+  })
+}
+
+/**
+ * 删除优秀思政课堂
+ * @param id 课堂ID
+ */
+export function deleteNiceCourse(id: string | number): Promise<any> {
+  return request({
+    url: `/niceCourse/remove/${id}`,
+    method: 'DELETE'
+  })
+}
+

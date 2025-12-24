@@ -45,32 +45,22 @@
 
     <!-- 数据统计 -->
     <div class="data-stats">
-      共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+      共 {{ pagination.total }} 条
+    </div>
+
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>加载中...</p>
     </div>
 
     <!-- 列表内容 -->
-    <div class="content-list">
+    <div v-else class="content-list">
       <div
-        v-for="(item, index) in filteredItems"
+        v-for="(item, index) in items"
         :key="item.id"
         class="content-item"
-        :draggable="true"
-        @dragstart="handleDragStart(index, $event)"
-        @dragover.prevent
-        @drop="handleDrop(index, $event)"
       >
-        <!-- 拖动手柄 -->
-        <div class="drag-handle">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="5" cy="3" r="1" fill="#999"/>
-            <circle cx="11" cy="3" r="1" fill="#999"/>
-            <circle cx="5" cy="8" r="1" fill="#999"/>
-            <circle cx="11" cy="8" r="1" fill="#999"/>
-            <circle cx="5" cy="13" r="1" fill="#999"/>
-            <circle cx="11" cy="13" r="1" fill="#999"/>
-          </svg>
-        </div>
-
         <!-- 缩略图 -->
         <div class="item-thumbnail">
           <img :src="item.cover || '/images/home/video-1.jpg'" :alt="item.title" />
@@ -103,8 +93,10 @@
 
           <div class="item-footer">
             <div class="footer-info">
-              <span class="sort-info">排序：第 {{ index + 1 }} 位</span>
-              <span class="time-info">发布时间：{{ item.publishTime }}</span>
+              <span class="time-info">发布时间：{{ item.publishTime || item.createTime || '-' }}</span>
+              <span :class="['status-badge', item.showFront === 1 ? 'status-badge--active' : 'status-badge--inactive']">
+                {{ item.showFront === 1 ? '已显示' : '已隐藏' }}
+              </span>
             </div>
           </div>
         </div>
@@ -132,12 +124,48 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="items.length === 0" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <p>暂无数据</p>
+      </div>
+    </div>
+
+    <!-- 分页器 -->
+    <div v-if="pagination.total > 0" class="pagination">
+      <button 
+        class="pagination-btn" 
+        :disabled="pagination.current <= 1"
+        @click="handlePageChange(pagination.current - 1)"
+      >
+        上一页
+      </button>
+      
+      <div class="pagination-pages">
+        <template v-for="page in visiblePages" :key="page">
+          <span v-if="page === -1" class="pagination-ellipsis">...</span>
+          <button
+            v-else
+            :class="['pagination-page', { 'pagination-page--active': page === pagination.current }]"
+            @click="handlePageChange(page)"
+          >
+            {{ page }}
+          </button>
+        </template>
+      </div>
+      
+      <button 
+        class="pagination-btn"
+        :disabled="pagination.current >= pagination.pages"
+        @click="handlePageChange(pagination.current + 1)"
+      >
+        下一页
+      </button>
+      
+      <div class="pagination-info">
+        共 {{ pagination.total }} 条，第 {{ pagination.current }} / {{ pagination.pages }} 页
       </div>
     </div>
 
@@ -309,52 +337,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-
-interface ClassItem {
-  id: string
-  title: string
-  teacher: string
-  college: string
-  category: string
-  description: string
-  cover?: string
-  status: 'active' | 'inactive'
-  publishTime: string
-  sort: number
-}
+import { ref, computed, onMounted } from 'vue'
+import { 
+  getNiceCoursePageList, 
+  addNiceCourse, 
+  editNiceCourse, 
+  deleteNiceCourse,
+  type NiceCourseItem 
+} from '@/api/resource'
+import { uploadFile } from '@/api/banner'
 
 // 数据列表
-const items = ref<ClassItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    teacher: '张教授',
-    college: '计算机学院',
-    category: '专业必修课程',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    cover: '/images/home/video-1.jpg',
-    status: 'active',
-    publishTime: '2024-11-20',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    teacher: '王教授',
-    college: '机械学院',
-    category: '通识教育课程',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    cover: '/images/home/video-2.jpg',
-    status: 'active',
-    publishTime: '2024-11-18',
-    sort: 2
-  }
-])
+const items = ref<NiceCourseItem[]>([])
+
+// 加载状态
+const loading = ref(false)
+
+// 分页信息
+const pagination = ref({
+  current: 1,
+  size: 10,
+  total: 0,
+  pages: 0
+})
 
 // 搜索和筛选
 const searchKeyword = ref('')
-const statusFilter = ref('all')
+const statusFilter = ref<'all' | 'active' | 'inactive'>('all')
 
 // 对话框状态
 const showAddDialog = ref(false)
@@ -376,55 +385,117 @@ const formData = ref({
 })
 
 // 预览数据
-const previewData = ref<ClassItem | null>(null)
+const previewData = ref<NiceCourseItem | null>(null)
 
-// 拖拽相关
-const draggedIndex = ref<number | null>(null)
-
-// 计算属性
-const totalCount = computed(() => items.value.length)
-
-const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
+// 计算可见的页码
+const visiblePages = computed(() => {
+  const total = pagination.value.pages
+  const current = pagination.value.current
+  const pages: number[] = []
+  
+  if (total <= 7) {
+    // 总页数小于等于7，显示全部
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    // 总页数大于7，显示部分
+    if (current <= 4) {
+      // 当前页在前面
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push(-1) // 省略号
+      pages.push(total)
+    } else if (current >= total - 3) {
+      // 当前页在后面
+      pages.push(1)
+      pages.push(-1) // 省略号
+      for (let i = total - 4; i <= total; i++) {
+        pages.push(i)
+      }
+    } else {
+      // 当前页在中间
+      pages.push(1)
+      pages.push(-1) // 省略号
+      for (let i = current - 1; i <= current + 1; i++) {
+        pages.push(i)
+      }
+      pages.push(-1) // 省略号
+      pages.push(total)
+    }
+  }
+  
+  return pages
 })
 
-// 搜索处理
+// 加载数据列表
+const loadDataList = async () => {
+  try {
+    loading.value = true
+    
+    // 构建查询参数
+    const params: any = {
+      pageIndex: pagination.value.current,
+      pageSize: pagination.value.size
+    }
+    
+    // 添加搜索关键词
+    if (searchKeyword.value.trim()) {
+      params.keyword = searchKeyword.value.trim()
+    }
+    
+    // 添加显示状态筛选
+    if (statusFilter.value === 'active') {
+      params.showFront = 1
+    } else if (statusFilter.value === 'inactive') {
+      params.showFront = 0
+    }
+    
+    console.log('查询优秀思政课堂列表，参数：', params)
+    
+    const response = await getNiceCoursePageList(params)
+    
+    console.log('查询结果：', response)
+    
+    items.value = response.records || []
+    pagination.value = {
+      current: response.current || 1,
+      size: response.size || 10,
+      total: response.total || 0,
+      pages: response.pages || 0
+    }
+  } catch (error) {
+    console.error('加载数据失败：', error)
+    alert('加载数据失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 搜索处理（防抖）
+let searchTimer: number | null = null
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+  searchTimer = window.setTimeout(() => {
+    pagination.value.current = 1 // 重置到第一页
+    loadDataList()
+  }, 500)
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  pagination.value.current = 1 // 重置到第一页
+  loadDataList()
 }
 
-// 拖拽开始
-const handleDragStart = (index: number, event: DragEvent) => {
-  draggedIndex.value = index
-  if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move'
-  }
-}
-
-// 拖拽放下
-const handleDrop = (targetIndex: number, event: DragEvent) => {
-  event.preventDefault()
-  if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
-
-  const draggedItem = filteredItems.value[draggedIndex.value]
-  const targetItem = filteredItems.value[targetIndex]
-  
-  const tempSort = draggedItem.sort
-  draggedItem.sort = targetItem.sort
-  targetItem.sort = tempSort
-
-  draggedIndex.value = null
+// 分页切换
+const handlePageChange = (page: number) => {
+  if (page < 1 || page > pagination.value.pages) return
+  pagination.value.current = page
+  loadDataList()
 }
 
 // 触发封面上传
@@ -454,43 +525,45 @@ const removeCover = () => {
 }
 
 // 编辑项目
-const editItem = (item: ClassItem) => {
+const editItem = (item: NiceCourseItem) => {
   formData.value = {
-    id: item.id,
+    id: item.id.toString(),
     title: item.title,
     cover: item.cover || '',
     teacher: item.teacher,
     college: item.college,
     category: item.category,
     description: item.description,
-    displayOrder: item.sort,
-    showOnFrontend: item.status === 'active'
+    displayOrder: item.displayOrder || 1,
+    showOnFrontend: item.showFront === 1
   }
   showEditDialog.value = true
 }
 
 // 预览项目
-const previewItem = (item: ClassItem) => {
+const previewItem = (item: NiceCourseItem) => {
   previewData.value = item
   showPreviewDialog.value = true
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
-  if (confirm('确定要删除这个课堂吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
-    }
+const deleteItem = async (id: string | number) => {
+  if (!confirm('确定要删除这个课堂吗？')) {
+    return
+  }
+  
+  try {
+    await deleteNiceCourse(id)
+    alert('删除成功')
+    loadDataList() // 重新加载列表
+  } catch (error) {
+    console.error('删除失败：', error)
+    alert('删除失败，请稍后重试')
   }
 }
 
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
   // 验证必填项
   if (!formData.value.title) {
     alert('请输入标题')
@@ -517,40 +590,37 @@ const saveItem = () => {
     return
   }
 
-  if (showEditDialog.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        cover: formData.value.cover,
-        teacher: formData.value.teacher,
-        college: formData.value.college,
-        category: formData.value.category,
-        description: formData.value.description,
-        status: formData.value.showOnFrontend ? 'active' : 'inactive',
-        sort: formData.value.displayOrder
-      }
-    }
-  } else {
-    // 新增
-    const newItem: ClassItem = {
-      id: Date.now().toString(),
+  try {
+    const requestData = {
       title: formData.value.title,
       cover: formData.value.cover,
       teacher: formData.value.teacher,
       college: formData.value.college,
       category: formData.value.category,
       description: formData.value.description,
-      status: formData.value.showOnFrontend ? 'active' : 'inactive',
-      publishTime: new Date().toISOString().split('T')[0],
-      sort: formData.value.displayOrder || items.value.length + 1
+      displayOrder: formData.value.displayOrder,
+      showFront: formData.value.showOnFrontend ? 1 : 0
     }
-    items.value.push(newItem)
-  }
 
-  closeDialog()
+    if (showEditDialog.value) {
+      // 编辑
+      await editNiceCourse({
+        ...requestData,
+        id: formData.value.id
+      })
+      alert('编辑成功')
+    } else {
+      // 新增
+      await addNiceCourse(requestData)
+      alert('新增成功')
+    }
+
+    closeDialog()
+    loadDataList() // 重新加载列表
+  } catch (error) {
+    console.error('保存失败：', error)
+    alert('保存失败，请稍后重试')
+  }
 }
 
 // 关闭对话框
@@ -569,6 +639,11 @@ const closeDialog = () => {
     showOnFrontend: true
   }
 }
+
+// 组件挂载时加载数据
+onMounted(() => {
+  loadDataList()
+})
 </script>
 
 <style scoped>
@@ -1133,6 +1208,134 @@ const closeDialog = () => {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #e31e24;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+/* 状态徽章 */
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+.status-badge--active {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.status-badge--inactive {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+/* 分页器 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 20px 0;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.pagination-btn:disabled {
+  background: #f5f5f5;
+  color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-page {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-page:hover {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.pagination-page--active {
+  background: #e31e24;
+  color: white;
+  border-color: #e31e24;
+}
+
+.pagination-page--active:hover {
+  background: #c71b20;
+  border-color: #c71b20;
+  color: white;
+}
+
+.pagination-ellipsis {
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #999;
+}
+
+.pagination-info {
+  margin-left: 12px;
+  font-size: 14px;
+  color: #666;
 }
 </style>
 

@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         // 代理所有API请求，解决开发环境跨域问题
-        '^/(upload|banner|resource|politicalResource|politicalCourse|course|exam|analysis|ai|auth|xiThought)': {
+        '^/(upload|banner|resource|politicalResource|politicalCourse|niceCourse|courseExpo|course|exam|analysis|ai|auth|xiThought)': {
           target: proxyTarget, // https://dszk.fzu.edu.cn/dszk-api
           changeOrigin: true,
           secure: false,

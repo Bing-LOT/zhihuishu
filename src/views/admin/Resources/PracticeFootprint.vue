@@ -457,9 +457,11 @@ import {
   removeFootprintBanner, 
   uploadFile, 
   getFootprintList,
+  addFootprint,
   type FootprintBannerItem,
   type FootprintListParams,
-  type FootprintListItem
+  type FootprintListItem,
+  type FootprintAddItem
 } from '@/api/banner'
 
 interface BannerItem {
@@ -874,7 +876,7 @@ const deleteItem = (id: number) => {
   }
 }
 
-const saveItem = () => {
+const saveItem = async () => {
   if (!formData.value.title) {
     alert('请输入标题')
     return
@@ -894,14 +896,37 @@ const saveItem = () => {
     }
   }
 
-  // TODO: 实现新增/编辑的后端API调用
-  if (showEditDialog.value) {
-    alert('编辑功能待实现后端API')
-  } else {
-    alert('新增功能待实现后端API')
+  try {
+    if (showEditDialog.value) {
+      // TODO: 编辑功能待实现后端API
+      alert('编辑功能待实现后端API')
+    } else {
+      // 新增功能
+      console.log('🔄 开始新增足迹...')
+      
+      const addData: FootprintAddItem = {
+        title: formData.value.title,
+        footprintType: formData.value.contentType === 'richtext' ? 0 : 1,
+        content: formData.value.content,
+        pinTop: formData.value.isPinned ? 1 : 0,
+        showFront: formData.value.showOnFrontend ? 1 : 0
+      }
+      
+      console.log('请求数据:', addData)
+      
+      await addFootprint(addData)
+      console.log('✅ 足迹新增成功')
+      
+      alert('新增成功！')
+      closeDialog()
+      
+      // 重新加载列表
+      await loadFootprintList()
+    }
+  } catch (error: any) {
+    console.error('❌ 保存失败:', error)
+    alert(error.message || '保存失败，请稍后重试')
   }
-
-  closeDialog()
 }
 
 const closeDialog = () => {

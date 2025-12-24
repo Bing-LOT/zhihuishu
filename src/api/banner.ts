@@ -551,3 +551,26 @@ export function getFootprintList(params: FootprintListParams): Promise<Footprint
     data: params
   })
 }
+
+/**
+ * 新增足迹数据结构
+ */
+export interface FootprintAddItem {
+  title: string
+  footprintType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
+  content: string
+  pinTop: number  // 1=置顶；0=不置顶
+  showFront: number  // 1=显示；0=不显示
+}
+
+/**
+ * 新增总书记的福建足迹
+ * @param data 足迹数据
+ */
+export function addFootprint(data: FootprintAddItem): Promise<{ id: number }> {
+  return request({
+    url: '/xiThought/footprint/add',
+    method: 'POST',
+    data
+  })
+}

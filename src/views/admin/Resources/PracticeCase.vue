@@ -266,6 +266,16 @@
           </div>
 
           <div class="form-group">
+            <label>教师职称 <span class="required">*</span></label>
+            <input
+              v-model="formData.teacherTitle"
+              type="text"
+              placeholder="请输入教师职称，如：教授、副教授、讲师等"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
             <label>所属单位 <span class="required">*</span></label>
             <select v-model="formData.unit" class="form-input">
               <option value="">请选择学院</option>
@@ -299,6 +309,15 @@
               <option value="通识教育课程">通识教育课程</option>
               <option value="专业选修课程">专业选修课程</option>
               <option value="实践课程">实践课程</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>入选方向 <span class="required">*</span></label>
+            <select v-model="formData.direction" class="form-input">
+              <option value="">请选择入选方向</option>
+              <option value="面向产出">面向产出</option>
+              <option value="教学有道">教学有道</option>
             </select>
           </div>
 
@@ -406,8 +425,11 @@ interface CaseItem {
   id: number
   title: string
   teacher: string
+  teacherTitle?: string  // 教师职称
   college: string
   category: string
+  property?: string  // 课程性质（原始值）
+  direction?: string  // 入选方向（原始值）
   description: string  // 摘要文本（用于列表显示）
   fullContent: string  // 完整的HTML内容（用于编辑和预览）
   status: 'active' | 'inactive'
@@ -443,8 +465,10 @@ const formData = ref({
   title: '',
   cover: '',
   teacherName: '',
+  teacherTitle: '',  // 教师职称
   unit: '',
   category: '',
+  direction: '',  // 入选方向
   content: '',
   displayOrder: 1,
   showOnFrontend: true
@@ -529,17 +553,31 @@ const extractTextFromHtml = (html: string, maxLength: number = 150): string => {
 
 // 转换 API 数据为组件数据格式
 const convertApiToItem = (apiItem: ExampleExpoListItem): CaseItem => {
+  // 提取第一个教师的信息
+  const teacherName = apiItem.teachers && apiItem.teachers.length > 0 
+    ? apiItem.teachers[0].name 
+    : ''
+  const teacherTitle = apiItem.teachers && apiItem.teachers.length > 0 
+    ? apiItem.teachers[0].title 
+    : ''
+  
+  // 组合显示分类信息
+  const categoryDisplay = [apiItem.direction, apiItem.property].filter(Boolean).join(' / ') || '未分类'
+  
   return {
     id: apiItem.id,
-    title: apiItem.title,
-    teacher: apiItem.presenter,
-    college: apiItem.college,
-    category: apiItem.category,
-    description: extractTextFromHtml(apiItem.content, 120), // 提取纯文本摘要用于列表显示
-    fullContent: apiItem.content, // 保存完整的HTML内容
+    title: apiItem.name || '',  // API字段是name
+    teacher: teacherName,
+    teacherTitle: teacherTitle,  // 保存教师职称用于编辑回显
+    college: apiItem.college || '',
+    category: categoryDisplay,
+    property: apiItem.property,  // 保存原始值
+    direction: apiItem.direction,  // 保存原始值
+    description: extractTextFromHtml(apiItem.content, 120),
+    fullContent: apiItem.content || '',
     status: apiItem.showFront === 1 ? 'active' : 'inactive',
     publishTime: apiItem.createTime ? apiItem.createTime.split(' ')[0] : '',
-    cover: apiItem.coverUrl,
+    cover: apiItem.coverUrl || '',
     sort: 0
   }
 }
@@ -669,8 +707,10 @@ const editItem = (item: CaseItem) => {
     title: item.title,
     cover: item.cover || '',
     teacherName: item.teacher,
+    teacherTitle: item.teacherTitle || '',  // 回显教师职称
     unit: item.college,
-    category: item.category,
+    category: item.property || item.category,  // 使用原始的property值
+    direction: item.direction || '',  // 回显入选方向
     content: item.fullContent, // 使用完整的HTML内容
     displayOrder: item.sort,
     showOnFrontend: item.status === 'active'
@@ -721,12 +761,20 @@ const saveItem = async () => {
     alert('请输入教师姓名')
     return
   }
+  if (!formData.value.teacherTitle) {
+    alert('请输入教师职称')
+    return
+  }
   if (!formData.value.unit) {
     alert('请选择所属单位')
     return
   }
   if (!formData.value.category) {
     alert('请选择课程分类')
+    return
+  }
+  if (!formData.value.direction) {
+    alert('请选择入选方向')
     return
   }
   if (!formData.value.content) {
@@ -737,22 +785,30 @@ const saveItem = async () => {
   try {
     loading.value = true
     
-    const apiData = {
-      title: formData.value.title,
+    // 将表单数据转换为API需要的格式
+    const apiData: ExampleExpoItem = {
+      name: formData.value.title,  // 标题字段是name
       coverUrl: formData.value.cover,
-      category: formData.value.category,
+      teachers: [{  // 教师数组格式
+        name: formData.value.teacherName,
+        title: formData.value.teacherTitle  // 使用表单的教师职称
+      }],
+      property: formData.value.category || '其他',  // 课程性质
+      direction: formData.value.direction,  // 使用表单的入选方向
       college: formData.value.unit,
-      presenter: formData.value.teacherName,
       content: formData.value.content,
+      videoUrl: '',  // 默认空视频URL
       showFront: formData.value.showOnFrontend ? 1 : 0
     }
+
+    console.log('💾 保存API数据:', apiData)
 
     if (showEditDialog.value) {
       // 编辑
       await editExampleExpo({
         ...apiData,
         id: formData.value.id
-      })
+      } as ExampleExpoEditItem)
       alert('编辑成功')
     } else {
       // 新增
@@ -780,8 +836,10 @@ const closeDialog = () => {
     title: '',
     cover: '',
     teacherName: '',
+    teacherTitle: '',  // 重置教师职称
     unit: '',
     category: '',
+    direction: '',  // 重置入选方向
     content: '',
     displayOrder: 1,
     showOnFrontend: true

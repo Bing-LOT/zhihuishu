@@ -361,12 +361,17 @@ export interface ExampleExpoListParams {
  */
 export interface ExampleExpoListItem {
   id: number
-  title: string
+  name: string  // 案例/课程名称
   coverUrl: string
-  category: string
+  property?: string  // 课程性质
+  direction?: string  // 入选方向：面向产出、教学有道
   college: string
-  presenter: string
+  teachers?: Array<{  // 教师信息
+    name: string  // 教师姓名
+    title?: string  // 职称
+  }>
   content: string
+  videoUrl?: string  // 教学视频
   showFront: number
   createTime?: string
   updateTime?: string
@@ -395,15 +400,20 @@ export function getExampleExpoList(params: ExampleExpoListParams): Promise<Examp
 }
 
 /**
- * 实践案例数据结构
+ * 实践案例数据结构（新增）
  */
 export interface ExampleExpoItem {
-  title: string
+  name: string  // 案例/课程名称
   coverUrl: string
-  category: string
+  teachers: Array<{  // 教师信息
+    name: string  // 教师姓名
+    title: string  // 职称
+  }>
+  property: string  // 课程性质
+  direction: string  // 入选方向：面向产出、教学有道
   college: string
-  presenter: string
   content: string
+  videoUrl: string  // 教学视频
   showFront: number
 }
 

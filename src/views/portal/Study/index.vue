@@ -242,60 +242,73 @@
           </button>
         </div>
 
-        <!-- 课程网格 -->
-        <div class="courses-grid">
-          <div
-            v-for="course in collegeCourses.slice(0, 4)"
-            :key="course.id"
-            class="course-card-vertical"
-            @click="viewCourseDetail(course)"
-          >
-            <div class="course-card-vertical__image">
-              <img :src="course.cover" alt="" />
-              <div class="course-card-vertical__label">{{ course.college }}</div>
-            </div>
-            <div class="course-card-vertical__content">
-              <h3 class="course-card-vertical__title">{{ course.title }}</h3>
-              <div class="course-card-vertical__meta">
-                <span>教师：{{ course.teacher }}</span>
-                <div class="course-card-vertical__views">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 7C8.61929 7 7.5 8.11929 7.5 9.5C7.5 10.8807 8.61929 12 10 12C11.3807 12 12.5 10.8807 12.5 9.5C12.5 8.11929 11.3807 7 10 7Z" fill="#333333" fill-opacity="0.5"/>
-                    <path d="M10 4.16667C5.83333 4.16667 2.27500 6.73333 0.833336 10.4167C2.27500 14.1 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.725 14.1 19.1667 10.4167C17.725 6.73333 14.1667 4.16667 10 4.16667ZM10 14.5C7.51667 14.5 5.5 12.4833 5.5 10C5.5 7.51667 7.51667 5.5 10 5.5C12.4833 5.5 14.5 7.51667 14.5 10C14.5 12.4833 12.4833 14.5 10 14.5Z" fill="#333333" fill-opacity="0.5"/>
-                  </svg>
-                  <span>{{ course.views }}人</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- 加载状态 -->
+        <div v-if="collegeLoading" class="college-loading-state">
+          <div class="loading-spinner"></div>
+          <p>加载中...</p>
         </div>
 
-        <div class="courses-grid">
-          <div
-            v-for="course in collegeCourses.slice(4, 8)"
-            :key="course.id"
-            class="course-card-vertical"
-            @click="viewCourseDetail(course)"
-          >
-            <div class="course-card-vertical__image">
-              <img :src="course.cover" alt="" />
-              <div class="course-card-vertical__label">{{ course.college }}</div>
-            </div>
-            <div class="course-card-vertical__content">
-              <h3 class="course-card-vertical__title">{{ course.title }}</h3>
-              <div class="course-card-vertical__meta">
-                <span>教师：{{ course.teacher }}</span>
-                <div class="course-card-vertical__views">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 7C8.61929 7 7.5 8.11929 7.5 9.5C7.5 10.8807 8.61929 12 10 12C11.3807 12 12.5 10.8807 12.5 9.5C12.5 8.11929 11.3807 7 10 7Z" fill="#333333" fill-opacity="0.5"/>
-                    <path d="M10 4.16667C5.83333 4.16667 2.27500 6.73333 0.833336 10.4167C2.27500 14.1 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.725 14.1 19.1667 10.4167C17.725 6.73333 14.1667 4.16667 10 4.16667ZM10 14.5C7.51667 14.5 5.5 12.4833 5.5 10C5.5 7.51667 7.51667 5.5 10 5.5C12.4833 5.5 14.5 7.51667 14.5 10C14.5 12.4833 12.4833 14.5 10 14.5Z" fill="#333333" fill-opacity="0.5"/>
-                  </svg>
-                  <span>{{ course.views }}人</span>
+        <!-- 空状态 -->
+        <div v-else-if="collegeCourses.length === 0" class="college-empty-state">
+          <p>暂无课程数据</p>
+        </div>
+
+        <!-- 课程网格 -->
+        <template v-else>
+          <div class="courses-grid">
+            <div
+              v-for="course in collegeCourses.slice(0, 4)"
+              :key="course.id"
+              class="course-card-vertical"
+              @click="viewCourseDetail(course)"
+            >
+              <div class="course-card-vertical__image">
+                <img :src="course.cover" alt="" />
+                <div class="course-card-vertical__label">{{ course.college }}</div>
+              </div>
+              <div class="course-card-vertical__content">
+                <h3 class="course-card-vertical__title">{{ course.title }}</h3>
+                <div class="course-card-vertical__meta">
+                  <span>教师：{{ course.teacher }}</span>
+                  <div class="course-card-vertical__views">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 7C8.61929 7 7.5 8.11929 7.5 9.5C7.5 10.8807 8.61929 12 10 12C11.3807 12 12.5 10.8807 12.5 9.5C12.5 8.11929 11.3807 7 10 7Z" fill="#333333" fill-opacity="0.5"/>
+                      <path d="M10 4.16667C5.83333 4.16667 2.27500 6.73333 0.833336 10.4167C2.27500 14.1 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.725 14.1 19.1667 10.4167C17.725 6.73333 14.1667 4.16667 10 4.16667ZM10 14.5C7.51667 14.5 5.5 12.4833 5.5 10C5.5 7.51667 7.51667 5.5 10 5.5C12.4833 5.5 14.5 7.51667 14.5 10C14.5 12.4833 12.4833 14.5 10 14.5Z" fill="#333333" fill-opacity="0.5"/>
+                    </svg>
+                    <span>{{ course.views }}人</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="courses-grid" v-if="collegeCourses.length > 4">
+            <div
+              v-for="course in collegeCourses.slice(4, 8)"
+              :key="course.id"
+              class="course-card-vertical"
+              @click="viewCourseDetail(course)"
+            >
+              <div class="course-card-vertical__image">
+                <img :src="course.cover" alt="" />
+                <div class="course-card-vertical__label">{{ course.college }}</div>
+              </div>
+              <div class="course-card-vertical__content">
+                <h3 class="course-card-vertical__title">{{ course.title }}</h3>
+                <div class="course-card-vertical__meta">
+                  <span>教师：{{ course.teacher }}</span>
+                  <div class="course-card-vertical__views">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 7C8.61929 7 7.5 8.11929 7.5 9.5C7.5 10.8807 8.61929 12 10 12C11.3807 12 12.5 10.8807 12.5 9.5C12.5 8.11929 11.3807 7 10 7Z" fill="#333333" fill-opacity="0.5"/>
+                      <path d="M10 4.16667C5.83333 4.16667 2.27500 6.73333 0.833336 10.4167C2.27500 14.1 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.725 14.1 19.1667 10.4167C17.725 6.73333 14.1667 4.16667 10 4.16667ZM10 14.5C7.51667 14.5 5.5 12.4833 5.5 10C5.5 7.51667 7.51667 5.5 10 5.5C12.4833 5.5 14.5 7.51667 14.5 10C14.5 12.4833 12.4833 14.5 10 14.5Z" fill="#333333" fill-opacity="0.5"/>
+                    </svg>
+                    <span>{{ course.views }}人</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
     </section>
 
@@ -453,8 +466,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getNiceCourseTopList } from '@/api/course'
-import type { NiceCourseItem } from '@/api/course'
+import { getNiceCourseTopList, getCollegeSpecialTopList } from '@/api/course'
+import type { NiceCourseItem, CollegeSpecialItem } from '@/api/course'
 
 const router = useRouter()
 
@@ -534,75 +547,62 @@ const fetchNiceCourses = async () => {
 // 组件挂载时获取数据
 onMounted(() => {
   fetchNiceCourses()
+  fetchCollegeCourses()
 })
 
 // "一院一品"专题数据
-const collegeCourses = ref([
-  {
-    id: '1',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-1.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '2',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-2.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '3',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-3.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '4',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-4.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '5',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-1.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '6',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-2.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '7',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-3.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
-  },
-  {
-    id: '8',
-    title: '概率论与数理统计',
-    cover: '/images/home/video-4.jpg',
-    college: '电气工程与自动学院',
-    teacher: '刘丽军',
-    views: 3456
+interface CollegeCourseItem {
+  id: string
+  title: string
+  cover: string
+  college: string
+  teacher: string
+  views: number
+  teachers?: string[]
+  types?: string[]
+  content?: string
+  createTime?: string
+}
+
+const collegeCourses = ref<CollegeCourseItem[]>([])
+const collegeLoading = ref(false)
+
+// 获取一院一品专题数据
+const fetchCollegeCourses = async () => {
+  try {
+    collegeLoading.value = true
+    const data = await getCollegeSpecialTopList()
+    
+    // 数据映射：将API返回的数据转换为组件使用的格式
+    collegeCourses.value = data.map((item: CollegeSpecialItem) => ({
+      id: String(item.id),
+      title: item.name,
+      cover: item.coverUrl || '/images/home/video-1.jpg',
+      college: item.所在学院 || '',
+      teacher: item.teachers && item.teachers.length > 0 ? item.teachers.join('、') : '',
+      views: item.statPv || 0,
+      teachers: item.teachers,
+      types: item.types,
+      content: item.content,
+      createTime: item.createTime
+    }))
+  } catch (error) {
+    console.error('获取一院一品专题数据失败:', error)
+    // 如果接口失败，使用默认数据
+    collegeCourses.value = [
+      {
+        id: '1',
+        title: '概率论与数理统计',
+        cover: '/images/home/video-1.jpg',
+        college: '电气工程与自动学院',
+        teacher: '刘丽军',
+        views: 3456
+      }
+    ]
+  } finally {
+    collegeLoading.value = false
   }
-])
+}
 
 // 红色文化资源数据
 const cultureResources = ref([
@@ -787,7 +787,7 @@ const selectResource = (resource: any) => {
   position: absolute;
   bottom: -15%;
   left: 0;
-  right: 60.44%;
+  right: 70%;
   top: 30.77%;
 }
 
@@ -799,7 +799,7 @@ const selectResource = (resource: any) => {
 .section-title-right {
   position: absolute;
   bottom: -15%;
-  left: 60.44%;
+  left: 70%;
   right: 0;
   top: 30.77%;
 }
@@ -1105,7 +1105,51 @@ const selectResource = (resource: any) => {
 .college-special {
   position: relative;
   padding: 96px 160px;
+  margin-top: 156px;
   z-index: 1;
+}
+
+/* 一院一品加载状态 */
+.college-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #333;
+}
+
+.college-loading-state .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(188, 34, 32, 0.3);
+  border-top-color: #bc2220;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.college-loading-state p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  opacity: 0.8;
+}
+
+/* 一院一品空状态 */
+.college-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #333;
+}
+
+.college-empty-state p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  opacity: 0.8;
 }
 
 .college-special__container {

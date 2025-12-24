@@ -282,3 +282,28 @@ export function getNiceCourseTopList(): Promise<NiceCourseItem[]> {
   })
 }
 
+/**
+ * 一院一品专题项
+ */
+export interface CollegeSpecialItem {
+  id: number
+  name: string
+  coverUrl: string
+  所在学院: string
+  types: string[]
+  teachers: string[]
+  content: string
+  createTime: string
+  statPv: number
+}
+
+/**
+ * 获取一院一品专题列表
+ */
+export function getCollegeSpecialTopList(): Promise<CollegeSpecialItem[]> {
+  return request({
+    url: '/api/special/college/top/list',
+    method: 'GET'
+  })
+}
+

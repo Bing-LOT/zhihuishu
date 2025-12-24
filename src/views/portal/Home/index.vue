@@ -107,10 +107,11 @@
 
       <!-- 视频缩略图轮播 -->
       <div v-if="!videosLoading && videoList.length > 0" class="home__video-carousel">
-        <div class="home__video-list">
+        <div ref="videoListContainer" class="home__video-list">
           <VideoCard
             v-for="(video, index) in videoList"
             :key="video.id"
+            :ref="(el) => setVideoCardRef(el, index)"
             :thumbnail="video.thumbnail"
             :title="video.title"
             :is-large="index === currentVideo"
@@ -219,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import VideoCard from '@/components/common/VideoCard/index.vue'
@@ -297,6 +298,9 @@ const scrollToVideo = () => {
 const backgroundVideo = ref<HTMLVideoElement | null>(null)
 const currentVideo = ref(0)
 const videosLoading = ref(true)
+const videoListContainer = ref<HTMLElement | null>(null)
+const videoCardRefs = ref<(HTMLElement | null)[]>([])
+
 const videoList = ref<Array<{
   id: string
   thumbnail: string
@@ -306,6 +310,51 @@ const videoList = ref<Array<{
   createTime?: string
   description?: string
 }>>([])
+
+/**
+ * 设置视频卡片 ref
+ */
+const setVideoCardRef = (el: any, index: number) => {
+  if (el) {
+    videoCardRefs.value[index] = el.$el || el
+  }
+}
+
+/**
+ * 滚动到当前视频
+ */
+const scrollToCurrentVideo = () => {
+  nextTick(() => {
+    if (!videoListContainer.value || !videoCardRefs.value[currentVideo.value]) {
+      return
+    }
+
+    const container = videoListContainer.value
+    const currentCard = videoCardRefs.value[currentVideo.value]
+    
+    if (currentCard) {
+      // 计算当前视频卡片相对于容器的位置
+      const cardRect = currentCard.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
+      
+      // 计算需要滚动的距离（让当前卡片居中）
+      const scrollLeft = currentCard.offsetLeft - (container.clientWidth / 2) + (currentCard.clientWidth / 2)
+      
+      // 平滑滚动到目标位置
+      container.scrollTo({
+        left: scrollLeft,
+        behavior: 'smooth'
+      })
+    }
+  })
+}
+
+/**
+ * 监听当前视频变化，自动滚动
+ */
+watch(currentVideo, () => {
+  scrollToCurrentVideo()
+})
 
 /**
  * 加载视频列表数据
@@ -940,6 +989,10 @@ onUnmounted(() => {
 }
 
 .home__video-list {
+  /* 隐藏滚动条核心样式 */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
   display: flex;
   gap: 16px;
   align-items: flex-end;

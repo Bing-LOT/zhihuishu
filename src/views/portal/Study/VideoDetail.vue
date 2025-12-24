@@ -9,7 +9,7 @@
       <!-- 面包屑 -->
       <div class="course-detail__breadcrumb">
         <span class="label">您的位置：</span>
-        <router-link to="/study" class="link">学习中心</router-link>
+        <router-link to="/overview" class="link">思政概览</router-link>
         <span class="separator">>></span>
         <router-link to="/overview" class="link">党员教师课程思政示范课展播</router-link>
         <span class="separator">>></span>

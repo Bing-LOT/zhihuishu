@@ -201,7 +201,7 @@ const fetchCourseList = async () => {
     }
     // 添加搜索关键字
     if (searchQuery.value && searchQuery.value.trim()) {
-      params.name = searchQuery.value.trim()
+      params.keyword = searchQuery.value.trim()
     }
 
     const response = await getCourseExpoPageList(params)

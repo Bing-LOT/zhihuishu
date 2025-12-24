@@ -94,7 +94,7 @@ export function updateCollege(data: EditCollegeParams) {
  * 删除一院一品
  */
 export function deleteCollege(id: number) {
-  return request.post('/college/delete', { id })
+  return request.delete(`/college/remove/${id}`)
 }
 
 /**

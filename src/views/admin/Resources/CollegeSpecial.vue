@@ -350,7 +350,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef } from 'vue'
-import { getCollegePageList, addCollege, updateCollege, type CollegeItem } from '@/api/college'
+import { getCollegePageList, addCollege, updateCollege, deleteCollege, type CollegeItem } from '@/api/college'
 import { uploadFile } from '@/api/banner'
 import Pagination from '@/components/common/Pagination/index.vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
@@ -661,17 +661,27 @@ const toggleShowFront = async (item: CollegeItem) => {
 
 // 删除项目
 const deleteItem = async (id: number) => {
-  if (confirm('确定要删除这条内容吗？')) {
-    try {
-      // TODO: 调用删除API
-      // await deleteCollege(id)
-      alert('删除功能暂未实现，需要调用API接口')
-      // 删除成功后重新加载数据
-      // await loadData()
-    } catch (error) {
-      console.error('删除失败:', error)
-      alert('删除失败，请稍后重试')
-    }
+  if (!confirm('确定要删除这条内容吗？删除后将无法恢复！')) {
+    return
+  }
+  
+  try {
+    loading.value = true
+    
+    // 调用删除API
+    await deleteCollege(id)
+    
+    console.log('删除成功')
+    alert('删除成功！')
+    
+    // 删除成功后重新加载数据
+    await loadData()
+  } catch (error: any) {
+    console.error('删除失败:', error)
+    const errorMsg = error?.message || '删除失败，请稍后重试'
+    alert(errorMsg)
+  } finally {
+    loading.value = false
   }
 }
 

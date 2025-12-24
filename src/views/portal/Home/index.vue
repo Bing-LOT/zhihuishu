@@ -947,6 +947,8 @@ onUnmounted(() => {
   display: flex;
   gap: 16px;
   align-items: flex-end;
+  width: 1300px;
+  overflow: auto;
 }
 
 .home__video-controls {

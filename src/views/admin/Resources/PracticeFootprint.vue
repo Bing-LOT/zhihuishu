@@ -83,11 +83,16 @@
 
       <!-- 数据统计 -->
       <div class="data-stats">
-        共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+        共 {{ totalCount }} 条
+      </div>
+
+      <!-- 加载状态 -->
+      <div v-if="isLoadingItems" class="loading-state">
+        <p>加载中...</p>
       </div>
 
       <!-- 列表内容 -->
-      <div class="content-list">
+      <div v-else class="content-list">
         <div
           v-for="(item, index) in filteredItems"
           :key="item.id"
@@ -113,20 +118,32 @@
           <div class="item-content">
             <div class="item-header">
               <h3 class="item-title">{{ item.title }}</h3>
-              <span v-if="item.isPinned" class="badge-pinned">
+              <span v-if="item.pinTop === 1" class="badge-pinned">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                   <path d="M6 1L7.545 4.13L11 4.635L8.5 7.07L9.09 10.51L6 8.885L2.91 10.51L3.5 7.07L1 4.635L4.455 4.13L6 1Z" fill="white"/>
                 </svg>
                 置顶
               </span>
+              <span class="badge-status" :class="{ 'badge-status--active': item.showFront === 1 }">
+                {{ item.showFront === 1 ? '显示中' : '已隐藏' }}
+              </span>
             </div>
             
-            <p class="item-description">{{ item.description }}</p>
+            <div class="item-meta">
+              <span class="meta-item">
+                类型：{{ item.footprintType === 0 ? '富文本内容' : 'URL地址' }}
+              </span>
+              <span class="meta-item">
+                浏览量：{{ item.statPv }}
+              </span>
+            </div>
+            
+            <p class="item-description">{{ item.content?.substring(0, 100) }}{{ item.content?.length > 100 ? '...' : '' }}</p>
 
             <div class="item-footer">
               <div class="footer-info">
                 <span class="sort-info">排序：第 {{ index + 1 }} 位</span>
-                <span class="time-info">发布时间：{{ item.publishTime }}</span>
+                <span class="time-info">发布时间：{{ item.createTime }}</span>
               </div>
             </div>
           </div>
@@ -134,12 +151,12 @@
           <!-- 操作按钮 -->
           <div class="item-actions">
             <button
-              :class="['action-btn', 'action-btn--pin', { 'action-btn--pinned': item.isPinned }]"
+              :class="['action-btn', 'action-btn--pin', { 'action-btn--pinned': item.pinTop === 1 }]"
               @click="togglePin(item)"
-              :title="item.isPinned ? '取消置顶' : '置顶'"
+              :title="item.pinTop === 1 ? '取消置顶' : '置顶'"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L9.545 5.13L13 5.635L10.5 8.07L11.09 11.51L8 9.885L4.91 11.51L5.5 8.07L3 5.635L6.455 5.13L8 2Z" :fill="item.isPinned ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 2L9.545 5.13L13 5.635L10.5 8.07L11.09 11.51L8 9.885L4.91 11.51L5.5 8.07L3 5.635L6.455 5.13L8 2Z" :fill="item.pinTop === 1 ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5"/>
               </svg>
             </button>
             <button class="action-btn action-btn--edit" @click="editItem(item)" title="编辑">
@@ -169,6 +186,62 @@
             <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
           </svg>
           <p>暂无数据</p>
+        </div>
+      </div>
+
+      <!-- 分页 -->
+      <div v-if="filteredItems.length > 0" class="pagination">
+        <div class="pagination-info">
+          显示第 {{ (pagination.current - 1) * pagination.pageSize + 1 }} 到 
+          {{ Math.min(pagination.current * pagination.pageSize, pagination.total) }} 条，
+          共 {{ pagination.total }} 条
+        </div>
+        <div class="pagination-controls">
+          <select v-model.number="pagination.pageSize" @change="handlePageSizeChange(pagination.pageSize)" class="page-size-select">
+            <option :value="10">10 条/页</option>
+            <option :value="20">20 条/页</option>
+            <option :value="50">50 条/页</option>
+            <option :value="100">100 条/页</option>
+          </select>
+          <button 
+            class="page-btn" 
+            :disabled="pagination.current === 1"
+            @click="handlePageChange(1)"
+          >
+            首页
+          </button>
+          <button 
+            class="page-btn" 
+            :disabled="pagination.current === 1"
+            @click="handlePageChange(pagination.current - 1)"
+          >
+            上一页
+          </button>
+          <div class="page-numbers">
+            <button
+              v-for="page in getPageNumbers()"
+              :key="page"
+              :class="['page-number', { 'active': page === pagination.current, 'ellipsis': page === -1 }]"
+              :disabled="page === -1"
+              @click="page !== -1 && handlePageChange(page)"
+            >
+              {{ page === -1 ? '...' : page }}
+            </button>
+          </div>
+          <button 
+            class="page-btn" 
+            :disabled="pagination.current === pagination.pages"
+            @click="handlePageChange(pagination.current + 1)"
+          >
+            下一页
+          </button>
+          <button 
+            class="page-btn" 
+            :disabled="pagination.current === pagination.pages"
+            @click="handlePageChange(pagination.pages)"
+          >
+            末页
+          </button>
         </div>
       </div>
     </div>
@@ -361,22 +434,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getFootprintBannerList, addFootprintBanner, removeFootprintBanner, uploadFile, type FootprintBannerItem } from '@/api/banner'
+import { 
+  getFootprintBannerList, 
+  addFootprintBanner, 
+  removeFootprintBanner, 
+  uploadFile, 
+  getFootprintList,
+  type FootprintBannerItem,
+  type FootprintListParams,
+  type FootprintListItem
+} from '@/api/banner'
 
 interface BannerItem {
   id: number
   picUrl: string
-  sort: number
-}
-
-interface ContentItem {
-  id: string
-  title: string
-  description: string
-  cover?: string
-  status: 'active' | 'inactive'
-  publishTime: string
-  isPinned: boolean
   sort: number
 }
 
@@ -385,30 +456,20 @@ const banners = ref<BannerItem[]>([])
 const isLoadingBanners = ref(false)
 
 // 内容列表
-const items = ref<ContentItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    status: 'active',
-    publishTime: '2024-11-20',
-    isPinned: true,
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    status: 'active',
-    publishTime: '2024-11-18',
-    isPinned: false,
-    sort: 2
-  }
-])
+const items = ref<FootprintListItem[]>([])
+const isLoadingItems = ref(false)
 
 // 搜索和筛选
 const searchKeyword = ref('')
 const statusFilter = ref('all')
+
+// 分页参数
+const pagination = ref({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  pages: 0
+})
 
 // 对话框状态
 const showBannerDialog = ref(false)
@@ -454,37 +515,80 @@ const loadBannerList = async () => {
   }
 }
 
+// 加载足迹内容列表
+const loadFootprintList = async () => {
+  try {
+    isLoadingItems.value = true
+    
+    // 构建查询参数
+    const params: FootprintListParams = {
+      pageIndex: pagination.value.current,
+      pageSize: pagination.value.pageSize
+    }
+    
+    // 添加搜索关键词
+    if (searchKeyword.value) {
+      params.keyword = searchKeyword.value
+    }
+    
+    // 添加显示状态筛选
+    if (statusFilter.value === 'active') {
+      params.showFront = 1
+    } else if (statusFilter.value === 'inactive') {
+      params.showFront = 0
+    }
+    
+    const response = await getFootprintList(params)
+    items.value = response.records
+    pagination.value.total = response.total
+    pagination.value.current = response.current
+    pagination.value.pages = response.pages
+    
+    console.log('✅ 获取足迹列表成功:', response)
+  } catch (error) {
+    console.error('❌ 获取足迹列表失败:', error)
+    alert('获取列表失败，请稍后重试')
+  } finally {
+    isLoadingItems.value = false
+  }
+}
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadBannerList()
+  loadFootprintList()
 })
 
 // 计算属性
-const totalCount = computed(() => items.value.length)
+const totalCount = computed(() => pagination.value.total)
 
 const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => {
-    // 置顶的排在前面
-    if (a.isPinned && !b.isPinned) return -1
-    if (!a.isPinned && b.isPinned) return 1
-    return a.sort - b.sort
-  })
+  // 数据已经在后端筛选过，直接返回
+  return items.value
 })
 
 // 搜索处理
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  pagination.value.current = 1  // 重置到第一页
+  loadFootprintList()
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  pagination.value.current = 1  // 重置到第一页
+  loadFootprintList()
+}
+
+// 分页处理
+const handlePageChange = (page: number) => {
+  pagination.value.current = page
+  loadFootprintList()
+}
+
+const handlePageSizeChange = (size: number) => {
+  pagination.value.pageSize = size
+  pagination.value.current = 1  // 重置到第一页
+  loadFootprintList()
 }
 
 // === Banner管理 ===
@@ -575,6 +679,48 @@ const closeBannerDialog = () => {
   bannerFormData.value = { image: '', file: null }
 }
 
+// 获取分页页码数组
+const getPageNumbers = () => {
+  const pages = pagination.value.pages
+  const current = pagination.value.current
+  const pageNumbers: number[] = []
+  
+  if (pages <= 7) {
+    // 总页数小于等于7，显示所有页码
+    for (let i = 1; i <= pages; i++) {
+      pageNumbers.push(i)
+    }
+  } else {
+    // 总页数大于7，显示部分页码
+    if (current <= 4) {
+      // 当前页在前面
+      for (let i = 1; i <= 5; i++) {
+        pageNumbers.push(i)
+      }
+      pageNumbers.push(-1) // 省略号
+      pageNumbers.push(pages)
+    } else if (current >= pages - 3) {
+      // 当前页在后面
+      pageNumbers.push(1)
+      pageNumbers.push(-1) // 省略号
+      for (let i = pages - 4; i <= pages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      // 当前页在中间
+      pageNumbers.push(1)
+      pageNumbers.push(-1) // 省略号
+      for (let i = current - 1; i <= current + 1; i++) {
+        pageNumbers.push(i)
+      }
+      pageNumbers.push(-1) // 省略号
+      pageNumbers.push(pages)
+    }
+  }
+  
+  return pageNumbers
+}
+
 // === 内容管理 ===
 const handleDragStart = (index: number, event: DragEvent) => {
   draggedIndex.value = index
@@ -587,46 +733,41 @@ const handleDrop = (targetIndex: number, event: DragEvent) => {
   event.preventDefault()
   if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
 
-  const draggedItem = filteredItems.value[draggedIndex.value]
-  const targetItem = filteredItems.value[targetIndex]
-  
-  const tempSort = draggedItem.sort
-  draggedItem.sort = targetItem.sort
-  targetItem.sort = tempSort
-
+  // TODO: 实现拖拽排序的后端API调用
+  alert('拖拽排序功能待实现后端API')
   draggedIndex.value = null
 }
 
-const togglePin = (item: ContentItem) => {
-  item.isPinned = !item.isPinned
+const togglePin = (item: FootprintListItem) => {
+  // TODO: 实现置顶功能的后端API调用
+  alert('置顶功能待实现后端API')
 }
 
-const editItem = (item: ContentItem) => {
+const editItem = (item: FootprintListItem) => {
   formData.value = {
-    id: item.id,
+    id: item.id.toString(),
     title: item.title,
-    contentType: 'richtext',
-    content: item.description,
-    isPinned: item.isPinned,
-    showOnFrontend: item.status === 'active'
+    contentType: item.footprintType === 0 ? 'richtext' : 'url',
+    content: item.content,
+    isPinned: item.pinTop === 1,
+    showOnFrontend: item.showFront === 1
   }
   showEditDialog.value = true
 }
 
-const previewItem = (item: ContentItem) => {
-  previewData.value = item
+const previewItem = (item: FootprintListItem) => {
+  previewData.value = {
+    title: item.title,
+    description: item.content,
+    publishTime: item.createTime
+  } as any
   showPreviewDialog.value = true
 }
 
-const deleteItem = (id: string) => {
+const deleteItem = (id: number) => {
   if (confirm('确定要删除这条内容吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
-    }
+    // TODO: 实现删除功能的后端API调用
+    alert('删除功能待实现后端API')
   }
 }
 
@@ -650,28 +791,11 @@ const saveItem = () => {
     }
   }
 
+  // TODO: 实现新增/编辑的后端API调用
   if (showEditDialog.value) {
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        description: formData.value.content,
-        status: formData.value.showOnFrontend ? 'active' : 'inactive',
-        isPinned: formData.value.isPinned
-      }
-    }
+    alert('编辑功能待实现后端API')
   } else {
-    const newItem: ContentItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      description: formData.value.content,
-      status: formData.value.showOnFrontend ? 'active' : 'inactive',
-      publishTime: new Date().toISOString().split('T')[0],
-      isPinned: formData.value.isPinned,
-      sort: items.value.length + 1
-    }
-    items.value.push(newItem)
+    alert('新增功能待实现后端API')
   }
 
   closeDialog()
@@ -941,6 +1065,36 @@ const closeDialog = () => {
   border-radius: 2px;
   font-size: 12px;
   flex-shrink: 0;
+}
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background: #d9d9d9;
+  color: #666;
+  border-radius: 2px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.badge-status--active {
+  background: #52c41a;
+  color: white;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
 }
 
 .item-description {
@@ -1419,6 +1573,106 @@ const closeDialog = () => {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 分页 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-size-select {
+  padding: 6px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  background: white;
+}
+
+.page-btn {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.page-btn:disabled {
+  color: #d9d9d9;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-number {
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.page-number:hover:not(:disabled):not(.active) {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.page-number.active {
+  background: #e31e24;
+  color: white;
+  border-color: #e31e24;
+}
+
+.page-number.ellipsis {
+  border: none;
+  cursor: default;
+}
+
+.page-number:disabled {
+  cursor: default;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #666;
 }
 </style>
 

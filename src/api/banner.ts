@@ -504,3 +504,50 @@ export function removeFootprintBanner(id: number): Promise<void> {
     method: 'DELETE'
   })
 }
+
+/**
+ * 总书记的福建足迹列表查询参数
+ */
+export interface FootprintListParams {
+  pageIndex: number
+  pageSize: number
+  keyword?: string
+  showFront?: number  // 显示状态：1=显示；0=不显示；不传显示所有
+}
+
+/**
+ * 总书记的福建足迹列表项
+ */
+export interface FootprintListItem {
+  id: number
+  title: string
+  footprintType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
+  content: string
+  pinTop: number  // 1=置顶；0=不置顶
+  statPv: number  // 浏览量
+  showFront: number  // 1=显示；0=不显示
+  createTime: string
+}
+
+/**
+ * 总书记的福建足迹列表响应
+ */
+export interface FootprintListResponse {
+  records: FootprintListItem[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+
+/**
+ * 获取总书记的福建足迹列表（分页）
+ * @param params 查询参数
+ */
+export function getFootprintList(params: FootprintListParams): Promise<FootprintListResponse> {
+  return request({
+    url: '/xiThought/footprint/page/list',
+    method: 'POST',
+    data: params
+  })
+}

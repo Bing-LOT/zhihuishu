@@ -14,6 +14,7 @@ export interface VideoItem {
   videoUrl: string    // 视频地址
   college: string     // 学院
   createTime: string  // 发布日期
+  description?: string // 视频描述
 }
 
 /**

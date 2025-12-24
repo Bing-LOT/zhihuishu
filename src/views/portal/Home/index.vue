@@ -76,29 +76,29 @@
       <!-- 背景视频 -->
       <div class="home__video-background">
         <video
+          v-if="!videosLoading && videoList.length > 0"
           ref="backgroundVideo"
+          :key="currentVideo"
           autoplay
           loop
           muted
           playsinline
           class="home__video-bg"
+          :src="videoList[currentVideo]?.videoUrl"
         >
-          <source src="/videos/hero-video.mp4" type="video/mp4" />
         </video>
         <div class="home__video-overlay"></div>
       </div>
 
       <!-- 视频信息卡片 -->
-      <div class="home__video-info">
-        <p class="home__video-date">{{ featuredVideo.date }}</p>
-        <p class="home__video-source">{{ featuredVideo.source }}</p>
+      <div v-if="!videosLoading && videoList.length > 0" class="home__video-info">
+        <p class="home__video-date">{{ videoList[currentVideo]?.createTime || '' }}</p>
+        <p class="home__video-source">{{ videoList[currentVideo]?.college || '' }}</p>
         <div class="home__video-title">
-          <p>{{ featuredVideo.title }}</p>
-          <p>{{ featuredVideo.subtitle }}</p>
+          <p>{{ videoList[currentVideo]?.title || '' }}</p>
         </div>
-        <div class="home__video-description">
-          <p>{{ featuredVideo.description }}</p>
-          <p>此处共放置字体3行..</p>
+        <div class="home__video-description" v-if="videoList[currentVideo]?.description">
+          <p>{{ videoList[currentVideo]?.description }}</p>
         </div>
         <button class="home__video-play" @click="playVideo">
           播放
@@ -304,15 +304,8 @@ const videoList = ref<Array<{
   videoUrl?: string
   college?: string
   createTime?: string
+  description?: string
 }>>([])
-
-const featuredVideo = {
-  date: '2025-06-25',
-  source: '党委宣传部 融媒体中心',
-  title: '福州大学2025毕业季',
-  subtitle: '——微电影《干杯》',
-  description: '谨以此片献给福州大学2025届毕业生'
-}
 
 /**
  * 加载视频列表数据
@@ -328,7 +321,8 @@ const loadVideos = async () => {
       title: video.title,
       videoUrl: video.videoUrl,
       college: video.college,
-      createTime: video.createTime
+      createTime: video.createTime,
+      description: video.description
     }))
     console.log('✅ 视频列表加载成功:', videoList.value)
   } catch (error) {
@@ -362,11 +356,13 @@ const loadVideos = async () => {
 }
 
 const nextVideo = () => {
-  currentVideo.value = (currentVideo.value + 1) % videoList.length
+  if (videoList.value.length === 0) return
+  currentVideo.value = (currentVideo.value + 1) % videoList.value.length
 }
 
 const prevVideo = () => {
-  currentVideo.value = (currentVideo.value - 1 + videoList.length) % videoList.length
+  if (videoList.value.length === 0) return
+  currentVideo.value = (currentVideo.value - 1 + videoList.value.length) % videoList.value.length
 }
 
 const selectVideo = (index: number) => {

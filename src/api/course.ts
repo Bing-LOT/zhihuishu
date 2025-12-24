@@ -211,6 +211,40 @@ export function getCourseExpoList(): Promise<CourseExpoItem[]> {
 }
 
 /**
+ * 课程展播分页查询参数
+ */
+export interface CourseExpoPageParams {
+  pageIndex: number
+  pageSize: number
+  property?: string
+  levelName?: string
+  college?: string
+}
+
+/**
+ * 课程展播分页响应
+ */
+export interface CourseExpoPageResponse {
+  records: CourseExpoItem[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+
+/**
+ * 获取课程展播分页列表
+ * @param params 查询参数
+ */
+export function getCourseExpoPageList(params: CourseExpoPageParams): Promise<CourseExpoPageResponse> {
+  return request({
+    url: '/api/courseExpo/page/list',
+    method: 'POST',
+    data: params
+  })
+}
+
+/**
  * 获取课程展播详情
  * @param id 课程ID
  */

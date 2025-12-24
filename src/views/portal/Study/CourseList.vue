@@ -109,7 +109,7 @@
           <!-- 这里的图标可以用 gailanmulu_icon.png 或者是其他的 -->
           <img src="/images/gailanmulu_icon.png" alt="" class="list-icon" />
           <h2 class="list-title">展播目录</h2>
-          <span class="list-count">共计收录 <span class="highlight">19467个</span> 视频</span>
+          <span class="list-count">共计收录 <span class="highlight">{{ totalCount }}个</span> 视频</span>
         </div>
         <div class="search-box">
           <div class="search-icon">
@@ -118,13 +118,19 @@
               <path d="M17.5 17.5L13.875 13.875" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <input type="text" placeholder="请输入" v-model="searchQuery" />
-          <button class="search-btn">搜索</button>
+          <input type="text" placeholder="请输入" v-model="searchQuery" @keyup.enter="fetchCourseList" />
+          <button class="search-btn" @click="fetchCourseList">搜索</button>
         </div>
       </div>
 
       <!-- 课程列表 -->
-      <div class="course-grid">
+      <div v-if="loading" class="loading-container">
+        <div class="loading-text">加载中...</div>
+      </div>
+      <div v-else-if="filteredCourseList.length === 0" class="empty-container">
+        <div class="empty-text">暂无数据</div>
+      </div>
+      <div v-else class="course-grid">
         <CourseCard
           v-for="course in filteredCourseList"
           :key="course.id"
@@ -138,10 +144,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import type { Course } from '@/types'
+import { getCourseExpoPageList, type CourseExpoItem } from '@/api/course'
 
 /**
  * 学习中心（课程列表）页面
@@ -149,13 +156,18 @@ import type { Course } from '@/types'
 const router = useRouter()
 
 // 筛选状态
-const activeType = ref('示范课程')
+const activeType = ref('全部')
 const activeLevel = ref('全部')
 const activeDepartment = ref('全部')
 const searchQuery = ref('')
 
+// 课程列表数据
+const courseList = ref<CourseExpoItem[]>([])
+const totalCount = ref(0)
+const loading = ref(false)
+
 // 筛选选项
-const typeOptions = ['示范课程', '建设发展', '一院一品', '思政微视频']
+const typeOptions = ['全部', '示范课程', '建设发展', '一院一品', '思政微视频']
 const levelOptions = ['全部', '国家示范', '省级示范']
 const departmentOptions = [
   '全部',
@@ -166,125 +178,73 @@ const departmentOptions = [
   '军事教研室'
 ]
 
-// 模拟课程数据
-const courseList = ref<any[]>([
-  {
-    id: '1',
-    title: '重磅会议利好！要活跃资本市场，提振投资者信心！',
-    cover: '/images/home/video-1.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '教师课程',
-    level: '国家示范',
-    type: '示范课程'
-  },
-  {
-    id: '2',
-    title: '为什么现在中端机更受欢迎？看了这几款我完全懂了',
-    cover: '/images/home/video-2.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '成果展播',
-    level: '国家示范',
-    type: '示范课程'
-  },
-  {
-    id: '3',
-    title: '从大众到冷门，这些 APP 经历了什么',
-    cover: '/images/home/video-3.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '成果展播',
-    level: '国家示范',
-    type: '示范课程'
-  },
-  {
-    id: '4',
-    title: '联播+｜事关你我，这场会议释放4大民生信号',
-    cover: '/images/home/video-4.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '海洋学院',
-    level: '国家示范',
-    type: '示范课程'
-  },
-  {
-    id: '5',
-    title: '重磅会议利好！要活跃资本市场，提振投资者信心！',
-    cover: '/images/home/video-1.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '教师课程',
-    level: '国家示范',
-    type: '建设发展'
-  },
-  {
-    id: '6',
-    title: '女装尺码“大缩水”,谁“绑架”了女性的审美',
-    cover: '/images/home/video-2.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '福州大学',
-    level: '国家示范',
-    type: '示范课程'
-  },
-  {
-    id: '7',
-    title: '联播+｜事关你我，这场会议释放4大民生信号',
-    cover: '/images/home/video-3.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '安徽大学',
-    level: '国家示范',
-    type: '示范课程'
-  },
-  {
-    id: '8',
-    title: '青春主场｜欢聚在成都',
-    cover: '/images/home/video-4.jpg',
-    teacherList: [{ name: '薛美玉', title: '教授' }],
-    studentCount: 3456,
-    badge: '国家示范',
-    department: '上海交通大学',
-    level: '国家示范',
-    type: '示范课程'
-  }
-])
+/**
+ * 获取课程列表
+ */
+const fetchCourseList = async () => {
+  loading.value = true
+  try {
+    const params: any = {
+      pageIndex: 1,
+      pageSize: 16
+    }
 
-// 过滤后的课程列表
+    // 添加筛选条件
+    if (activeType.value && activeType.value !== '全部') {
+      params.property = activeType.value
+    }
+    if (activeLevel.value && activeLevel.value !== '全部') {
+      params.levelName = activeLevel.value
+    }
+    if (activeDepartment.value && activeDepartment.value !== '全部') {
+      params.college = activeDepartment.value
+    }
+
+    const response = await getCourseExpoPageList(params)
+    courseList.value = response.records
+    totalCount.value = response.total
+  } catch (error) {
+    console.error('获取课程列表失败:', error)
+    courseList.value = []
+    totalCount.value = 0
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听筛选条件变化
+watch([activeType, activeLevel, activeDepartment], () => {
+  fetchCourseList()
+})
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchCourseList()
+})
+
+// 转换课程数据为卡片所需格式
 const filteredCourseList = computed(() => {
-  return courseList.value.filter(course => {
-    // 展播类型筛选
-    if (activeType.value && activeType.value !== '全部' && course.type !== activeType.value) {
-      // 暂时不严格过滤类型，因为模拟数据不全
-      // return false 
-    }
-    
-    // 获评课程筛选
-    if (activeLevel.value !== '全部' && course.level !== activeLevel.value) {
-      return false
-    }
-    
-    // 学院筛选 (由于模拟数据 department 字段不统一，暂时略过或模糊匹配)
-    // if (activeDepartment.value !== '全部' && !course.department?.includes(activeDepartment.value)) {
-    //   return false
-    // }
-    
-    // 搜索
-    if (searchQuery.value) {
-      return course.title.includes(searchQuery.value) || 
-             course.teacherList.some((t: any) => t.name.includes(searchQuery.value))
-    }
-    
-    return true
-  })
+  let list = courseList.value.map(course => ({
+    id: course.id.toString(),
+    title: course.name,
+    cover: course.coverUrl,
+    teacherList: course.teachers.map(t => ({ name: t.name, title: t.department || '' })),
+    studentCount: course.showStatPv || course.statPv || 0,
+    badge: course.levelName,
+    department: course.college,
+    level: course.levelName,
+    type: course.property
+  }))
+
+  // 搜索过滤
+  if (searchQuery.value) {
+    list = list.filter(course => 
+      course.title.includes(searchQuery.value) || 
+      course.teacherList.some((t: any) => t.name.includes(searchQuery.value))
+    )
+  }
+
+  return list
 })
 
 const handleCourseClick = (course: any) => {
@@ -559,6 +519,22 @@ const handleCourseClick = (course: any) => {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 48px;
+}
+
+/* 加载状态 */
+.loading-container,
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 0;
+  min-height: 400px;
+}
+
+.loading-text,
+.empty-text {
+  font-size: 18px;
+  color: #999;
 }
 </style>
 

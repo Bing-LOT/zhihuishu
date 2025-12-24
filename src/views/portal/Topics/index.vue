@@ -226,8 +226,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
-import { getXiThoughtTitles, getXiThoughtVideoTopList } from '@/api/redCulture'
-import type { XiThoughtTitle, XiThoughtVideo } from '@/api/redCulture'
+import { getXiThoughtTitles, getXiThoughtVideoTopList, getXiThoughtExampleTopList } from '@/api/redCulture'
+import type { XiThoughtTitle, XiThoughtVideo, XiThoughtExampleVideo } from '@/api/redCulture'
 import type { Course } from '@/types'
 
 const router = useRouter()
@@ -295,12 +295,40 @@ const convertVideoToCourse = (video: XiThoughtVideo): Course => {
   }
 }
 
+// 将示例案例 API 数据转换为 Course 格式
+const convertExampleVideoToCourse = (video: XiThoughtExampleVideo): Course => {
+  return {
+    id: String(video.id),
+    title: video.name,
+    cover: video.coverUrl,
+    description: video.content || '',
+    level: 'primary' as any,
+    teacherList: video.teachers?.map((teacher, index) => ({
+      id: String(video.id) + '-' + index,
+      name: teacher.name,
+      title: teacher.title || '教师',
+      avatar: '',
+      bio: '',
+      department: video.college || ''
+    })) || [],
+    sort: 0,
+    status: 'published' as any,
+    studentCount: video.statPv || 0,
+    chapterCount: 0,
+    totalDuration: 0,
+    tags: [video.direction || ''].filter(Boolean),
+    createTime: video.createTime,
+    updateTime: video.createTime,
+    video: video.videoUrl || ''
+  }
+}
+
 // 列表数据
 const list1 = ref<Course[]>([])
 const list2 = ref<Course[]>([])
 const list3 = ref<Course[]>([])
 
-// 获取视频展播列表
+// 获取视频展播列表（list1）
 const fetchVideoList = async () => {
   try {
     const response = await getXiThoughtVideoTopList()
@@ -314,7 +342,21 @@ const fetchVideoList = async () => {
   }
 }
 
-// 模拟数据（用于list2和list3）
+// 获取示例案例展播列表（list2）
+const fetchExampleList = async () => {
+  try {
+    const response = await getXiThoughtExampleTopList()
+    console.log('获取示例案例列表成功：', response)
+    if (response && Array.isArray(response)) {
+      // 将返回的数据转换为 Course 格式
+      list2.value = response.map(convertExampleVideoToCourse)
+    }
+  } catch (error) {
+    console.error('获取示例案例列表失败：', error)
+  }
+}
+
+// 模拟数据（用于list3）
 const generateList = (count: number, prefix: string) => {
   return Array.from({ length: count }).map((_, i) => ({
     id: `${prefix}-${i}`,
@@ -325,7 +367,6 @@ const generateList = (count: number, prefix: string) => {
   })) as Course[]
 }
 
-list2.value = generateList(8, 's2')
 list3.value = generateList(8, 's3')
 
 // 足迹目录数据
@@ -345,6 +386,7 @@ const footprintList = ref([
 onMounted(() => {
   fetchTitles()
   fetchVideoList()
+  fetchExampleList()
 })
 
 </script>

@@ -234,3 +234,34 @@ export function getXiThoughtVideoPageList(params: XiThoughtVideoPageParams): Pro
   })
 }
 
+/**
+ * 习思想示例案例展播数据结构
+ */
+export interface XiThoughtExampleVideo {
+  id: number          // 业务id
+  name: string        // 课程名称
+  coverUrl: string    // 封面
+  createTime: string  // 发布时间
+  teachers?: Array<{  // 主讲教师信息
+    name: string
+    title?: string
+  }>
+  property?: string   // 课程性质
+  direction?: string  // 入选方向
+  college?: string    // 所在学院
+  content?: string    // 思政元素
+  videoUrl?: string   // 案例视频
+  statPv?: number     // 浏览量
+}
+
+/**
+ * 获取习思想示例案例展播Top列表
+ * @returns 视频列表
+ */
+export function getXiThoughtExampleTopList(): Promise<XiThoughtExampleVideo[]> {
+  return request({
+    url: '/api/xiThought/exampleExpo/top/list',
+    method: 'get'
+  })
+}
+

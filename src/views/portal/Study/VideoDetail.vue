@@ -247,8 +247,13 @@ onMounted(() => {
 /* 左侧信息卡片 */
 .course-info-card {
   width: 364px;
+  min-height: 750px;
   flex-shrink: 0;
   background: #fff;
+  background-image: url('/images/Frame_1000015326.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
@@ -351,8 +356,12 @@ onMounted(() => {
   border-radius: 16px;
   padding: 48px 24px 24px; /* 顶部留多一点给 tabs */
   background: rgba(255, 255, 255, 0.6);
+  background-image: url('/images/Frame_1000015327.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
-  min-height: 600px;
+  min-height: 750px;
 }
 
 .course-tabs {

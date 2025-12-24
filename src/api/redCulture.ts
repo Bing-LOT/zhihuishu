@@ -85,6 +85,36 @@ export function createRedCulture(data: CreateRedCultureParams): Promise<any> {
 }
 
 /**
+ * 编辑红色文化资源参数
+ */
+export interface EditRedCultureParams {
+  id: number              // 资源ID（必需）
+  coverUrl: string        // 封面图片（必需）
+  title: string           // 标题（必需）
+  address: string         // 地址（必需）
+  tags: string[]          // 建设课程类型，多个（必需）
+  contentType: number     // 资源详情内容类型：0=富文本；1=URL地址（必需）
+  content: string         // 富文本或URL地址（必需）
+  pinTop: number          // 是否置顶：1=置顶；0=不置顶（必需）
+  showFront: number       // 前台显示：1=显示；0=隐藏（必需）
+  lng?: number            // 经度（可选）
+  lat?: number            // 纬度（可选）
+}
+
+/**
+ * 编辑红色文化资源
+ * @param data 资源数据（包含id）
+ * @returns 编辑结果
+ */
+export function editRedCulture(data: EditRedCultureParams): Promise<any> {
+  return request({
+    url: '/redCulture/edit',
+    method: 'put',
+    data
+  })
+}
+
+/**
  * 更新红色文化资源
  * @param id 资源ID
  * @param data 资源数据

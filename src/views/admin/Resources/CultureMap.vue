@@ -410,9 +410,11 @@ import { ref, computed, onMounted, shallowRef, onBeforeUnmount, watch } from 'vu
 import { 
   getRedCultureList, 
   createRedCulture,
+  editRedCulture,
   type RedCultureItem, 
   type RedCulturePageParams,
-  type CreateRedCultureParams 
+  type CreateRedCultureParams,
+  type EditRedCultureParams 
 } from '@/api/redCulture'
 import { uploadFile } from '@/api/banner'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
@@ -870,19 +872,27 @@ const saveItem = async () => {
   try {
     if (showEditDialog.value) {
       // 编辑
-      // TODO: 调用更新API（待后端提供）
-      // await updateRedCulture(Number(formData.value.id), {
-      //   title: formData.value.title,
-      //   coverUrl: formData.value.coverUrl,
-      //   address: formData.value.address,
-      //   tags: formData.value.tags,
-      //   contentType: formData.value.contentType,
-      //   content: formData.value.content,
-      //   lng: formData.value.lng,
-      //   lat: formData.value.lat,
-      //   pinTop: formData.value.pinTop,
-      //   showFront: formData.value.showFront
-      // })
+      const params: EditRedCultureParams = {
+        id: Number(formData.value.id),
+        title: formData.value.title.trim(),
+        coverUrl: formData.value.coverUrl,
+        address: formData.value.address.trim(),
+        tags: formData.value.tags,
+        contentType: formData.value.contentType,
+        content: formData.value.content.trim(),
+        pinTop: formData.value.pinTop,
+        showFront: formData.value.showFront
+      }
+      
+      // 如果填写了坐标，添加到参数中
+      if (formData.value.lng && formData.value.lat) {
+        params.lng = formData.value.lng
+        params.lat = formData.value.lat
+      }
+      
+      console.log('编辑参数:', params)
+      
+      await editRedCulture(params)
       alert('编辑成功')
     } else {
       // 新增

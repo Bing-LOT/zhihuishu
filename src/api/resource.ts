@@ -171,6 +171,17 @@ export function getPoliticalResourceList(params: PoliticalResourceListParams): P
 }
 
 /**
+ * 获取思政资源详情
+ * @param id 资源ID
+ */
+export function getPoliticalResourceDetail(id: string | number): Promise<PoliticalResourceItem> {
+  return request({
+    url: `/politicalResource/get/${id}`,
+    method: 'GET'
+  })
+}
+
+/**
  * 编辑思政资源
  * @param data 编辑数据
  */

@@ -6,54 +6,43 @@
 
     <div class="page-container">
       <!-- 面包屑 -->
-      <div class="breadcrumb">
+      <div class="breadcrumb" v-if="detail">
         <span class="label">您的位置：</span>
         <router-link to="/" class="link">首页</router-link>
         <span class="separator">>></span>
         <router-link to="/resources" class="link">思政资源</router-link>
         <span class="separator">>></span>
-        <span class="link">政策文件库</span> <!-- 或者是动态分类 -->
+        <span class="link">{{ getCategoryName(detail.category) }}</span>
         <span class="separator">>></span>
         <span class="current">文件详情</span>
       </div>
 
+      <!-- 加载状态 -->
+      <div v-if="loading" class="detail-card">
+        <div class="loading-state">
+          <p>加载中...</p>
+        </div>
+      </div>
+
       <!-- 详情内容 -->
-      <div class="detail-card">
+      <div v-else-if="detail" class="detail-card">
         <div class="detail-header">
-          <h1 class="detail-title">智慧农业风起，中科原动力带机器人走进田间地头</h1>
+          <h1 class="detail-title">{{ detail.title }}</h1>
           <div class="detail-meta">
-            <span class="meta-item">发布时间：2025-11-04</span>
+            <span class="meta-item">发布时间：{{ formatDate(detail.createTime) }}</span>
             <span class="separator">|</span>
-            <span class="meta-item">浏览人数：47698</span>
+            <span class="meta-item">浏览人数：{{ detail.statPv || 0 }}</span>
           </div>
         </div>
 
-        <!-- 视频播放器 -->
-        <div class="detail-player">
-          <video 
-            class="video-content"
-            controls
-            poster="/images/home/video-1.jpg"
-          >
-            <source src="/videos/hero-video.mp4" type="video/mp4">
-          </video>
-        </div>
+        <!-- 富文本内容 -->
+        <div class="detail-body" v-if="detail.contentType === 0" v-html="detail.content"></div>
+      </div>
 
-        <!-- 正文内容 -->
-        <div class="detail-body">
-          <p>课程是人才培养的最后一公里。随着大数据时代的来临，“概率论与数理统计”作为大数据的主要基础理论之一，受到专家学者的广泛关注，这一课程已成为高等院校理工科、经管类各专业重要的基础课程之一，大量应用于社会、经济、科学等领域。其中概率论以现代数学框架为基础研究随机现象的统计规律性，数理统计则以概率论为理论基础，研究怎样用有效的方法去收集、整理、分析受随机性影响的数据，并对所研究的问题作出统计推断和预测，同时为决策和行动提供依据和建议。</p>
-          <br>
-          <p>通过本课程的学习，学生能掌握概率论与数理统计的基本概念、基本理论和方法，从而理解随机现象的基本思想、训练数理逻辑思维，培养运用概率统计方法分析和解决实际问题的能力，为后续学习乃至工作奠定必备的数理基础。</p>
-        </div>
-
-        <!-- 底部图片 -->
-        <div class="detail-images">
-          <div class="image-item">
-            <img src="/images/home/video-2.jpg" alt="" />
-          </div>
-          <div class="image-item">
-            <img src="/images/home/video-3.jpg" alt="" />
-          </div>
+      <!-- 空状态 -->
+      <div v-else class="detail-card">
+        <div class="empty-state">
+          <p>暂无数据</p>
         </div>
       </div>
     </div>
@@ -61,9 +50,59 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getPoliticalResourceDetail } from '@/api/resource'
+import type { PoliticalResourceItem } from '@/types'
+
 /**
  * 资源详情页
  */
+const route = useRoute()
+const router = useRouter()
+
+const loading = ref(false)
+const detail = ref<PoliticalResourceItem | null>(null)
+
+// 获取分类名称
+const getCategoryName = (category: number) => {
+  return category === 0 ? '政策文件库' : '思政素材库'
+}
+
+// 格式化日期
+const formatDate = (dateStr: string | undefined) => {
+  if (!dateStr) return ''
+  return dateStr.split(' ')[0] // 只取日期部分
+}
+
+// 获取详情数据
+const fetchDetail = async () => {
+  const id = route.params.id
+  if (!id) {
+    console.error('缺少资源ID')
+    return
+  }
+
+  try {
+    loading.value = true
+    const data = await getPoliticalResourceDetail(id as string)
+    detail.value = data
+
+    // 如果是外部链接类型，直接跳转
+    if (data.contentType === 1 && data.content) {
+      window.location.href = data.content
+    }
+  } catch (error) {
+    console.error('获取资源详情失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化加载
+onMounted(() => {
+  fetchDetail()
+})
 </script>
 
 <style scoped>
@@ -164,50 +203,64 @@
   background: #ccc;
 }
 
-/* 播放器 */
-.detail-player {
-  width: 100%;
-  max-width: 900px;
-  aspect-ratio: 16/9;
-  background: #000;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.video-content {
-  width: 100%;
-  height: 100%;
-}
-
 /* 正文 */
 .detail-body {
   width: 100%;
-  max-width: 900px;
-  font-size: 18px;
-  line-height: 1.75;
+  max-width: 1200px;
+  font-size: 16px;
+  line-height: 1.8;
   color: #333;
+  padding: 24px 0;
+}
+
+/* 富文本内容样式 */
+.detail-body :deep(p) {
+  margin-bottom: 16px;
   text-indent: 2em;
 }
 
-/* 图片 */
-.detail-images {
-  width: 100%;
-  max-width: 900px;
+.detail-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+}
+
+.detail-body :deep(h1),
+.detail-body :deep(h2),
+.detail-body :deep(h3),
+.detail-body :deep(h4),
+.detail-body :deep(h5),
+.detail-body :deep(h6) {
+  margin: 20px 0 16px;
+  font-weight: 600;
+  text-indent: 0;
+}
+
+.detail-body :deep(ul),
+.detail-body :deep(ol) {
+  margin: 16px 0;
+  padding-left: 2em;
+}
+
+.detail-body :deep(li) {
+  margin-bottom: 8px;
+}
+
+.detail-body :deep(a) {
+  color: #bc2220;
+  text-decoration: underline;
+}
+
+/* 加载和空状态 */
+.loading-state,
+.empty-state {
   display: flex;
-  gap: 24px;
-}
-
-.image-item {
-  flex: 1;
-  height: 200px; /* 估算高度 */
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.image-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #999;
+  font-size: 16px;
 }
 </style>
 

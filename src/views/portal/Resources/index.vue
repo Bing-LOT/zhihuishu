@@ -301,7 +301,14 @@ const pageNumbers = computed(() => {
 
 // 资源点击处理
 const handleResourceClick = (item: PoliticalResourceItem) => {
-  router.push(`/resources/detail/${item.id}`)
+  // contentType: 0=富文本内容（跳转详情页）；1=URL地址（直接跳转）
+  if (item.contentType === 1) {
+    // URL类型，直接在新窗口打开链接
+    window.open(item.content, '_blank')
+  } else {
+    // 富文本类型，跳转到详情页
+    router.push(`/resources/detail/${item.id}`)
+  }
 }
 
 // 格式化日期

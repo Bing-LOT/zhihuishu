@@ -223,8 +223,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import CourseCard from '@/components/common/CourseCard/index.vue'
-import { getXiThoughtTitles } from '@/api/redCulture'
-import type { XiThoughtTitle } from '@/api/redCulture'
+import { getXiThoughtTitles, getXiThoughtVideoTopList } from '@/api/redCulture'
+import type { XiThoughtTitle, XiThoughtVideo } from '@/api/redCulture'
+import type { Course } from '@/types'
 
 /**
  * 习思想的伟大实践页面
@@ -250,7 +251,54 @@ const scrollToContent = () => {
   }
 }
 
-// 模拟数据
+// 将 API 数据转换为 Course 格式
+const convertVideoToCourse = (video: XiThoughtVideo): Course => {
+  return {
+    id: String(video.id),
+    title: video.title,
+    cover: video.coverUrl,
+    description: video.content,
+    level: 'primary' as any,
+    teacherList: [{
+      id: String(video.id),
+      name: video.presenter || '未知',
+      title: '主讲人',
+      avatar: '',
+      bio: '',
+      department: video.college
+    }],
+    sort: 0,
+    status: 'published' as any,
+    studentCount: video.statPv,
+    chapterCount: 0,
+    totalDuration: 0,
+    tags: [video.expoType],
+    createTime: video.createTime,
+    updateTime: video.createTime,
+    video: video.videoUrl
+  }
+}
+
+// 列表数据
+const list1 = ref<Course[]>([])
+const list2 = ref<Course[]>([])
+const list3 = ref<Course[]>([])
+
+// 获取视频展播列表
+const fetchVideoList = async () => {
+  try {
+    const response = await getXiThoughtVideoTopList()
+    console.log('获取视频列表成功：', response)
+    if (response && Array.isArray(response)) {
+      // 将返回的数据转换为 Course 格式
+      list1.value = response.map(convertVideoToCourse)
+    }
+  } catch (error) {
+    console.error('获取视频列表失败：', error)
+  }
+}
+
+// 模拟数据（用于list2和list3）
 const generateList = (count: number, prefix: string) => {
   return Array.from({ length: count }).map((_, i) => ({
     id: `${prefix}-${i}`,
@@ -258,12 +306,11 @@ const generateList = (count: number, prefix: string) => {
     cover: `/images/home/video-${(i % 4) + 1}.jpg`,
     teacherList: [{ name: '薛美玉', title: '教授' }],
     studentCount: 3456
-  }))
+  })) as Course[]
 }
 
-const list1 = ref(generateList(8, 's1'))
-const list2 = ref(generateList(8, 's2'))
-const list3 = ref(generateList(8, 's3'))
+list2.value = generateList(8, 's2')
+list3.value = generateList(8, 's3')
 
 // 足迹目录数据
 const footprintList = ref([
@@ -278,9 +325,10 @@ const footprintList = ref([
   { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
 ])
 
-// 组件挂载时获取标题
+// 组件挂载时获取数据
 onMounted(() => {
   fetchTitles()
+  fetchVideoList()
 })
 
 </script>

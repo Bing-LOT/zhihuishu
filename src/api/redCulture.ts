@@ -160,3 +160,30 @@ export function getXiThoughtTitles(): Promise<XiThoughtTitle[]> {
   })
 }
 
+/**
+ * 习思想视频展播数据结构
+ */
+export interface XiThoughtVideo {
+  id: number          // 业务id
+  title: string       // 标题
+  coverUrl: string    // 封面图
+  createTime: string  // 发布时间
+  expoType: string    // 展播类型
+  college: string     // 所在学院
+  presenter: string   // 主持人
+  content: string     // 课程简介
+  videoUrl: string    // 视频
+  statPv: number      // 浏览量
+}
+
+/**
+ * 获取习思想视频展播Top列表
+ * @returns 视频列表
+ */
+export function getXiThoughtVideoTopList(): Promise<XiThoughtVideo[]> {
+  return request({
+    url: '/api/xiThought/videoExpo/top/list',
+    method: 'get'
+  })
+}
+

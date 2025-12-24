@@ -269,15 +269,25 @@
             <label>所属单位 <span class="required">*</span></label>
             <select v-model="formData.unit" class="form-input">
               <option value="">请选择学院</option>
-              <option value="电气工程与自动学院">电气工程与自动学院</option>
-              <option value="计算机学院">计算机学院</option>
-              <option value="机械学院">机械学院</option>
-              <option value="化学学院">化学学院</option>
-              <option value="数学与统计学院">数学与统计学院</option>
-              <option value="物理与信息工程学院">物理与信息工程学院</option>
+              <option value="计算机与大数据学院">计算机与大数据学院</option>
+              <option value="机械工程学院">机械工程学院</option>
+              <option value="材料科学与工程学院">材料科学与工程学院</option>
+              <option value="化学化工学院">化学化工学院</option>
               <option value="土木工程学院">土木工程学院</option>
               <option value="经济与管理学院">经济与管理学院</option>
+              <option value="法学院">法学院</option>
+              <option value="外国语学院">外国语学院</option>
+              <option value="数学与统计学院">数学与统计学院</option>
+              <option value="物理与信息工程学院">物理与信息工程学院</option>
+              <option value="生物科学与工程学院">生物科学与工程学院</option>
+              <option value="环境与安全工程学院">环境与安全工程学院</option>
+              <option value="建筑与城乡规划学院">建筑与城乡规划学院</option>
+              <option value="紫金矿业学院">紫金矿业学院</option>
+              <option value="海洋学院">海洋学院</option>
+              <option value="石油化工学院">石油化工学院</option>
+              <option value="交通运输学院">交通运输学院</option>
               <option value="马克思主义学院">马克思主义学院</option>
+              <option value="人文社会科学学院">人文社会科学学院</option>
             </select>
           </div>
 
@@ -294,13 +304,22 @@
 
           <div class="form-group">
             <label>详情内容 <span class="required">*</span></label>
-            <textarea
-              v-model="formData.content"
-              rows="10"
-              placeholder="请输入详情内容（支持富文本）"
-              class="form-textarea"
-            ></textarea>
-            <small class="field-hint">提示：实际使用时可集成富文本编辑器</small>
+            <div class="editor-container">
+              <Toolbar
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                :mode="editorMode"
+                class="editor-toolbar"
+              />
+              <Editor
+                v-model="formData.content"
+                :defaultConfig="editorConfig"
+                :mode="editorMode"
+                class="editor-content"
+                @onCreated="handleCreated"
+              />
+            </div>
+            <small class="field-hint">提示：支持富文本编辑，可插入图片、设置格式等</small>
           </div>
 
           <div class="form-group">
@@ -358,7 +377,7 @@
               <span>学院：{{ previewData.college }}</span>
               <span>类别：{{ previewData.category }}</span>
             </div>
-            <p class="preview-description">{{ previewData.description }}</p>
+            <div class="preview-description" v-html="previewData.description"></div>
             <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
           </div>
         </div>
@@ -368,7 +387,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, shallowRef } from 'vue'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import '@wangeditor/editor/dist/css/style.css'
 import { 
   getExampleExpoList, 
   addExampleExpo, 
@@ -386,7 +408,8 @@ interface CaseItem {
   teacher: string
   college: string
   category: string
-  description: string
+  description: string  // 摘要文本（用于列表显示）
+  fullContent: string  // 完整的HTML内容（用于编辑和预览）
   status: 'active' | 'inactive'
   publishTime: string
   cover?: string
@@ -433,6 +456,40 @@ const previewData = ref<CaseItem | null>(null)
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
 
+// 富文本编辑器相关
+const editorRef = shallowRef()
+const editorMode = 'default' // 或 'simple'
+
+// 编辑器配置
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '请输入详情内容...',
+  MENU_CONF: {
+    uploadImage: {
+      async customUpload(file: File, insertFn: any) {
+        try {
+          const result = await uploadFile(file)
+          insertFn(result.url, file.name, result.url)
+        } catch (error) {
+          console.error('图片上传失败:', error)
+          alert('图片上传失败')
+        }
+      }
+    }
+  }
+}
+
+// 工具栏配置
+const toolbarConfig: Partial<IToolbarConfig> = {
+  excludeKeys: [
+    'group-video' // 排除视频上传
+  ]
+}
+
+// 编辑器创建完成
+const handleCreated = (editor: any) => {
+  editorRef.value = editor
+}
+
 // 计算总页数
 const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
 
@@ -459,6 +516,17 @@ const visiblePages = computed(() => {
 // 过滤后的列表
 const filteredItems = computed(() => items.value)
 
+// 从 HTML 中提取纯文本（用于列表摘要显示）
+const extractTextFromHtml = (html: string, maxLength: number = 150): string => {
+  if (!html) return ''
+  // 创建临时 div 来解析 HTML
+  const temp = document.createElement('div')
+  temp.innerHTML = html
+  const text = temp.textContent || temp.innerText || ''
+  // 截取指定长度并添加省略号
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
 // 转换 API 数据为组件数据格式
 const convertApiToItem = (apiItem: ExampleExpoListItem): CaseItem => {
   return {
@@ -467,7 +535,8 @@ const convertApiToItem = (apiItem: ExampleExpoListItem): CaseItem => {
     teacher: apiItem.presenter,
     college: apiItem.college,
     category: apiItem.category,
-    description: apiItem.content,
+    description: extractTextFromHtml(apiItem.content, 120), // 提取纯文本摘要用于列表显示
+    fullContent: apiItem.content, // 保存完整的HTML内容
     status: apiItem.showFront === 1 ? 'active' : 'inactive',
     publishTime: apiItem.createTime ? apiItem.createTime.split(' ')[0] : '',
     cover: apiItem.coverUrl,
@@ -602,7 +671,7 @@ const editItem = (item: CaseItem) => {
     teacherName: item.teacher,
     unit: item.college,
     category: item.category,
-    content: item.description,
+    content: item.fullContent, // 使用完整的HTML内容
     displayOrder: item.sort,
     showOnFrontend: item.status === 'active'
   }
@@ -611,7 +680,11 @@ const editItem = (item: CaseItem) => {
 
 // 预览项目
 const previewItem = (item: CaseItem) => {
-  previewData.value = item
+  // 预览时也使用完整内容
+  previewData.value = {
+    ...item,
+    description: item.fullContent
+  }
   showPreviewDialog.value = true
 }
 
@@ -718,6 +791,13 @@ const closeDialog = () => {
 // 组件挂载时获取数据
 onMounted(() => {
   fetchList()
+})
+
+// 组件销毁前销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor == null) return
+  editor.destroy()
 })
 </script>
 
@@ -1213,6 +1293,57 @@ textarea.form-input {
   color: #999;
 }
 
+/* 富文本编辑器样式 */
+.editor-container {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.editor-container:focus-within {
+  border-color: #e31e24;
+  box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.1);
+}
+
+.editor-toolbar {
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+}
+
+.editor-content {
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
+  background: white;
+}
+
+/* 自定义编辑器内容区域样式 */
+:deep(.w-e-text-container) {
+  background-color: white;
+}
+
+:deep(.w-e-text-placeholder) {
+  color: #bbb;
+  font-style: normal;
+}
+
+:deep(.w-e-text-container [data-slate-editor]) {
+  padding: 15px;
+  min-height: 400px;
+  line-height: 1.8;
+}
+
+/* 编辑器工具栏按钮hover效果 */
+:deep(.w-e-bar-item button:hover) {
+  background-color: #f1f1f1;
+}
+
+:deep(.w-e-bar-item button.active) {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;
@@ -1385,6 +1516,72 @@ textarea.form-input {
   font-size: 16px;
   line-height: 1.8;
   color: #333;
+}
+
+/* 预览区域的富文本内容样式 */
+.preview-description :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 16px 0;
+}
+
+.preview-description :deep(p) {
+  margin: 12px 0;
+}
+
+.preview-description :deep(h1),
+.preview-description :deep(h2),
+.preview-description :deep(h3) {
+  margin: 24px 0 16px;
+  font-weight: 600;
+}
+
+.preview-description :deep(ul),
+.preview-description :deep(ol) {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.preview-description :deep(blockquote) {
+  border-left: 4px solid #e31e24;
+  padding-left: 16px;
+  margin: 16px 0;
+  color: #666;
+  font-style: italic;
+}
+
+.preview-description :deep(code) {
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+.preview-description :deep(pre) {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.preview-description :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.preview-description :deep(table th),
+.preview-description :deep(table td) {
+  border: 1px solid #e8e8e8;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.preview-description :deep(table th) {
+  background: #fafafa;
+  font-weight: 600;
 }
 
 .preview-time {

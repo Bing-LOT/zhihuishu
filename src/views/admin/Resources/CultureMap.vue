@@ -73,18 +73,24 @@
 
         <!-- 缩略图 -->
         <div class="item-thumbnail">
-          <img :src="item.cover || '/images/home/video-1.jpg'" :alt="item.title" />
+          <img :src="item.coverUrl || '/images/home/video-1.jpg'" :alt="item.title" />
         </div>
 
         <!-- 内容信息 -->
         <div class="item-content">
           <h3 class="item-title">{{ item.title }}</h3>
-          <p class="item-description">{{ item.description }}</p>
+          <p class="item-description">{{ item.address }}</p>
+          <div class="item-tags" v-if="item.tags && item.tags.length > 0">
+            <span v-for="tag in item.tags" :key="tag" class="tag">{{ tag }}</span>
+          </div>
 
           <div class="item-footer">
             <div class="footer-info">
-              <span class="sort-info">排序：第 {{ index + 1 }} 位</span>
-              <span class="time-info">发布时间：{{ item.publishTime }}</span>
+              <span class="sort-info">排序：第 {{ (currentPage - 1) * pageSize + index + 1 }} 位</span>
+              <span class="time-info">发布时间：{{ item.createTime }}</span>
+              <span class="status-info">
+                {{ item.showFront === 1 ? '显示中' : '已隐藏' }}
+              </span>
             </div>
           </div>
         </div>
@@ -112,12 +118,62 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="!loading && filteredItems.length === 0" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <p>暂无数据</p>
+      </div>
+
+      <!-- 加载状态 -->
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <!-- 分页器 -->
+    <div v-if="!loading && totalCount > 0" class="pagination">
+      <div class="pagination-info">
+        共 {{ totalCount }} 条数据，第 {{ currentPage }} / {{ totalPages }} 页
+      </div>
+      <div class="pagination-controls">
+        <button 
+          class="page-btn" 
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+        >
+          上一页
+        </button>
+        <div class="page-numbers">
+          <button 
+            v-for="page in getPageNumbers()" 
+            :key="page"
+            class="page-number"
+            :class="{ active: page === currentPage }"
+            @click="typeof page === 'number' && handlePageChange(page)"
+            :disabled="typeof page === 'string'"
+          >
+            {{ page }}
+          </button>
+        </div>
+        <button 
+          class="page-btn" 
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+        >
+          下一页
+        </button>
+        <select 
+          v-model.number="pageSize" 
+          class="page-size-select"
+          @change="handlePageSizeChange(pageSize)"
+        >
+          <option :value="10">10条/页</option>
+          <option :value="20">20条/页</option>
+          <option :value="50">50条/页</option>
+        </select>
       </div>
     </div>
 
@@ -264,13 +320,12 @@
         
         <div class="dialog__body">
           <div v-if="previewData" class="preview-content">
-            <div v-if="previewData.cover" class="preview-cover">
-              <img :src="previewData.cover" alt="封面" />
+            <div v-if="previewData.coverUrl" class="preview-cover">
+              <img :src="previewData.coverUrl" alt="封面" />
             </div>
             <h2>{{ previewData.title }}</h2>
-            <div class="preview-meta" v-if="previewData.location || previewData.type || previewData.address">
-              <span v-if="previewData.location">地点：{{ previewData.location }}</span>
-              <span v-if="previewData.type">类型：{{ previewData.type }}</span>
+            <div class="preview-tags" v-if="previewData.tags && previewData.tags.length > 0">
+              <span v-for="tag in previewData.tags" :key="tag" class="preview-tag">{{ tag }}</span>
             </div>
             <div v-if="previewData.address" class="preview-address">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -279,8 +334,16 @@
               </svg>
               <span>{{ previewData.address }}</span>
             </div>
-            <p class="preview-description">{{ previewData.description }}</p>
-            <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
+            <div class="preview-coordinates" v-if="previewData.lng && previewData.lat">
+              坐标：{{ previewData.lng }}, {{ previewData.lat }}
+            </div>
+            <div class="preview-description" v-if="previewData.contentType === '0'">
+              <div v-html="previewData.content"></div>
+            </div>
+            <div class="preview-description" v-else>
+              <a :href="previewData.content" target="_blank">{{ previewData.content }}</a>
+            </div>
+            <div class="preview-time">发布时间：{{ previewData.createTime }}</div>
           </div>
         </div>
       </div>
@@ -289,48 +352,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getRedCultureList, type RedCultureItem, type RedCulturePageParams } from '@/api/redCulture'
 
 interface CultureItem {
-  id: string
+  id: number
   title: string
-  location?: string
-  type?: string
-  address?: string
-  description: string
-  cover?: string
-  status: 'active' | 'inactive'
-  publishTime: string
-  sort: number
+  address: string
+  tags: string[]
+  lng: number
+  lat: number
+  contentType: string
+  content: string
+  coverUrl: string
+  pinTop: number
+  showFront: number
+  createTime: string
 }
 
 // 数据列表
-const items = ref<CultureItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    location: '福州市',
-    type: '博物馆',
-    address: '福州市鼓楼区某某路123号',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    cover: '/images/home/video-1.jpg',
-    status: 'active',
-    publishTime: '2024-11-20',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    location: '福州市',
-    type: '纪念馆',
-    address: '福州市台江区某某路456号',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    cover: '/images/home/video-2.jpg',
-    status: 'active',
-    publishTime: '2024-11-18',
-    sort: 2
-  }
-])
+const items = ref<CultureItem[]>([])
+
+// 分页状态
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalCount = ref(0)
+const totalPages = ref(0)
+
+// 加载状态
+const loading = ref(false)
 
 // 搜索和筛选
 const searchKeyword = ref('')
@@ -361,28 +411,86 @@ const previewData = ref<CultureItem | null>(null)
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
 
-// 计算属性
-const totalCount = computed(() => items.value.length)
-
+// 计算属性 - 根据状态筛选显示的项
 const filteredItems = computed(() => {
   return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
+    if (statusFilter.value === 'active') return item.showFront === 1
+    if (statusFilter.value === 'inactive') return item.showFront === 0
+    return true
+  })
 })
 
-// 搜索处理
+/**
+ * 加载数据列表
+ */
+const loadData = async () => {
+  try {
+    loading.value = true
+    
+    const params: RedCulturePageParams = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value
+    }
+    
+    // 添加搜索关键词（如果有）
+    if (searchKeyword.value.trim()) {
+      params.keyword = searchKeyword.value.trim()
+    }
+    
+    console.log('请求参数:', params)
+    
+    const response = await getRedCultureList(params)
+    
+    console.log('API响应:', response)
+    
+    items.value = response.records || []
+    totalCount.value = response.total || 0
+    totalPages.value = response.pages || 0
+    currentPage.value = response.current || 1
+    
+    console.log('数据加载成功，共', totalCount.value, '条')
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    alert('加载数据失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 搜索处理 - 防抖
+let searchTimer: number | null = null
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+  searchTimer = window.setTimeout(() => {
+    currentPage.value = 1 // 重置到第一页
+    loadData()
+  }, 500)
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  // 筛选逻辑通过 computed 实现，不需要重新加载数据
 }
+
+// 页码变化
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  loadData()
+}
+
+// 页面大小变化
+const handlePageSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1
+  loadData()
+}
+
+// 组件挂载时加载数据
+onMounted(() => {
+  loadData()
+})
 
 // 拖拽开始
 const handleDragStart = (index: number, event: DragEvent) => {
@@ -436,17 +544,52 @@ const removeCover = () => {
 // 编辑项目
 const editItem = (item: CultureItem) => {
   formData.value = {
-    id: item.id,
+    id: String(item.id),
     title: item.title,
-    cover: item.cover || '',
-    location: item.location || '',
-    type: item.type || '',
+    cover: item.coverUrl || '',
+    location: '',
+    type: '',
     address: item.address || '',
-    description: item.description,
-    displayOrder: item.sort,
-    showOnFrontend: item.status === 'active'
+    description: item.content || '',
+    displayOrder: 1,
+    showOnFrontend: item.showFront === 1
   }
   showEditDialog.value = true
+}
+
+// 获取分页按钮数字
+const getPageNumbers = () => {
+  const pages: (number | string)[] = []
+  const showPages = 5 // 显示的页码数量
+  
+  if (totalPages.value <= showPages + 2) {
+    // 总页数较少，全部显示
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    // 总页数较多，显示部分
+    pages.push(1)
+    
+    if (currentPage.value > 3) {
+      pages.push('...')
+    }
+    
+    const start = Math.max(2, currentPage.value - 1)
+    const end = Math.min(totalPages.value - 1, currentPage.value + 1)
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+    
+    if (currentPage.value < totalPages.value - 2) {
+      pages.push('...')
+    }
+    
+    pages.push(totalPages.value)
+  }
+  
+  return pages
 }
 
 // 预览项目
@@ -456,15 +599,18 @@ const previewItem = (item: CultureItem) => {
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
+const deleteItem = async (id: number) => {
   if (confirm('确定要删除这个资源吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
+    try {
+      // TODO: 调用删除API
+      // await deleteRedCulture(id)
+      alert('删除成功')
+      
+      // 重新加载数据
+      loadData()
+    } catch (error) {
+      console.error('删除失败:', error)
+      alert('删除失败，请稍后重试')
     }
   }
 }
@@ -493,40 +639,38 @@ const saveItem = () => {
     return
   }
 
-  if (showEditDialog.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        cover: formData.value.cover,
-        location: formData.value.location,
-        type: formData.value.type,
-        address: formData.value.address,
-        description: formData.value.description,
-        status: formData.value.showOnFrontend ? 'active' : 'inactive',
-        sort: formData.value.displayOrder
-      }
+  try {
+    if (showEditDialog.value) {
+      // 编辑
+      // TODO: 调用更新API
+      // await updateRedCulture(Number(formData.value.id), {
+      //   title: formData.value.title,
+      //   coverUrl: formData.value.cover,
+      //   address: formData.value.address,
+      //   content: formData.value.description,
+      //   showFront: formData.value.showOnFrontend ? 1 : 0
+      // })
+      alert('编辑成功')
+    } else {
+      // 新增
+      // TODO: 调用新增API
+      // await createRedCulture({
+      //   title: formData.value.title,
+      //   coverUrl: formData.value.cover,
+      //   address: formData.value.address,
+      //   content: formData.value.description,
+      //   showFront: formData.value.showOnFrontend ? 1 : 0
+      // })
+      alert('新增成功')
     }
-  } else {
-    // 新增
-    const newItem: CultureItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      cover: formData.value.cover,
-      location: formData.value.location,
-      type: formData.value.type,
-      address: formData.value.address,
-      description: formData.value.description,
-      status: formData.value.showOnFrontend ? 'active' : 'inactive',
-      publishTime: new Date().toISOString().split('T')[0],
-      sort: formData.value.displayOrder || items.value.length + 1
-    }
-    items.value.push(newItem)
-  }
 
-  closeDialog()
+    closeDialog()
+    // 重新加载数据
+    loadData()
+  } catch (error) {
+    console.error('保存失败:', error)
+    alert('保存失败，请稍后重试')
+  }
 }
 
 // 关闭对话框
@@ -1084,6 +1228,166 @@ const closeDialog = () => {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 标签样式 */
+.item-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 2px 8px;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.status-info {
+  padding: 2px 8px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.preview-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.preview-tag {
+  padding: 4px 12px;
+  background: #e6f7ff;
+  color: #1890ff;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.preview-coordinates {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #e31e24;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+/* 分页器 */
+.pagination {
+  margin-top: 24px;
+  padding: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-btn {
+  padding: 6px 16px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.page-number {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.page-number:hover:not(:disabled):not(.active) {
+  border-color: #e31e24;
+  color: #e31e24;
+}
+
+.page-number.active {
+  background: #e31e24;
+  border-color: #e31e24;
+  color: white;
+}
+
+.page-number:disabled {
+  border: none;
+  cursor: default;
+}
+
+.page-size-select {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
 }
 </style>
 

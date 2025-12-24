@@ -71,17 +71,27 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
-    console.log('响应:', response.config.url, response.status)
+    console.log('========== API 响应 ==========')
+    console.log('URL:', response.config.url)
+    console.log('HTTP Status:', response.status)
+    console.log('响应数据完整结构:', response.data)
+    console.log('=============================')
     
     // 处理响应数据
     const { code, data, msg } = response.data as any
     
+    console.log('解析后 - code:', code, 'msg:', msg)
+    
     if (code === 200 || code === 0) {
-      console.log('API响应成功:', msg || '操作成功')
+      console.log('✅ API响应成功:', msg || '操作成功')
       return data
+    } else if (code === undefined) {
+      // 如果 code 不存在，可能整个 response.data 就是数据本身
+      console.warn('⚠️ 响应数据中没有 code 字段，直接返回整个 response.data')
+      return response.data
     } else {
       // 业务错误
-      console.error('API业务错误:', msg || '操作失败', 'code:', code)
+      console.error('❌ API业务错误:', msg || '操作失败', 'code:', code)
       return Promise.reject(new Error(msg || '操作失败'))
     }
   },

@@ -9,4 +9,5 @@ export * from './exam'
 export * from './analysis'
 export * from './ai'
 export * from './college'
+export * from './redCulture'
 

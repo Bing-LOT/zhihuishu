@@ -35,7 +35,7 @@
         </select>
       </div>
 
-      <button class="btn-add" @click="showAddDialog = true">
+      <button class="btn-add" @click="openAddDialog">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M7 2.33333V11.6667M2.33333 7H11.6667" stroke="white" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -210,8 +210,8 @@
                 style="display: none"
                 @change="handleCoverChange"
               />
-              <div v-if="formData.cover" class="image-preview-box">
-                <img :src="formData.cover" alt="预览" />
+              <div v-if="formData.coverUrl" class="image-preview-box">
+                <img :src="formData.coverUrl" alt="预览" />
                 <button class="btn-remove-image" @click="removeCover">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
@@ -231,31 +231,7 @@
           </div>
 
           <div class="form-group">
-            <label>地点名称 <span class="required">*</span></label>
-            <input
-              v-model="formData.location"
-              type="text"
-              placeholder="请输入地点名称"
-              class="form-input"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>资源类型 <span class="required">*</span></label>
-            <select v-model="formData.type" class="form-input">
-              <option value="">请选择资源类型</option>
-              <option value="博物馆">博物馆</option>
-              <option value="纪念馆">纪念馆</option>
-              <option value="烈士陵园">烈士陵园</option>
-              <option value="革命遗址">革命遗址</option>
-              <option value="党校">党校</option>
-              <option value="党群中心">党群中心</option>
-              <option value="人物故居">人物故居</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>详细地址</label>
+            <label>详细地址 <span class="required">*</span></label>
             <input
               v-model="formData.address"
               type="text"
@@ -265,29 +241,107 @@
           </div>
 
           <div class="form-group">
-            <label>资源简介 <span class="required">*</span></label>
-            <textarea
-              v-model="formData.description"
-              rows="8"
-              placeholder="请输入资源简介"
-              class="form-textarea"
-            ></textarea>
+            <label>标签（建设课程类型） <span class="required">*</span></label>
+            <div class="tags-container">
+              <div class="selected-tags">
+                <span v-for="(tag, index) in formData.tags" :key="index" class="selected-tag">
+                  {{ tag }}
+                  <button type="button" @click="removeTag(index)" class="remove-tag-btn">×</button>
+                </span>
+              </div>
+              <div class="tag-input-row">
+                <input
+                  v-model="tagInput"
+                  type="text"
+                  placeholder="输入标签后按回车添加"
+                  class="form-input"
+                  @keypress.enter.prevent="addTag"
+                />
+                <button type="button" class="btn-add-tag" @click="addTag">添加</button>
+              </div>
+              <!-- <div class="available-tags">
+                <span>常用标签：</span>
+                <button
+                  v-for="tag in availableTags"
+                  :key="tag"
+                  type="button"
+                  class="available-tag"
+                  :class="{ selected: formData.tags.includes(tag) }"
+                  @click="toggleTag(tag)"
+                >
+                  {{ tag }}
+                </button>
+              </div> -->
+            </div>
+          </div>
+
+          <!-- <div class="form-group">
+            <label>地图坐标</label>
+            <div class="coordinate-row">
+              <input
+                v-model.number="formData.lng"
+                type="number"
+                step="0.000001"
+                placeholder="经度"
+                class="form-input"
+              />
+              <input
+                v-model.number="formData.lat"
+                type="number"
+                step="0.000001"
+                placeholder="纬度"
+                class="form-input"
+              />
+            </div>
+          </div> -->
+
+          <div class="form-group">
+            <label>内容类型 <span class="required">*</span></label>
+            <select v-model.number="formData.contentType" class="form-input">
+              <option :value="0">富文本</option>
+              <option :value="1">URL地址</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label>显示顺序</label>
+            <label>
+              {{ formData.contentType === 0 ? '资源详情（富文本）' : 'URL地址' }}
+              <span class="required">*</span>
+            </label>
+            <div v-if="formData.contentType === 0" class="editor-container">
+              <Toolbar
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                mode="default"
+                class="editor-toolbar"
+              />
+              <Editor
+                v-model="formData.content"
+                :defaultConfig="editorConfig"
+                mode="default"
+                class="editor-content"
+                @onCreated="handleCreated"
+              />
+            </div>
             <input
-              v-model.number="formData.displayOrder"
-              type="number"
-              min="1"
+              v-else
+              v-model="formData.content"
+              type="url"
+              placeholder="请输入URL地址"
               class="form-input"
-              placeholder="1"
             />
           </div>
 
           <div class="form-group">
             <label class="checkbox-label">
-              <input v-model="formData.showOnFrontend" type="checkbox" />
+              <input v-model="formData.pinTop" type="checkbox" :true-value="1" :false-value="0" />
+              <span>置顶显示</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input v-model="formData.showFront" type="checkbox" :true-value="1" :false-value="0" />
               <span>前台显示</span>
             </label>
           </div>
@@ -352,8 +406,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { getRedCultureList, type RedCultureItem, type RedCulturePageParams } from '@/api/redCulture'
+import { ref, computed, onMounted, shallowRef, onBeforeUnmount, watch } from 'vue'
+import { 
+  getRedCultureList, 
+  createRedCulture,
+  type RedCultureItem, 
+  type RedCulturePageParams,
+  type CreateRedCultureParams 
+} from '@/api/redCulture'
+import { uploadFile } from '@/api/banner'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import '@wangeditor/editor/dist/css/style.css'
 
 interface CultureItem {
   id: number
@@ -392,18 +456,116 @@ const showEditDialog = ref(false)
 const showPreviewDialog = ref(false)
 const coverInput = ref<HTMLInputElement | null>(null)
 
+// 富文本编辑器
+const editorRef = shallowRef<IDomEditor>()
+
+// 标记是否允许监听类型切换（避免在编辑模式加载数据时误触发）
+const allowTypeSwitch = ref(false)
+
+// 编辑器工具栏配置
+const toolbarConfig: Partial<IToolbarConfig> = {
+  toolbarKeys: [
+    'headerSelect',
+    'bold',
+    'italic',
+    'underline',
+    'through',
+    '|',
+    'color',
+    'bgColor',
+    '|',
+    'fontSize',
+    'fontFamily',
+    'lineHeight',
+    '|',
+    'bulletedList',
+    'numberedList',
+    'todo',
+    '|',
+    'justifyLeft',
+    'justifyCenter',
+    'justifyRight',
+    'justifyJustify',
+    '|',
+    'emotion',
+    'insertLink',
+    'insertImage',
+    'insertTable',
+    'codeBlock',
+    'divider',
+    '|',
+    'undo',
+    'redo',
+    '|',
+    'fullScreen'
+  ]
+}
+
+// 编辑器内容配置
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '请输入资源详细内容...',
+  MENU_CONF: {
+    // 配置上传图片
+    uploadImage: {
+      // 单个文件的最大体积限制，默认为 2M
+      maxFileSize: 5 * 1024 * 1024, // 5M
+      // 最多可上传几个文件，默认为 100
+      maxNumberOfFiles: 10,
+      // 选择文件时的类型限制，默认为 ['image/*']
+      allowedFileTypes: ['image/*'],
+      // 自定义上传
+      async customUpload(file: File, insertFn: any) {
+        try {
+          console.log('富文本编辑器上传图片:', file.name)
+          const result = await uploadFile(file)
+          console.log('图片上传成功:', result.url)
+          // 插入图片到编辑器
+          insertFn(result.url, '', result.url)
+        } catch (error) {
+          console.error('图片上传失败:', error)
+          alert('图片上传失败，请重试')
+        }
+      }
+    }
+  }
+}
+
+// 编辑器创建完成
+const handleCreated = (editor: IDomEditor) => {
+  editorRef.value = editor
+}
+
 // 表单数据
 const formData = ref({
   id: '',
   title: '',
-  cover: '',
-  location: '',
-  type: '',
+  coverUrl: '',
   address: '',
-  description: '',
-  displayOrder: 1,
-  showOnFrontend: true
+  tags: [] as string[],
+  contentType: 0,
+  content: '',
+  lng: 0,
+  lat: 0,
+  pinTop: 0,
+  showFront: 1
 })
+
+// 标签输入
+const tagInput = ref('')
+
+// 可用标签选项
+const availableTags = [
+  '博物馆',
+  '纪念馆',
+  '烈士陵园',
+  '革命遗址',
+  '党校',
+  '党群中心',
+  '人物故居',
+  '红色教育基地',
+  '党史馆',
+  '展览馆'
+]
 
 // 预览数据
 const previewData = ref<CultureItem | null>(null)
@@ -487,9 +649,31 @@ const handlePageSizeChange = (size: number) => {
   loadData()
 }
 
+// 监听内容类型切换
+watch(() => formData.value.contentType, (newType, oldType) => {
+  // 只有在允许切换时才处理（避免在加载编辑数据时误触发）
+  if (allowTypeSwitch.value && newType !== oldType) {
+    // 当从富文本切换到 URL 模式，或从 URL 切换到富文本时，清空内容
+    formData.value.content = ''
+    
+    // 如果切换到富文本模式，清空编辑器
+    if (newType === 0 && editorRef.value) {
+      editorRef.value.clear()
+    }
+  }
+})
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadData()
+})
+
+// 组件销毁前
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor) {
+    editor.destroy()
+  }
 })
 
 // 拖拽开始
@@ -520,25 +704,63 @@ const triggerCoverUpload = () => {
   coverInput.value?.click()
 }
 
-// 处理封面选择
-const handleCoverChange = (event: Event) => {
+// 处理封面选择并上传
+const handleCoverChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      formData.value.cover = e.target?.result as string
+    try {
+      console.log('开始上传图片...')
+      const result = await uploadFile(file)
+      formData.value.coverUrl = result.url
+      console.log('图片上传成功:', result.url)
+      alert('图片上传成功')
+    } catch (error) {
+      console.error('图片上传失败:', error)
+      alert('图片上传失败，请重试')
     }
-    reader.readAsDataURL(file)
   }
 }
 
 // 移除封面
 const removeCover = () => {
-  formData.value.cover = ''
+  formData.value.coverUrl = ''
   if (coverInput.value) {
     coverInput.value.value = ''
   }
+}
+
+// 添加标签
+const addTag = () => {
+  const tag = tagInput.value.trim()
+  if (tag && !formData.value.tags.includes(tag)) {
+    formData.value.tags.push(tag)
+    tagInput.value = ''
+  }
+}
+
+// 移除标签
+const removeTag = (index: number) => {
+  formData.value.tags.splice(index, 1)
+}
+
+// 切换标签
+const toggleTag = (tag: string) => {
+  const index = formData.value.tags.indexOf(tag)
+  if (index > -1) {
+    formData.value.tags.splice(index, 1)
+  } else {
+    formData.value.tags.push(tag)
+  }
+}
+
+// 打开新增对话框
+const openAddDialog = () => {
+  showAddDialog.value = true
+  // 延迟启用类型切换监听，避免初始化时触发
+  setTimeout(() => {
+    allowTypeSwitch.value = true
+  }, 100)
 }
 
 // 编辑项目
@@ -546,15 +768,21 @@ const editItem = (item: CultureItem) => {
   formData.value = {
     id: String(item.id),
     title: item.title,
-    cover: item.coverUrl || '',
-    location: '',
-    type: '',
+    coverUrl: item.coverUrl || '',
     address: item.address || '',
-    description: item.content || '',
-    displayOrder: 1,
-    showOnFrontend: item.showFront === 1
+    tags: [...(item.tags || [])],
+    contentType: parseInt(item.contentType) || 0,
+    content: item.content || '',
+    lng: item.lng || 0,
+    lat: item.lat || 0,
+    pinTop: item.pinTop || 0,
+    showFront: item.showFront
   }
   showEditDialog.value = true
+  // 延迟启用类型切换监听，避免数据加载时触发
+  setTimeout(() => {
+    allowTypeSwitch.value = true
+  }, 100)
 }
 
 // 获取分页按钮数字
@@ -616,77 +844,105 @@ const deleteItem = async (id: number) => {
 }
 
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
   // 验证必填项
-  if (!formData.value.title) {
+  if (!formData.value.title.trim()) {
     alert('请输入标题')
     return
   }
-  if (!formData.value.cover) {
+  if (!formData.value.coverUrl) {
     alert('请上传封面图片')
     return
   }
-  if (!formData.value.location) {
-    alert('请输入地点名称')
+  if (!formData.value.address.trim()) {
+    alert('请输入详细地址')
     return
   }
-  if (!formData.value.type) {
-    alert('请选择资源类型')
+  if (formData.value.tags.length === 0) {
+    alert('请至少选择一个标签')
     return
   }
-  if (!formData.value.description) {
-    alert('请输入资源简介')
+  if (!formData.value.content.trim()) {
+    alert('请输入资源详情内容')
     return
   }
 
   try {
     if (showEditDialog.value) {
       // 编辑
-      // TODO: 调用更新API
+      // TODO: 调用更新API（待后端提供）
       // await updateRedCulture(Number(formData.value.id), {
       //   title: formData.value.title,
-      //   coverUrl: formData.value.cover,
+      //   coverUrl: formData.value.coverUrl,
       //   address: formData.value.address,
-      //   content: formData.value.description,
-      //   showFront: formData.value.showOnFrontend ? 1 : 0
+      //   tags: formData.value.tags,
+      //   contentType: formData.value.contentType,
+      //   content: formData.value.content,
+      //   lng: formData.value.lng,
+      //   lat: formData.value.lat,
+      //   pinTop: formData.value.pinTop,
+      //   showFront: formData.value.showFront
       // })
       alert('编辑成功')
     } else {
       // 新增
-      // TODO: 调用新增API
-      // await createRedCulture({
-      //   title: formData.value.title,
-      //   coverUrl: formData.value.cover,
-      //   address: formData.value.address,
-      //   content: formData.value.description,
-      //   showFront: formData.value.showOnFrontend ? 1 : 0
-      // })
+      const params: CreateRedCultureParams = {
+        title: formData.value.title.trim(),
+        coverUrl: formData.value.coverUrl,
+        address: formData.value.address.trim(),
+        tags: formData.value.tags,
+        contentType: formData.value.contentType,
+        content: formData.value.content.trim(),
+        pinTop: formData.value.pinTop,
+        showFront: formData.value.showFront
+      }
+      
+      // 如果填写了坐标，添加到参数中
+      if (formData.value.lng && formData.value.lat) {
+        params.lng = formData.value.lng
+        params.lat = formData.value.lat
+      }
+      
+      console.log('新增参数:', params)
+      
+      await createRedCulture(params)
       alert('新增成功')
     }
 
     closeDialog()
     // 重新加载数据
-    loadData()
+    await loadData()
   } catch (error) {
     console.error('保存失败:', error)
-    alert('保存失败，请稍后重试')
+    alert('保存失败：' + (error as Error).message)
   }
 }
 
 // 关闭对话框
 const closeDialog = () => {
+  // 禁用类型切换监听
+  allowTypeSwitch.value = false
+  
   showAddDialog.value = false
   showEditDialog.value = false
   formData.value = {
     id: '',
     title: '',
-    cover: '',
-    location: '',
-    type: '',
+    coverUrl: '',
     address: '',
-    description: '',
-    displayOrder: 1,
-    showOnFrontend: true
+    tags: [],
+    contentType: 0,
+    content: '',
+    lng: 0,
+    lat: 0,
+    pinTop: 0,
+    showFront: 1
+  }
+  tagInput.value = ''
+  
+  // 清空富文本编辑器内容
+  if (editorRef.value) {
+    editorRef.value.clear()
   }
 }
 </script>
@@ -1388,6 +1644,152 @@ const closeDialog = () => {
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
+}
+
+/* 标签容器 */
+.tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 32px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.selected-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #1890ff;
+  color: white;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.remove-tag-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-tag-btn:hover {
+  opacity: 0.8;
+}
+
+.tag-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-input-row .form-input {
+  flex: 1;
+}
+
+.btn-add-tag {
+  padding: 8px 16px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-add-tag:hover {
+  background: #096dd9;
+}
+
+.available-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: #666;
+}
+
+.available-tag {
+  padding: 4px 12px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.available-tag:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.available-tag.selected {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* 坐标输入行 */
+.coordinate-row {
+  display: flex;
+  gap: 12px;
+}
+
+.coordinate-row .form-input {
+  flex: 1;
+}
+
+/* 富文本编辑器样式 */
+.editor-container {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.editor-container:focus-within {
+  border-color: #e31e24;
+}
+
+.editor-toolbar {
+  border-bottom: 1px solid #d9d9d9;
+  background-color: #fafafa;
+}
+
+.editor-content {
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* 编辑器内容区域样式 */
+.editor-content :deep(.w-e-text-container) {
+  background-color: white;
+}
+
+.editor-content :deep(.w-e-text-placeholder) {
+  color: #999;
+  font-style: normal;
 }
 </style>
 

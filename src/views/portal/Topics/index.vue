@@ -16,11 +16,12 @@
         <div class="hero-content-box">
           <div class="hero-header">
             <div class="hero-title-wrapper">
-              <div class="hero-title-en">the Great China</div>
+              <img src="/images/chengguo.svg" alt="" />
+              <!-- <div class="hero-title-en">the Great China</div>
               <div class="hero-title-cn">融入成果</div>
               <div class="hero-title-icon">
                 <img src="/images/xiaohui2.png" alt="" />
-              </div>
+              </div> -->
             </div>
           </div>
           
@@ -270,7 +271,7 @@ const list3 = ref(generateList(8, 's3'))
 
 .hero-header {
   position: absolute;
-  top: -60px; /* 突出顶部 */
+  top: -90px; /* 突出顶部 */
   left: 50%;
   transform: translateX(-50%);
   display: flex;

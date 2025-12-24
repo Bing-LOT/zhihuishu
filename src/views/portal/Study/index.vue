@@ -65,7 +65,7 @@
         <div class="courses-carousel">
           <button class="carousel-btn carousel-btn--prev" @click="prevSlide" :disabled="loading">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path d="M20 24L12 16L20 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 24L20 16L12 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
 
@@ -513,16 +513,16 @@ const fetchNiceCourses = async () => {
     console.error('获取优秀思政课堂数据失败:', error)
     // 如果接口失败，使用默认数据
     excellentCourses.value = [
-      {
-        id: '1',
-        title: '教学督导表扬的优秀本科课堂第二十四期',
-        cover: '/images/home/video-1.jpg',
-        courseName: '马克思主义基本原理',
-        teacher: '董海峰-副教授',
-        semester: '2025年春季学期',
-        supervisor: '戴力芬',
-        publishTime: '2025-12-11',
-        views: 3456,
+  {
+    id: '1',
+    title: '教学督导表扬的优秀本科课堂第二十四期',
+    cover: '/images/home/video-1.jpg',
+    courseName: '马克思主义基本原理',
+    teacher: '董海峰-副教授',
+    semester: '2025年春季学期',
+    supervisor: '戴力芬',
+    publishTime: '2025-12-11',
+    views: 3456,
         description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。'
       }
     ]

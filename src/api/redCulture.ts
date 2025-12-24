@@ -141,3 +141,22 @@ export function deleteRedCulture(id: number): Promise<any> {
   })
 }
 
+/**
+ * 习思想标题数据结构
+ */
+export interface XiThoughtTitle {
+  code: string  // 内容代码
+  title: string // 标题
+}
+
+/**
+ * 获取习思想标题列表
+ * @returns 标题列表
+ */
+export function getXiThoughtTitles(): Promise<XiThoughtTitle[]> {
+  return request({
+    url: '/api/xiThought/titles/get',
+    method: 'get'
+  })
+}
+

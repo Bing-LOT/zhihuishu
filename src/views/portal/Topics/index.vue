@@ -59,7 +59,7 @@
                 <path d="M35.4805 13.8691H26.4805V13.4262C26.4805 10.9125 28.4995 8.86914 30.9797 8.86914C33.4599 8.86914 35.4789 10.9141 35.4789 13.4262V13.8691H35.4805ZM27.3806 12.9849H34.5803C34.3648 11.1679 32.8327 9.75501 30.9813 9.75501C29.1299 9.75501 27.5977 11.1679 27.3806 12.9849Z" fill="#EFE0D3"/>
               </svg>
             </div>
-            <h2 class="section-title">习思想优秀视频展播</h2>
+            <h2 class="section-title">{{ titles[0]?.title || '习思想优秀视频展播' }}</h2>
             <div class="section-title-decoration right">
               <svg xmlns="http://www.w3.org/2000/svg" width="122" height="37" viewBox="0 0 122 37" fill="none">
                 <path d="M65.7837 25.1402C62.7203 25.1402 60.4746 22.6335 60.4746 19.5701C60.4746 16.5068 62.7182 14 65.7837 14" stroke="#EFE0D3" stroke-linejoin="round"/>
@@ -97,7 +97,7 @@
       <section class="topics-section">
         <div class="section-header">
           <div class="section-title-wrapper">
-            <h2 class="section-title">习思想融入学科教学实践示范案例展播</h2>
+            <h2 class="section-title">{{ titles[1]?.title || '习思想融入学科教学实践示范案例展播' }}</h2>
             <div class="section-title-icon">
               <img src="/images/xiaohui2.png" alt="" />
             </div>
@@ -119,7 +119,7 @@
       </section>
 
       <!-- 列表区域 3 -->
-      <section class="topics-section">
+      <!-- <section class="topics-section">
         <div class="section-header">
           <div class="section-title-wrapper">
             <h2 class="section-title">习思想融入学科教学实践示范案例展播</h2>
@@ -141,7 +141,7 @@
             :course="course"
           />
         </div>
-      </section>
+      </section> -->
 
       <!-- 总书记的福建足迹 -->
       <section class="footprint-section">
@@ -161,7 +161,7 @@
               </svg>
             </div>
             <div class="footprint-title-content">
-              <h2 class="footprint-main-title">总书记的福建足迹</h2>
+              <h2 class="footprint-main-title">{{ titles[2]?.title || '总书记的福建足迹' }}</h2>
               <div class="footprint-title-icon">
                 <img src="/images/xiaohui2.png" alt="" />
               </div>
@@ -221,12 +221,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import CourseCard from '@/components/common/CourseCard/index.vue'
+import { getXiThoughtTitles } from '@/api/redCulture'
+import type { XiThoughtTitle } from '@/api/redCulture'
 
 /**
  * 习思想的伟大实践页面
  */
+
+// 标题数据
+const titles = ref<XiThoughtTitle[]>([])
+
+// 获取标题
+const fetchTitles = async () => {
+  try {
+    const response = await getXiThoughtTitles()
+    titles.value = response || []
+  } catch (error) {
+    console.error('获取标题失败：', error)
+  }
+}
 
 const scrollToContent = () => {
   const section1 = document.getElementById('section-1')
@@ -262,6 +277,11 @@ const footprintList = ref([
   { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
   { title: '论坛论道丨肖钢：大力发展数字经济', date: '2025-09-03' },
 ])
+
+// 组件挂载时获取标题
+onMounted(() => {
+  fetchTitles()
+})
 
 </script>
 

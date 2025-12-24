@@ -352,14 +352,28 @@
 
           <div class="form-group">
             <label>内容配置 <span class="required">*</span></label>
-            <textarea
+            <!-- 富文本编辑器 -->
+            <div v-if="formData.contentType === 'richtext'" class="editor-wrapper">
+              <Toolbar
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                class="editor-toolbar"
+              />
+              <Editor
+                v-model="formData.content"
+                :defaultConfig="editorConfig"
+                class="editor-content"
+                @onCreated="handleCreated"
+              />
+            </div>
+            <!-- URL输入框 -->
+            <input
+              v-else
               v-model="formData.content"
-              rows="8"
-              :placeholder="formData.contentType === 'richtext' 
-                ? '根据内容类型选择，配置富文本详情或URL跳转地址' 
-                : '请输入URL地址'"
-              class="form-textarea"
-            ></textarea>
+              type="text"
+              placeholder="请输入URL地址"
+              class="form-input"
+            />
             <small class="field-hint">
               提示：若选择富文本内容，此处输入详情；若选择URL地址，此处输入链接
             </small>
@@ -433,7 +447,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, shallowRef, onBeforeUnmount, watch } from 'vue'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import '@wangeditor/editor/dist/css/style.css'
 import { 
   getFootprintBannerList, 
   addFootprintBanner, 
@@ -499,6 +516,92 @@ const previewData = ref<ContentItem | null>(null)
 
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
+
+// 富文本编辑器
+const editorRef = shallowRef<IDomEditor>()
+
+// 编辑器配置
+const toolbarConfig: Partial<IToolbarConfig> = {
+  toolbarKeys: [
+    'headerSelect',
+    'bold',
+    'italic',
+    'underline',
+    'through',
+    '|',
+    'color',
+    'bgColor',
+    '|',
+    'fontSize',
+    'fontFamily',
+    'lineHeight',
+    '|',
+    'bulletedList',
+    'numberedList',
+    'todo',
+    '|',
+    'justifyLeft',
+    'justifyCenter',
+    'justifyRight',
+    'justifyJustify',
+    '|',
+    'insertLink',
+    'insertImage',
+    'insertVideo',
+    'insertTable',
+    'codeBlock',
+    'divider',
+    '|',
+    'undo',
+    'redo',
+    '|',
+    'fullScreen'
+  ]
+}
+
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '请输入富文本内容...',
+  MENU_CONF: {
+    uploadImage: {
+      async customUpload(file: File, insertFn: any) {
+        try {
+          const result = await uploadFile(file)
+          insertFn(result.url, file.name, result.url)
+        } catch (error) {
+          console.error('图片上传失败:', error)
+          alert('图片上传失败，请重试')
+        }
+      }
+    }
+  }
+}
+
+// 编辑器创建回调
+const handleCreated = (editor: IDomEditor) => {
+  editorRef.value = editor
+}
+
+// 组件卸载时销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor) {
+    editor.destroy()
+  }
+})
+
+// 监听内容类型切换，清空内容
+watch(() => formData.value.contentType, (newType, oldType) => {
+  if (oldType && newType !== oldType) {
+    // 切换类型时清空内容
+    formData.value.content = ''
+    
+    // 如果从富文本切换，销毁编辑器
+    if (oldType === 'richtext' && editorRef.value) {
+      editorRef.value.destroy()
+      editorRef.value = undefined
+    }
+  }
+})
 
 // 加载 Banner 列表
 const loadBannerList = async () => {
@@ -802,6 +905,12 @@ const saveItem = () => {
 }
 
 const closeDialog = () => {
+  // 销毁编辑器
+  if (editorRef.value) {
+    editorRef.value.destroy()
+    editorRef.value = undefined
+  }
+  
   showAddDialog.value = false
   showEditDialog.value = false
   formData.value = {
@@ -1673,6 +1782,38 @@ const closeDialog = () => {
   justify-content: center;
   padding: 40px 20px;
   color: #666;
+}
+
+/* 富文本编辑器 */
+.editor-wrapper {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.editor-wrapper:focus-within {
+  border-color: #e31e24;
+}
+
+.editor-toolbar {
+  border-bottom: 1px solid #d9d9d9;
+  background: #fafafa;
+}
+
+.editor-content {
+  height: 400px;
+  overflow-y: auto;
+  background: white;
+}
+
+.editor-content :deep(.w-e-text-container) {
+  background: white;
+}
+
+.editor-content :deep(.w-e-text-placeholder) {
+  color: #999;
+  font-style: normal;
 }
 </style>
 

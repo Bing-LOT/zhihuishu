@@ -962,10 +962,19 @@ const saveItem = async () => {
     return
   }
   
-  // 验证URL格式
+  // 验证并处理URL格式
   if (formData.value.contentType === 'url') {
+    let url = formData.value.content.trim()
+    
+    // 如果URL不包含协议，自动添加https://
+    if (url && !/^https?:\/\//i.test(url)) {
+      url = 'https://' + url
+      formData.value.content = url
+    }
+    
+    // 验证URL格式
     try {
-      new URL(formData.value.content)
+      new URL(url)
     } catch {
       alert('请输入有效的URL地址')
       return

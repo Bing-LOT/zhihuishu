@@ -368,3 +368,15 @@ export function getFootprintPageList(params: FootprintPageParams): Promise<Footp
   })
 }
 
+/**
+ * 获取足迹详情
+ * @param id 足迹ID
+ * @returns 足迹详情
+ */
+export function getFootprintDetail(id: string | number): Promise<FootprintItem> {
+  return request({
+    url: `/api/xiThought/footprint/get/${id}`,
+    method: 'get'
+  })
+}
+

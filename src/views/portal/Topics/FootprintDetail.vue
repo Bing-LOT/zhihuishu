@@ -8,14 +8,14 @@
     <div class="detail-container">
       <!-- 面包屑导航 -->
       <div class="breadcrumb">
-        <span class="breadcrumb-item">您的位置：</span>
+        <span class="breadcrumb-item">您的位置： </span>
         <span class="breadcrumb-item clickable" @click="$router.push('/topics')">习思想的伟大实践</span>
-        <span class="breadcrumb-item">&gt;&gt;</span>
+        <span class="breadcrumb-item"> >> </span>
         <span class="breadcrumb-item clickable" @click="$router.push('/topics')">总书记的福建脚步</span>
-        <span class="breadcrumb-item">&gt;&gt;</span>
+        <span class="breadcrumb-item"> >> </span>
         <span class="breadcrumb-item clickable" @click="$router.push('/topics/footprints')">更多内容</span>
-        <span class="breadcrumb-item">&gt;&gt;</span>
-        <span class="breadcrumb-item active">详情</span>
+        <span class="breadcrumb-item"> >> </span>
+        <span class="breadcrumb-item active">内容详情</span>
       </div>
 
       <!-- 加载状态 -->
@@ -25,17 +25,28 @@
 
       <!-- 主内容区 -->
       <div v-else-if="footprintDetail" class="main-content">
-        <!-- 标题 -->
+        <!-- 标题和元信息 -->
         <div class="content-header">
           <h1 class="content-title">{{ footprintDetail.title }}</h1>
           <div class="content-meta">
-            <span class="meta-item">
-              发布时间：{{ formatDate(footprintDetail.createTime) }}
-            </span>
-            <span class="meta-item">
-              浏览量：<span class="count-number">{{ formatViewCount(footprintDetail.statPv) }}</span>
-            </span>
+            <span class="meta-item">发布时间：{{ formatDate(footprintDetail.createTime) }}</span>
+            <div class="meta-divider"></div>
+            <span class="meta-item">浏览人数：{{ footprintDetail.statPv || 0 }}</span>
           </div>
+        </div>
+
+        <!-- 视频播放器（如果有视频内容） -->
+        <div v-if="hasVideo" class="video-container">
+          <video
+            ref="videoPlayer"
+            class="video-player"
+            :src="videoUrl"
+            controls
+            controlsList="nodownload"
+            @loadedmetadata="onVideoLoaded"
+          >
+            您的浏览器不支持视频播放。
+          </video>
         </div>
 
         <!-- 富文本内容 -->
@@ -54,12 +65,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { getFootprintPageList } from '@/api/redCulture'
+import { getFootprintDetail } from '@/api/redCulture'
 import type { FootprintItem } from '@/api/redCulture'
 
 const route = useRoute()
 const footprintDetail = ref<FootprintItem | null>(null)
 const loading = ref(false)
+const videoPlayer = ref<HTMLVideoElement | null>(null)
 
 // 格式化日期
 const formatDate = (dateStr: string) => {
@@ -71,13 +83,26 @@ const formatDate = (dateStr: string) => {
   return `${year}-${month}-${day}`
 }
 
-// 格式化浏览量
-const formatViewCount = (count: number) => {
-  if (!count) return '0'
-  if (count >= 10000) {
-    return `${(count / 10000).toFixed(1)}万`
-  }
-  return count.toString()
+// 检查是否有视频
+const hasVideo = computed(() => {
+  if (!footprintDetail.value?.content) return false
+  // 检查内容中是否包含视频标签或视频URL
+  const content = footprintDetail.value.content
+  return content.includes('<video') || content.includes('.mp4') || content.includes('.webm')
+})
+
+// 提取视频URL（如果需要的话）
+const videoUrl = computed(() => {
+  if (!footprintDetail.value?.content) return ''
+  const content = footprintDetail.value.content
+  // 尝试从内容中提取视频URL
+  const videoMatch = content.match(/src=["']([^"']*\.(mp4|webm|ogg))["']/i)
+  return videoMatch ? videoMatch[1] : ''
+})
+
+// 视频加载完成
+const onVideoLoaded = () => {
+  console.log('视频加载完成')
 }
 
 // 获取足迹详情
@@ -87,18 +112,9 @@ const fetchFootprintDetail = async () => {
 
   loading.value = true
   try {
-    // 由于没有单独的详情接口，我们通过列表接口获取所有数据，然后筛选
-    // 这里简化处理，实际应该有专门的详情接口
-    const response = await getFootprintPageList({
-      pageIndex: 1,
-      pageSize: 1000  // 获取足够多的数据
-    })
-    
-    if (response && response.records) {
-      const item = response.records.find(item => item.id === Number(id))
-      if (item) {
-        footprintDetail.value = item
-      }
+    const response = await getFootprintDetail(id)
+    if (response) {
+      footprintDetail.value = response
     }
   } catch (error) {
     console.error('获取足迹详情失败：', error)
@@ -141,9 +157,9 @@ onMounted(() => {
 
 .detail-container {
   position: relative;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 40px 80px;
+  padding: 64px 240px 80px;
   z-index: 1;
 }
 
@@ -151,11 +167,11 @@ onMounted(() => {
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0;
   font-size: 16px;
   color: #333;
   opacity: 0.5;
-  margin-bottom: 48px;
+  margin-bottom: 32px;
   line-height: 1.75;
   flex-wrap: wrap;
 }
@@ -170,7 +186,7 @@ onMounted(() => {
 }
 
 .breadcrumb-item.clickable:hover {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .breadcrumb-item.active {
@@ -213,55 +229,82 @@ onMounted(() => {
 
 /* 主内容区 */
 .main-content {
-  background: #fff;
-  border-radius: 8px;
-  padding: 48px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: 24px 24px 48px;
+  border-radius: 16px;
 }
 
 /* 内容头部 */
 .content-header {
-  margin-bottom: 48px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
 }
 
 .content-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 500;
   color: #333;
-  line-height: 1.5;
-  margin: 0 0 24px 0;
+  line-height: normal;
+  margin: 0;
 }
 
 .content-meta {
   display: flex;
   align-items: center;
-  gap: 32px;
+  justify-content: center;
+  gap: 24px;
   font-size: 16px;
-  color: #666;
+  color: #333;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  white-space: nowrap;
 }
 
-.count-number {
-  color: #bc2220;
-  font-weight: 500;
+.meta-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(51, 51, 51, 0.3);
+}
+
+/* 视频容器 */
+.video-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-player {
+  width: 100%;
+  height: auto;
+  min-height: 489px;
+  display: block;
 }
 
 /* 富文本内容 */
 .content-body {
-  font-size: 16px;
-  line-height: 1.8;
+  font-size: 18px;
+  line-height: 1.75;
   color: #333;
 }
 
 .content-body :deep(p) {
   margin: 0 0 16px 0;
+  text-indent: 36px;
+}
+
+.content-body :deep(p:first-of-type) {
+  text-indent: 36px;
 }
 
 .content-body :deep(h1),
@@ -270,9 +313,10 @@ onMounted(() => {
 .content-body :deep(h4),
 .content-body :deep(h5),
 .content-body :deep(h6) {
-  margin: 24px 0 16px 0;
+  margin: 32px 0 16px 0;
   font-weight: 600;
   line-height: 1.4;
+  text-indent: 0;
 }
 
 .content-body :deep(h1) {
@@ -295,13 +339,31 @@ onMounted(() => {
 
 .content-body :deep(li) {
   margin: 8px 0;
+  text-indent: 0;
 }
 
 .content-body :deep(img) {
   max-width: 100%;
   height: auto;
   margin: 24px 0;
-  border-radius: 4px;
+  border-radius: 8px;
+  display: block;
+}
+
+.content-body :deep(video) {
+  display: none;
+}
+
+/* 图片容器支持 */
+.content-body :deep(.image-row) {
+  display: flex;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.content-body :deep(.image-row img) {
+  flex: 1;
+  margin: 0;
 }
 
 .content-body :deep(blockquote) {
@@ -310,6 +372,7 @@ onMounted(() => {
   background: #f5f5f5;
   border-left: 4px solid #bc2220;
   color: #666;
+  text-indent: 0;
 }
 
 .content-body :deep(code) {
@@ -326,6 +389,7 @@ onMounted(() => {
   background: #f5f5f5;
   border-radius: 4px;
   overflow-x: auto;
+  text-indent: 0;
 }
 
 .content-body :deep(pre code) {
@@ -337,6 +401,7 @@ onMounted(() => {
   width: 100%;
   margin: 24px 0;
   border-collapse: collapse;
+  text-indent: 0;
 }
 
 .content-body :deep(table th),
@@ -360,6 +425,29 @@ onMounted(() => {
 .content-body :deep(a:hover) {
   opacity: 0.8;
   text-decoration: underline;
+}
+
+/* 响应式调整 */
+@media (max-width: 1680px) {
+  .detail-container {
+    padding: 64px 160px 80px;
+  }
+}
+
+@media (max-width: 1440px) {
+  .detail-container {
+    padding: 64px 120px 80px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .detail-container {
+    padding: 48px 60px 80px;
+  }
+  
+  .content-body {
+    font-size: 16px;
+  }
 }
 </style>
 

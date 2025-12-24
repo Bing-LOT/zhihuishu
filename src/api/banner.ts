@@ -593,3 +593,14 @@ export function editFootprint(data: FootprintEditItem): Promise<void> {
     data
   })
 }
+
+/**
+ * 删除总书记的福建足迹
+ * @param id 足迹ID
+ */
+export function removeFootprint(id: number): Promise<void> {
+  return request({
+    url: `/xiThought/footprint/remove/${id}`,
+    method: 'DELETE'
+  })
+}

@@ -470,6 +470,7 @@ import {
   getFootprintList,
   addFootprint,
   editFootprint,
+  removeFootprint,
   type FootprintBannerItem,
   type FootprintListParams,
   type FootprintListItem,
@@ -930,10 +931,24 @@ const toggleVisibility = async (item: FootprintListItem) => {
   }
 }
 
-const deleteItem = (id: number) => {
-  if (confirm('确定要删除这条内容吗？')) {
-    // TODO: 实现删除功能的后端API调用
-    alert('删除功能待实现后端API')
+const deleteItem = async (id: number) => {
+  if (!confirm('确定要删除这条内容吗？删除后将无法恢复！')) {
+    return
+  }
+
+  try {
+    console.log('🔄 开始删除足迹，ID:', id)
+    
+    await removeFootprint(id)
+    console.log('✅ 足迹删除成功')
+    
+    alert('删除成功！')
+    
+    // 重新加载列表
+    await loadFootprintList()
+  } catch (error: any) {
+    console.error('❌ 删除失败:', error)
+    alert(error.message || '删除失败，请稍后重试')
   }
 }
 

@@ -287,6 +287,7 @@ export interface XiThoughtExamplePageParams {
   property?: string    // 课程性质（可选）
   direction?: string   // 入选方向（可选）
   college?: string     // 所在学院（可选）
+  keyword?: string     // 搜索关键词（可选）
 }
 
 /**

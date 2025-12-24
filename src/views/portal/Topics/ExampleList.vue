@@ -258,6 +258,11 @@ const fetchExampleList = async () => {
       params.college = filters.value.college
     }
     
+    // 添加搜索关键词
+    if (searchKeyword.value && searchKeyword.value.trim() !== '') {
+      params.keyword = searchKeyword.value.trim()
+    }
+    
     // 调用API
     const response = await getXiThoughtExamplePageList(params)
     

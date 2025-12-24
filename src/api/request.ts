@@ -101,9 +101,25 @@ request.interceptors.response.use(
     
     if (error.response) {
       const status = error.response.status
-      const msg = error.response.data?.msg || error.message
+      const data = error.response.data
+      const msg = data?.msg || error.message
+      const code = data?.code
       
-      console.error(`HTTP ${status}:`, msg)
+      console.error(`HTTP ${status}:`, msg, 'code:', code)
+      
+      // 处理业务错误码 501 (Token过期)
+      if (code === 501) {
+        console.warn('⚠️ Token已过期 (code 501)')
+        // 清除过期的 token（但不清除固定的 authToken）
+        const userStore = useUserStore()
+        userStore.token = ''
+        userStore.refreshToken = ''
+        userStore.user = null
+        
+        // 如果有 SSO 登录地址，可以考虑重定向
+        // 但为了不影响不需要认证的页面，这里只打印警告
+        console.warn('如需重新登录，请访问:', data.ssoLoginUrl)
+      }
       
       switch (status) {
         case 401:

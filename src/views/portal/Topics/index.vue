@@ -657,6 +657,8 @@ onMounted(() => {
   font-size: 16px;
   color: #333;
   opacity: 0.7;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .course-grid {

@@ -165,8 +165,6 @@ onMounted(() => {
 
 /* 详情卡片 */
 .detail-card {
-  background: #fff;
-  border: 1px solid #fdd4a6; /* 黄色边框 */
   border-radius: 16px;
   padding: 48px;
   display: flex;
@@ -178,6 +176,9 @@ onMounted(() => {
 .detail-header {
   text-align: center;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .detail-title {
@@ -186,6 +187,7 @@ onMounted(() => {
   font-weight: 500;
   color: #333;
   margin: 0 0 16px;
+  text-align: center;
 }
 
 .detail-meta {

@@ -306,6 +306,7 @@ const handleResourceClick = (item: PoliticalResourceItem) => {
     // URL类型，直接在新窗口打开链接
     window.open(item.content, '_blank')
   } else {
+    console.log(item.id)
     // 富文本类型，跳转到详情页
     router.push(`/resources/detail/${item.id}`)
   }

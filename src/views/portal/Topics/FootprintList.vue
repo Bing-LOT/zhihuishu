@@ -2,21 +2,7 @@
   <div class="footprint-list-page">
     <!-- Hero 区域 -->
     <div class="hero-section">
-      <div class="hero-bg">
-        <img src="/images/Frame_1000015327.png" alt="" />
-      </div>
-      <div class="hero-content">
-        <h1 class="hero-title">他的足迹   紧密跟随</h1>
-        <div class="hero-decoration">
-          <svg width="386" height="29" viewBox="0 0 386 29" fill="none">
-            <circle cx="193" cy="14.5" r="6" fill="#BC2220" opacity="0.2"/>
-            <circle cx="168" cy="14.5" r="3" fill="#BC2220" opacity="0.4"/>
-            <circle cx="218" cy="14.5" r="3" fill="#BC2220" opacity="0.4"/>
-            <path d="M0 14.5H155" stroke="#BC2220" stroke-width="1" opacity="0.3"/>
-            <path d="M231 14.5H386" stroke="#BC2220" stroke-width="1" opacity="0.3"/>
-          </svg>
-        </div>
-      </div>
+      <img src="/images/7a10595e-8f27-4564-80bb-57018b664207.png" alt="他的足迹 紧密跟随" />
     </div>
 
     <!-- 背景图 -->
@@ -240,54 +226,14 @@ onMounted(() => {
 
 /* Hero 区域 */
 .hero-section {
-  position: relative;
   width: 100%;
-  height: 509px;
   overflow: hidden;
 }
 
-.hero-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
+.hero-section img {
   width: 100%;
-  height: 100%;
-  z-index: 0;
-}
-
-.hero-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 42px;
-  z-index: 1;
-}
-
-.hero-title {
-  font-family: 'STXingkai', 'KaiTi', serif;
-  font-size: 83.368px;
-  background: linear-gradient(180deg, #BC7120 17.925%, #BC2220 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0;
-  white-space: nowrap;
-  letter-spacing: 8px;
-}
-
-.hero-decoration {
-  width: 385px;
-  height: 28px;
+  height: auto;
+  display: block;
 }
 
 /* 背景图 */

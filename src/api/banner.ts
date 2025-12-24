@@ -458,3 +458,49 @@ export function deleteExampleExpo(id: number): Promise<void> {
     method: 'DELETE'
   })
 }
+
+/**
+ * 总书记的福建足迹 - Banner数据结构
+ */
+export interface FootprintBannerItem {
+  id: number
+  picUrl: string
+  sort: number
+}
+
+/**
+ * 获取总书记的福建足迹 Banner列表
+ */
+export function getFootprintBannerList(): Promise<FootprintBannerItem[]> {
+  return request({
+    url: '/xiThought/footprint/banner/list',
+    method: 'GET'
+  })
+}
+
+/**
+ * 新增总书记的福建足迹 Banner
+ * @param picUrl 图片地址
+ * @param sort 排序序号
+ */
+export function addFootprintBanner(picUrl: string, sort: number): Promise<{ id: number }> {
+  return request({
+    url: '/xiThought/footprint/banner/add',
+    method: 'POST',
+    data: {
+      picUrl,
+      sort
+    }
+  })
+}
+
+/**
+ * 删除总书记的福建足迹 Banner
+ * @param id Banner ID
+ */
+export function removeFootprintBanner(id: number): Promise<void> {
+  return request({
+    url: `/xiThought/footprint/banner/remove/${id}`,
+    method: 'DELETE'
+  })
+}

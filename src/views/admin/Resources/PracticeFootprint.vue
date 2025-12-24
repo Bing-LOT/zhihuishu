@@ -21,14 +21,22 @@
         添加Banner图
       </button>
 
-      <div class="banner-list">
+      <div v-if="isLoadingBanners" class="loading-state">
+        <p>加载中...</p>
+      </div>
+      
+      <div v-else-if="banners.length === 0" class="empty-state">
+        <p>暂无 Banner 图片</p>
+      </div>
+
+      <div v-else class="banner-list">
         <div
           v-for="banner in banners"
           :key="banner.id"
           class="banner-card"
         >
           <div class="banner-card__image">
-            <img :src="banner.image" :alt="banner.title" />
+            <img :src="banner.picUrl" alt="Banner图片" />
             <button class="banner-card__delete" @click="deleteBanner(banner.id)">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
@@ -352,12 +360,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getFootprintBannerList, addFootprintBanner, removeFootprintBanner, uploadFile, type FootprintBannerItem } from '@/api/banner'
 
 interface BannerItem {
-  id: string
-  title: string
-  image: string
+  id: number
+  picUrl: string
+  sort: number
 }
 
 interface ContentItem {
@@ -372,18 +381,8 @@ interface ContentItem {
 }
 
 // Banner列表
-const banners = ref<BannerItem[]>([
-  {
-    id: '1',
-    title: 'Banner 1',
-    image: '/images/home/video-1.jpg'
-  },
-  {
-    id: '2',
-    title: 'Banner 2',
-    image: '/images/home/video-2.jpg'
-  }
-])
+const banners = ref<BannerItem[]>([])
+const isLoadingBanners = ref(false)
 
 // 内容列表
 const items = ref<ContentItem[]>([
@@ -420,7 +419,8 @@ const bannerInput = ref<HTMLInputElement | null>(null)
 
 // Banner表单数据
 const bannerFormData = ref({
-  image: ''
+  image: '',
+  file: null as File | null
 })
 
 // 内容表单数据
@@ -438,6 +438,26 @@ const previewData = ref<ContentItem | null>(null)
 
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
+
+// 加载 Banner 列表
+const loadBannerList = async () => {
+  try {
+    isLoadingBanners.value = true
+    const data = await getFootprintBannerList()
+    banners.value = data.sort((a, b) => a.sort - b.sort)
+    console.log('✅ 获取总书记的福建足迹 Banner 列表成功:', data)
+  } catch (error) {
+    console.error('❌ 获取 Banner 列表失败:', error)
+    alert('获取 Banner 列表失败，请稍后重试')
+  } finally {
+    isLoadingBanners.value = false
+  }
+}
+
+// 组件挂载时加载数据
+onMounted(() => {
+  loadBannerList()
+})
 
 // 计算属性
 const totalCount = computed(() => items.value.length)
@@ -476,6 +496,10 @@ const handleBannerChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    // 保存文件对象，用于上传
+    bannerFormData.value.file = file
+    
+    // 读取预览图
     const reader = new FileReader()
     reader.onload = (e) => {
       bannerFormData.value.image = e.target?.result as string
@@ -486,38 +510,69 @@ const handleBannerChange = (event: Event) => {
 
 const removeBannerImage = () => {
   bannerFormData.value.image = ''
+  bannerFormData.value.file = null
   if (bannerInput.value) {
     bannerInput.value.value = ''
   }
 }
 
-const saveBanner = () => {
-  if (!bannerFormData.value.image) {
+const saveBanner = async () => {
+  if (!bannerFormData.value.image || !bannerFormData.value.file) {
     alert('请上传Banner图片')
     return
   }
 
-  const newBanner: BannerItem = {
-    id: Date.now().toString(),
-    title: `Banner ${banners.value.length + 1}`,
-    image: bannerFormData.value.image
+  try {
+    // 1. 上传图片文件，获取 picUrl
+    console.log('🔄 开始上传 Banner 图片...')
+    const uploadResult = await uploadFile(bannerFormData.value.file)
+    const picUrl = uploadResult.url
+    console.log('✅ 图片上传成功，URL:', picUrl)
+
+    // 2. 计算排序序号（最大值 + 1）
+    const maxSort = banners.value.length > 0 
+      ? Math.max(...banners.value.map(b => b.sort))
+      : 0
+    const sort = maxSort + 1
+
+    // 3. 调用添加 Banner API
+    console.log('🔄 调用添加 Banner API...', { picUrl, sort })
+    await addFootprintBanner(picUrl, sort)
+    console.log('✅ Banner 添加成功')
+
+    // 4. 重新加载列表
+    await loadBannerList()
+    
+    alert('添加成功！')
+    closeBannerDialog()
+  } catch (error: any) {
+    console.error('❌ 添加 Banner 失败:', error)
+    alert(error.message || '添加失败，请稍后重试')
   }
-  banners.value.push(newBanner)
-  closeBannerDialog()
 }
 
-const deleteBanner = (id: string) => {
-  if (confirm('确定要删除这个Banner吗？')) {
-    const index = banners.value.findIndex(b => b.id === id)
-    if (index > -1) {
-      banners.value.splice(index, 1)
-    }
+const deleteBanner = async (id: number) => {
+  if (!confirm('确定要删除这个 Banner 吗？')) {
+    return
+  }
+
+  try {
+    console.log('🔄 开始删除 Banner，ID:', id)
+    await removeFootprintBanner(id)
+    console.log('✅ Banner 删除成功')
+    
+    // 重新加载列表
+    await loadBannerList()
+    alert('删除成功！')
+  } catch (error: any) {
+    console.error('❌ 删除 Banner 失败:', error)
+    alert(error.message || '删除失败，请稍后重试')
   }
 }
 
 const closeBannerDialog = () => {
   showBannerDialog.value = false
-  bannerFormData.value = { image: '' }
+  bannerFormData.value = { image: '', file: null }
 }
 
 // === 内容管理 ===

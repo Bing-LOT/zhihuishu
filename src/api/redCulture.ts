@@ -199,3 +199,38 @@ export function getXiThoughtVideoDetail(id: string | number): Promise<XiThoughtV
   })
 }
 
+/**
+ * 习思想视频分页查询参数
+ */
+export interface XiThoughtVideoPageParams {
+  pageIndex: number    // 页码（必需）
+  pageSize: number     // 每页大小，默认10条（必需）
+  expoType?: string    // 展播类型（可选）
+  college?: string     // 所在学院（可选）
+  keyword?: string     // 搜索关键词（可选）
+}
+
+/**
+ * 习思想视频分页响应数据结构
+ */
+export interface XiThoughtVideoPageResponse {
+  records: XiThoughtVideo[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+
+/**
+ * 获取习思想视频展播分页列表
+ * @param params 分页查询参数
+ * @returns 分页数据
+ */
+export function getXiThoughtVideoPageList(params: XiThoughtVideoPageParams): Promise<XiThoughtVideoPageResponse> {
+  return request({
+    url: '/api/xiThought/videoExpo/page/list',
+    method: 'post',
+    data: params
+  })
+}
+

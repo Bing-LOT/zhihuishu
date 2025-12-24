@@ -178,7 +178,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getXiThoughtVideoTopList } from '@/api/redCulture'
+import { getXiThoughtVideoPageList } from '@/api/redCulture'
 import type { XiThoughtVideo } from '@/api/redCulture'
 
 const router = useRouter()
@@ -258,39 +258,32 @@ const displayPages = computed(() => {
 const fetchVideoList = async () => {
   loading.value = true
   try {
-    // 这里应该调用支持分页和筛选的API
-    // 目前使用 topList API 模拟
-    const response = await getXiThoughtVideoTopList()
+    const params: any = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value
+    }
     
-    if (response && Array.isArray(response)) {
-      let filteredList = response
-      
-      // 筛选展播类型
-      if (selectedExpoType.value) {
-        filteredList = filteredList.filter(v => v.expoType === selectedExpoType.value)
-      }
-      
-      // 筛选学院
-      if (selectedCollege.value && selectedCollege.value !== '全部') {
-        filteredList = filteredList.filter(v => v.college === selectedCollege.value)
-      }
-      
-      // 搜索关键词
-      if (searchKeyword.value) {
-        const keyword = searchKeyword.value.toLowerCase()
-        filteredList = filteredList.filter(v => 
-          v.title.toLowerCase().includes(keyword) ||
-          v.presenter.toLowerCase().includes(keyword)
-        )
-      }
-      
-      totalCount.value = filteredList.length
-      totalPages.value = Math.ceil(filteredList.length / pageSize.value)
-      
-      // 分页
-      const start = (currentPage.value - 1) * pageSize.value
-      const end = start + pageSize.value
-      videoList.value = filteredList.slice(start, end)
+    // 添加展播类型筛选
+    if (selectedExpoType.value) {
+      params.expoType = selectedExpoType.value
+    }
+    
+    // 添加学院筛选
+    if (selectedCollege.value && selectedCollege.value !== '全部') {
+      params.college = selectedCollege.value
+    }
+    
+    // 添加搜索关键词
+    if (searchKeyword.value) {
+      params.keyword = searchKeyword.value
+    }
+    
+    const response = await getXiThoughtVideoPageList(params)
+    
+    if (response && response.records) {
+      videoList.value = response.records
+      totalCount.value = response.total
+      totalPages.value = response.pages
     }
   } catch (error) {
     console.error('获取视频列表失败：', error)

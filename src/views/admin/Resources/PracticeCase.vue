@@ -78,7 +78,10 @@
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.title }}</h3>
+          <h3 class="item-title">
+            {{ item.title }}
+            <span v-if="item.status === 'inactive'" class="status-badge status-badge--hidden">前台隐藏</span>
+          </h3>
           
           <div class="item-meta">
             <div class="meta-item">
@@ -116,10 +119,21 @@
               <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="action-btn action-btn--preview" @click="previewItem(item)" title="预览">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <button 
+            class="action-btn" 
+            :class="item.status === 'active' ? 'action-btn--hide' : 'action-btn--show'"
+            @click="toggleVisibility(item)" 
+            :title="item.status === 'active' ? '隐藏' : '显示'"
+          >
+            <svg v-if="item.status === 'active'" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛打开图标 -->
               <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛关闭图标 -->
+              <path d="M13.5 2.5L2.5 13.5M5.5 5.5C4.6 6.2 4 7 4 8C4 8 5.5 11 8 11C8.5 11 9 10.9 9.5 10.7M10.5 10.5C11.4 9.8 12 9 12 8C12 8 10.5 5 8 5C7.5 5 7 5.1 6.5 5.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M9.5 6.5L6.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </button>
           <button class="action-btn action-btn--delete" @click="deleteItem(item.id)" title="删除">
@@ -746,6 +760,49 @@ const deleteItem = async (id: number) => {
   }
 }
 
+// 切换显示/隐藏状态
+const toggleVisibility = async (item: CaseItem) => {
+  const newStatus = item.status === 'active' ? 0 : 1
+  const statusText = newStatus === 1 ? '显示' : '隐藏'
+  
+  if (confirm(`确定要${statusText}这个案例吗？`)) {
+    try {
+      loading.value = true
+      
+      // 构建API数据
+      const apiData: ExampleExpoItem = {
+        name: item.title,
+        coverUrl: item.cover || '',
+        teachers: [{
+          name: item.teacher,
+          title: item.teacherTitle || '教师'
+        }],
+        property: item.property || '其他',
+        direction: item.direction || '面向产出',
+        college: item.college,
+        content: item.fullContent,
+        videoUrl: '',
+        showFront: newStatus  // 切换状态
+      }
+      
+      // 调用编辑API
+      await editExampleExpo({
+        ...apiData,
+        id: item.id
+      } as ExampleExpoEditItem)
+      
+      alert(`已${statusText}`)
+      // 重新获取列表
+      await fetchList()
+    } catch (error) {
+      console.error('切换状态失败:', error)
+      alert('操作失败，请重试')
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
 // 保存项目
 const saveItem = async () => {
   // 验证必填项
@@ -1091,10 +1148,29 @@ onBeforeUnmount(() => {
   color: #1a1a1a;
   line-height: 1.5;
   transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .content-item:hover .item-title {
   color: #e31e24;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.status-badge--hidden {
+  background: #fff1f0;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
 }
 
 .item-meta {
@@ -1181,13 +1257,22 @@ onBeforeUnmount(() => {
   border-color: #91d5ff;
 }
 
-.action-btn--preview {
+.action-btn--show {
   color: #52c41a;
 }
 
-.action-btn--preview:hover {
+.action-btn--show:hover {
   background: #f6ffed;
   border-color: #b7eb8f;
+}
+
+.action-btn--hide {
+  color: #faad14;
+}
+
+.action-btn--hide:hover {
+  background: #fffbe6;
+  border-color: #ffe58f;
 }
 
 .action-btn--delete {

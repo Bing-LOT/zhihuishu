@@ -194,7 +194,7 @@ export function getXiThoughtVideoTopList(): Promise<XiThoughtVideo[]> {
  */
 export function getXiThoughtVideoDetail(id: string | number): Promise<XiThoughtVideo> {
   return request({
-    url: `/api/xiThought/videoExpo/${id}`,
+    url: `/api/xiThought/videoExpo/get/${id}`,
     method: 'get'
   })
 }

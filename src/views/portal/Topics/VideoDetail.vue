@@ -106,7 +106,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
-import { getXiThoughtVideoTopList } from '@/api/redCulture'
+import { getXiThoughtVideoTopList, getXiThoughtVideoDetail } from '@/api/redCulture'
 import type { XiThoughtVideo } from '@/api/redCulture'
 import type { Course } from '@/types'
 
@@ -160,21 +160,22 @@ const convertVideoToCourse = (video: XiThoughtVideo): Course => {
   }
 }
 
-// 获取视频列表并找到当前视频详情
+// 获取视频详情和推荐列表
 const fetchVideoDetail = async () => {
   try {
     const videoId = route.params.id as string
-    const response = await getXiThoughtVideoTopList()
     
-    if (response && Array.isArray(response)) {
-      // 找到当前视频
-      const currentVideo = response.find(v => String(v.id) === videoId)
-      if (currentVideo) {
-        videoDetail.value = currentVideo
-      }
-      
+    // 获取视频详情
+    const detail = await getXiThoughtVideoDetail(videoId)
+    if (detail) {
+      videoDetail.value = detail
+    }
+    
+    // 获取推荐视频列表
+    const topList = await getXiThoughtVideoTopList()
+    if (topList && Array.isArray(topList)) {
       // 获取推荐视频（排除当前视频）
-      const otherVideos = response.filter(v => String(v.id) !== videoId).slice(0, 4)
+      const otherVideos = topList.filter(v => String(v.id) !== videoId).slice(0, 4)
       recommendList.value = otherVideos.map(convertVideoToCourse)
     }
   } catch (error) {
@@ -193,8 +194,10 @@ const onTimeUpdate = () => {
 }
 
 // 点击推荐视频
-const handleVideoClick = (video: Course) => {
-  router.push(`/topics/video/${video.id}`)
+const handleVideoClick = async (video: Course) => {
+  await router.push(`/topics/video/${video.id}`)
+  // 重新加载数据
+  await fetchVideoDetail()
   // 滚动到顶部
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -275,19 +278,12 @@ onMounted(() => {
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
-  background: linear-gradient(90deg, #ecd9ba 0%, #ecd9ba 100%);
-  position: relative;
-}
-
-.transcript-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
+  background-color: #ecd9ba;
   background-image: url('/images/Frame_1000015326.png');
   background-size: cover;
-  opacity: 0.2;
-  pointer-events: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
 .section-title {
@@ -320,19 +316,12 @@ onMounted(() => {
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
-  background: linear-gradient(90deg, #ecd9ba 0%, #ecd9ba 100%);
-  position: relative;
-}
-
-.video-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background-image: url('/images/Frame_1000015326.png');
+  background-color: #ecd9ba;
+  background-image: url('/images/Frame_1000015327.png');
   background-size: cover;
-  opacity: 0.2;
-  pointer-events: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
 .video-header {

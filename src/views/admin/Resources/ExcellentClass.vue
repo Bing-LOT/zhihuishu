@@ -89,7 +89,7 @@
             <span class="category-tag">{{ item.category }}</span>
           </div>
 
-          <p class="item-description">{{ item.description }}</p>
+          <div class="item-description" v-html="getPlainText(item.description)"></div>
 
           <div class="item-footer">
             <div class="footer-info">
@@ -261,15 +261,21 @@
 
           <div class="form-group">
             <label>详情内容 <span class="required">*</span></label>
-            <textarea
-              v-model="formData.description"
-              rows="10"
-              placeholder="请输入详情内容（支持富文本）"
-              class="form-textarea"
-            ></textarea>
-            <small class="field-hint">
-              提示：实际使用时可集成富文本编辑器
-            </small>
+            <div class="editor-container">
+              <Toolbar
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                mode="default"
+                class="editor-toolbar"
+              />
+              <Editor
+                v-model="formData.description"
+                :defaultConfig="editorConfig"
+                mode="default"
+                class="editor-content"
+                @onCreated="handleEditorCreated"
+              />
+            </div>
           </div>
 
           <div class="form-group">
@@ -327,7 +333,7 @@
               <span>学院：{{ previewData.college }}</span>
               <span>类别：{{ previewData.category }}</span>
             </div>
-            <p class="preview-description">{{ previewData.description }}</p>
+            <div class="preview-description" v-html="previewData.description"></div>
             <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
           </div>
         </div>
@@ -337,7 +343,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, shallowRef, onBeforeUnmount } from 'vue'
 import { 
   getNiceCoursePageList, 
   addNiceCourse, 
@@ -346,6 +352,9 @@ import {
   type NiceCourseItem 
 } from '@/api/resource'
 import { uploadFile } from '@/api/banner'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import '@wangeditor/editor/dist/css/style.css'
 
 // 数据列表
 const items = ref<NiceCourseItem[]>([])
@@ -386,6 +395,77 @@ const formData = ref({
 
 // 预览数据
 const previewData = ref<NiceCourseItem | null>(null)
+
+// 富文本编辑器
+const editorRef = shallowRef()
+
+// 编辑器配置
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '请输入详情内容...',
+  MENU_CONF: {
+    uploadImage: {
+      async customUpload(file: File, insertFn: (url: string) => void) {
+        try {
+          const result = await uploadFile(file)
+          insertFn(result.url)
+        } catch (error) {
+          console.error('图片上传失败：', error)
+          alert('图片上传失败')
+        }
+      }
+    }
+  }
+}
+
+// 工具栏配置
+const toolbarConfig: Partial<IToolbarConfig> = {
+  toolbarKeys: [
+    'headerSelect',
+    'bold',
+    'italic',
+    'underline',
+    'color',
+    'bgColor',
+    '|',
+    'fontSize',
+    'fontFamily',
+    'lineHeight',
+    '|',
+    'bulletedList',
+    'numberedList',
+    'todo',
+    '|',
+    'justifyLeft',
+    'justifyCenter',
+    'justifyRight',
+    'justifyJustify',
+    '|',
+    'emotion',
+    'insertLink',
+    'uploadImage',
+    'insertTable',
+    'codeBlock',
+    'divider',
+    '|',
+    'undo',
+    'redo',
+    '|',
+    'fullScreen'
+  ]
+}
+
+// 编辑器创建完成
+const handleEditorCreated = (editor: any) => {
+  editorRef.value = editor
+}
+
+// 获取纯文本（用于列表显示）
+const getPlainText = (html: string) => {
+  if (!html) return ''
+  // 移除HTML标签，只保留文本内容，限制长度
+  const text = html.replace(/<[^>]+>/g, '').substring(0, 150)
+  return text + (html.length > 150 ? '...' : '')
+}
 
 // 计算可见的页码
 const visiblePages = computed(() => {
@@ -644,6 +724,14 @@ const closeDialog = () => {
 onMounted(() => {
   loadDataList()
 })
+
+// 组件卸载前销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor) {
+    editor.destroy()
+  }
+})
 </script>
 
 <style scoped>
@@ -835,6 +923,17 @@ onMounted(() => {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.item-description :deep(*) {
+  margin: 0;
+  padding: 0;
 }
 
 .item-footer {
@@ -1010,22 +1109,32 @@ onMounted(() => {
   border-color: #e31e24;
 }
 
-.form-textarea {
-  width: 100%;
-  min-height: 140px;
-  padding: 12px;
+/* 富文本编辑器容器 */
+.editor-container {
   border: 1px solid #d9d9d9;
   border-radius: 4px;
-  font-size: 14px;
-  font-family: inherit;
-  line-height: 1.8;
-  resize: vertical;
-  transition: border-color 0.3s;
+  overflow: hidden;
 }
 
-.form-textarea:focus {
-  outline: none;
-  border-color: #e31e24;
+.editor-toolbar {
+  border-bottom: 1px solid #d9d9d9;
+  background: #fafafa;
+}
+
+.editor-content {
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* 编辑器内容样式 */
+:deep(.w-e-text-container) {
+  background: white;
+}
+
+:deep(.w-e-text-placeholder) {
+  color: #999;
+  font-style: normal;
 }
 
 /* 图片上传区域 */
@@ -1202,7 +1311,67 @@ onMounted(() => {
   font-size: 16px;
   line-height: 1.8;
   color: #333;
-  white-space: pre-wrap;
+}
+
+.preview-description :deep(img) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 16px 0;
+}
+
+.preview-description :deep(p) {
+  margin: 12px 0;
+}
+
+.preview-description :deep(h1),
+.preview-description :deep(h2),
+.preview-description :deep(h3),
+.preview-description :deep(h4),
+.preview-description :deep(h5),
+.preview-description :deep(h6) {
+  margin: 16px 0 12px;
+  font-weight: 600;
+}
+
+.preview-description :deep(ul),
+.preview-description :deep(ol) {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.preview-description :deep(blockquote) {
+  margin: 12px 0;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-left: 4px solid #e31e24;
+}
+
+.preview-description :deep(code) {
+  padding: 2px 6px;
+  background: #f5f5f5;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.preview-description :deep(pre) {
+  margin: 12px 0;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.preview-description :deep(table) {
+  width: 100%;
+  margin: 12px 0;
+  border-collapse: collapse;
+}
+
+.preview-description :deep(table th),
+.preview-description :deep(table td) {
+  padding: 8px 12px;
+  border: 1px solid #e8e8e8;
 }
 
 .preview-time {

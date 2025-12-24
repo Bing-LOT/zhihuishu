@@ -8,4 +8,5 @@ export * from './course'
 export * from './exam'
 export * from './analysis'
 export * from './ai'
+export * from './college'
 

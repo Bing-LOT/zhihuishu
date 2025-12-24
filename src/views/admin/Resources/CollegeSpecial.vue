@@ -45,13 +45,19 @@
 
     <!-- 数据统计 -->
     <div class="data-stats">
-      共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+      共 {{ pagination.total }} 条
+    </div>
+
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>加载中...</p>
     </div>
 
     <!-- 列表内容 -->
-    <div class="content-list">
+    <div v-else class="content-list">
       <div
-        v-for="(item, index) in filteredItems"
+        v-for="(item, index) in items"
         :key="item.id"
         class="content-item"
         :draggable="true"
@@ -73,12 +79,12 @@
 
         <!-- 缩略图 -->
         <div class="item-thumbnail">
-          <img :src="item.cover || '/images/home/video-1.jpg'" :alt="item.title" />
+          <img :src="item.coverUrl || '/images/home/video-1.jpg'" :alt="item.name" />
         </div>
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.title }}</h3>
+          <h3 class="item-title">{{ item.name }}</h3>
           
           <div class="item-meta">
             <div class="meta-item">
@@ -86,7 +92,7 @@
                 <path d="M7 7C8.38071 7 9.5 5.88071 9.5 4.5C9.5 3.11929 8.38071 2 7 2C5.61929 2 4.5 3.11929 4.5 4.5C4.5 5.88071 5.61929 7 7 7Z" fill="#666"/>
                 <path d="M7 8.5C4.51472 8.5 2.5 10.0147 2.5 11.9V12.5H11.5V11.9C11.5 10.0147 9.48528 8.5 7 8.5Z" fill="#666"/>
               </svg>
-              <span>{{ item.teacher }}</span>
+              <span>{{ item.teachers.join('、') }}</span>
             </div>
 
             <div class="meta-item">
@@ -96,15 +102,16 @@
               <span style="color: #d4a574;">{{ item.college }}</span>
             </div>
 
-            <span class="category-tag">{{ item.category }}</span>
+            <span v-for="type in item.types" :key="type" class="category-tag">{{ type }}</span>
           </div>
 
-          <p class="item-description">{{ item.description }}</p>
+          <p class="item-description">{{ item.content }}</p>
 
           <div class="item-footer">
             <div class="footer-info">
               <span class="sort-info">排序：第 {{ index + 1 }} 位</span>
-              <span class="time-info">发布时间：{{ item.publishTime }}</span>
+              <span class="time-info">发布时间：{{ item.createTime }}</span>
+              <span class="view-info">浏览量：{{ item.statPv }}</span>
             </div>
           </div>
         </div>
@@ -132,7 +139,7 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="items.length === 0" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
@@ -140,6 +147,16 @@
         <p>暂无数据</p>
       </div>
     </div>
+
+    <!-- 分页 -->
+    <Pagination
+      v-if="!loading && pagination.total > 0"
+      :page="pagination.current"
+      :page-size="pagination.size"
+      :total="pagination.total"
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <!-- 新增/编辑对话框 -->
     <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
@@ -155,11 +172,11 @@
         
         <div class="dialog__body">
           <div class="form-group">
-            <label>标题 <span class="required">*</span></label>
+            <label>课程名称 <span class="required">*</span></label>
             <input
-              v-model="formData.title"
+              v-model="formData.name"
               type="text"
-              placeholder="请输入标题"
+              placeholder="请输入课程名称"
               class="form-input"
             />
           </div>
@@ -174,8 +191,8 @@
                 style="display: none"
                 @change="handleCoverChange"
               />
-              <div v-if="formData.cover" class="image-preview-box">
-                <img :src="formData.cover" alt="预览" />
+              <div v-if="formData.coverUrl" class="image-preview-box">
+                <img :src="formData.coverUrl" alt="预览" />
                 <button class="btn-remove-image" @click="removeCover">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
@@ -197,11 +214,14 @@
           <div class="form-group">
             <label>教师姓名 <span class="required">*</span></label>
             <input
-              v-model="formData.teacher"
+              v-model="formData.teachers"
               type="text"
-              placeholder="请输入教师姓名"
+              placeholder="请输入教师姓名，多个教师用顿号（、）分隔"
               class="form-input"
             />
+            <small class="field-hint">
+              多个教师请用顿号（、）分隔，例如：张三、李四
+            </small>
           </div>
 
           <div class="form-group">
@@ -222,37 +242,28 @@
 
           <div class="form-group">
             <label>课程分类 <span class="required">*</span></label>
-            <select v-model="formData.category" class="form-input">
-              <option value="">请选择课程分类</option>
-              <option value="专业必修课程">专业必修课程</option>
-              <option value="通识教育课程">通识教育课程</option>
-              <option value="专业选修课程">专业选修课程</option>
-              <option value="实践课程">实践课程</option>
-            </select>
+            <input
+              v-model="formData.types"
+              type="text"
+              placeholder="请输入课程分类，多个分类用顿号（、）分隔"
+              class="form-input"
+            />
+            <small class="field-hint">
+              多个分类请用顿号（、）分隔，例如：专业必修课程、实践课程
+            </small>
           </div>
 
           <div class="form-group">
-            <label>详情内容 <span class="required">*</span></label>
+            <label>课程详细内容 <span class="required">*</span></label>
             <textarea
-              v-model="formData.description"
+              v-model="formData.content"
               rows="10"
-              placeholder="请输入详情内容（支持富文本）"
+              placeholder="请输入课程详细内容（支持富文本）"
               class="form-textarea"
             ></textarea>
             <small class="field-hint">
               提示：实际使用时可集成富文本编辑器
             </small>
-          </div>
-
-          <div class="form-group">
-            <label>显示顺序</label>
-            <input
-              v-model.number="formData.displayOrder"
-              type="number"
-              min="1"
-              class="form-input"
-              placeholder="1"
-            />
           </div>
 
           <div class="form-group">
@@ -290,17 +301,18 @@
         
         <div class="dialog__body">
           <div v-if="previewData" class="preview-content">
-            <div v-if="previewData.cover" class="preview-cover">
-              <img :src="previewData.cover" alt="封面" />
+            <div v-if="previewData.coverUrl" class="preview-cover">
+              <img :src="previewData.coverUrl" alt="封面" />
             </div>
-            <h2>{{ previewData.title }}</h2>
+            <h2>{{ previewData.name }}</h2>
             <div class="preview-meta">
-              <span>教师：{{ previewData.teacher }}</span>
+              <span>教师：{{ previewData.teachers.join('、') }}</span>
               <span>学院：{{ previewData.college }}</span>
-              <span>类别：{{ previewData.category }}</span>
+              <span>类别：{{ previewData.types.join('、') }}</span>
+              <span>浏览量：{{ previewData.statPv }}</span>
             </div>
-            <p class="preview-description">{{ previewData.description }}</p>
-            <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
+            <p class="preview-description">{{ previewData.content }}</p>
+            <div class="preview-time">发布时间：{{ previewData.createTime }}</div>
           </div>
         </div>
       </div>
@@ -309,52 +321,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-
-interface CollegeItem {
-  id: string
-  title: string
-  teacher: string
-  college: string
-  category: string
-  description: string
-  cover?: string
-  status: 'active' | 'inactive'
-  publishTime: string
-  sort: number
-}
+import { ref, onMounted } from 'vue'
+import { getCollegePageList, type CollegeItem } from '@/api/college'
+import Pagination from '@/components/common/Pagination/index.vue'
 
 // 数据列表
-const items = ref<CollegeItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    teacher: '张教授',
-    college: '计算机学院',
-    category: '专业必修课程',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    cover: '/images/home/video-1.jpg',
-    status: 'active',
-    publishTime: '2024-11-20',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    teacher: '王教授',
-    college: '机械学院',
-    category: '通识教育课程',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    cover: '/images/home/video-2.jpg',
-    status: 'active',
-    publishTime: '2024-11-18',
-    sort: 2
-  }
-])
+const items = ref<CollegeItem[]>([])
+
+// 加载状态
+const loading = ref(false)
 
 // 搜索和筛选
 const searchKeyword = ref('')
 const statusFilter = ref('all')
+
+// 分页数据
+const pagination = ref({
+  current: 1,
+  size: 10,
+  total: 0,
+  pages: 0
+})
 
 // 对话框状态
 const showAddDialog = ref(false)
@@ -365,13 +352,12 @@ const coverInput = ref<HTMLInputElement | null>(null)
 // 表单数据
 const formData = ref({
   id: '',
-  title: '',
-  cover: '',
-  teacher: '',
+  name: '',
+  coverUrl: '',
+  teachers: '',
   college: '',
-  category: '',
-  description: '',
-  displayOrder: 1,
+  types: '',
+  content: '',
   showOnFrontend: true
 })
 
@@ -381,27 +367,76 @@ const previewData = ref<CollegeItem | null>(null)
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
 
-// 计算属性
-const totalCount = computed(() => items.value.length)
-
-const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
-})
+// 加载数据
+const loadData = async () => {
+  try {
+    loading.value = true
+    
+    // 构建查询参数
+    const params: any = {
+      pageIndex: pagination.value.current,
+      pageSize: pagination.value.size
+    }
+    
+    // 添加搜索关键词
+    if (searchKeyword.value) {
+      params.keyword = searchKeyword.value
+    }
+    
+    // 添加显示状态筛选
+    if (statusFilter.value === 'active') {
+      params.showFront = 1
+    } else if (statusFilter.value === 'inactive') {
+      params.showFront = 0
+    }
+    // statusFilter.value === 'all' 时不传 showFront
+    
+    console.log('加载数据，参数:', params)
+    
+    const response = await getCollegePageList(params)
+    
+    console.log('API返回数据:', response)
+    
+    items.value = response.records || []
+    pagination.value = {
+      current: response.current,
+      size: response.size,
+      total: response.total,
+      pages: response.pages
+    }
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    alert('加载数据失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
 
 // 搜索处理
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  // 重置到第一页并重新加载
+  pagination.value.current = 1
+  loadData()
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  // 重置到第一页并重新加载
+  pagination.value.current = 1
+  loadData()
+}
+
+// 页码改变
+const handlePageChange = (newPage: number) => {
+  pagination.value.current = newPage
+  loadData()
+}
+
+// 每页数量改变
+const handleSizeChange = (newSize: number) => {
+  pagination.value.size = newSize
+  pagination.value.current = 1 // 重置到第一页
+  loadData()
 }
 
 // 拖拽开始
@@ -417,14 +452,19 @@ const handleDrop = (targetIndex: number, event: DragEvent) => {
   event.preventDefault()
   if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
 
-  const draggedItem = filteredItems.value[draggedIndex.value]
-  const targetItem = filteredItems.value[targetIndex]
-  
-  const tempSort = draggedItem.sort
-  draggedItem.sort = targetItem.sort
-  targetItem.sort = tempSort
+  // 交换两个元素的位置
+  const draggedItem = items.value[draggedIndex.value]
+  items.value.splice(draggedIndex.value, 1)
+  items.value.splice(targetIndex, 0, draggedItem)
 
   draggedIndex.value = null
+  
+  // TODO: 这里可以调用 API 更新排序
+  // const sortData = items.value.map((item, index) => ({
+  //   id: item.id,
+  //   sort: index + 1
+  // }))
+  // await updateCollegeSort(sortData)
 }
 
 // 触发封面上传
@@ -439,7 +479,7 @@ const handleCoverChange = (event: Event) => {
   if (file) {
     const reader = new FileReader()
     reader.onload = (e) => {
-      formData.value.cover = e.target?.result as string
+      formData.value.coverUrl = e.target?.result as string
     }
     reader.readAsDataURL(file)
   }
@@ -447,7 +487,7 @@ const handleCoverChange = (event: Event) => {
 
 // 移除封面
 const removeCover = () => {
-  formData.value.cover = ''
+  formData.value.coverUrl = ''
   if (coverInput.value) {
     coverInput.value.value = ''
   }
@@ -456,15 +496,14 @@ const removeCover = () => {
 // 编辑项目
 const editItem = (item: CollegeItem) => {
   formData.value = {
-    id: item.id,
-    title: item.title,
-    cover: item.cover || '',
-    teacher: item.teacher,
+    id: item.id.toString(),
+    name: item.name,
+    coverUrl: item.coverUrl || '',
+    teachers: item.teachers.join('、'),
     college: item.college,
-    category: item.category,
-    description: item.description,
-    displayOrder: item.sort,
-    showOnFrontend: item.status === 'active'
+    types: item.types.join('、'),
+    content: item.content,
+    showOnFrontend: item.showFront === 1
   }
   showEditDialog.value = true
 }
@@ -476,31 +515,33 @@ const previewItem = (item: CollegeItem) => {
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
+const deleteItem = async (id: number) => {
   if (confirm('确定要删除这条内容吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
+    try {
+      // TODO: 调用删除API
+      // await deleteCollege(id)
+      alert('删除功能暂未实现，需要调用API接口')
+      // 删除成功后重新加载数据
+      // await loadData()
+    } catch (error) {
+      console.error('删除失败:', error)
+      alert('删除失败，请稍后重试')
     }
   }
 }
 
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
   // 验证必填项
-  if (!formData.value.title) {
-    alert('请输入标题')
+  if (!formData.value.name) {
+    alert('请输入课程名称')
     return
   }
-  if (!formData.value.cover) {
+  if (!formData.value.coverUrl) {
     alert('请上传封面图片')
     return
   }
-  if (!formData.value.teacher) {
+  if (!formData.value.teachers) {
     alert('请输入教师姓名')
     return
   }
@@ -508,49 +549,54 @@ const saveItem = () => {
     alert('请选择所属单位')
     return
   }
-  if (!formData.value.category) {
-    alert('请选择课程分类')
+  if (!formData.value.types) {
+    alert('请输入课程分类')
     return
   }
-  if (!formData.value.description) {
+  if (!formData.value.content) {
     alert('请输入详情内容')
     return
   }
 
-  if (showEditDialog.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        cover: formData.value.cover,
-        teacher: formData.value.teacher,
-        college: formData.value.college,
-        category: formData.value.category,
-        description: formData.value.description,
-        status: formData.value.showOnFrontend ? 'active' : 'inactive',
-        sort: formData.value.displayOrder
-      }
+  try {
+    // 将字符串转换为数组
+    const teachersArray = formData.value.teachers.split('、').filter(t => t.trim())
+    const typesArray = formData.value.types.split('、').filter(t => t.trim())
+    
+    if (showEditDialog.value) {
+      // TODO: 调用编辑API
+      // await updateCollege({
+      //   id: Number(formData.value.id),
+      //   name: formData.value.name,
+      //   coverUrl: formData.value.coverUrl,
+      //   teachers: teachersArray,
+      //   college: formData.value.college,
+      //   types: typesArray,
+      //   content: formData.value.content,
+      //   showFront: formData.value.showOnFrontend ? 1 : 0
+      // })
+      alert('编辑功能暂未实现，需要调用API接口')
+    } else {
+      // TODO: 调用新增API
+      // await addCollege({
+      //   name: formData.value.name,
+      //   coverUrl: formData.value.coverUrl,
+      //   teachers: teachersArray,
+      //   college: formData.value.college,
+      //   types: typesArray,
+      //   content: formData.value.content,
+      //   showFront: formData.value.showOnFrontend ? 1 : 0
+      // })
+      alert('新增功能暂未实现，需要调用API接口')
     }
-  } else {
-    // 新增
-    const newItem: CollegeItem = {
-      id: Date.now().toString(),
-      title: formData.value.title,
-      cover: formData.value.cover,
-      teacher: formData.value.teacher,
-      college: formData.value.college,
-      category: formData.value.category,
-      description: formData.value.description,
-      status: formData.value.showOnFrontend ? 'active' : 'inactive',
-      publishTime: new Date().toISOString().split('T')[0],
-      sort: formData.value.displayOrder || items.value.length + 1
-    }
-    items.value.push(newItem)
+    
+    closeDialog()
+    // 保存成功后重新加载数据
+    // await loadData()
+  } catch (error) {
+    console.error('保存失败:', error)
+    alert('保存失败，请稍后重试')
   }
-
-  closeDialog()
 }
 
 // 关闭对话框
@@ -559,16 +605,20 @@ const closeDialog = () => {
   showEditDialog.value = false
   formData.value = {
     id: '',
-    title: '',
-    cover: '',
-    teacher: '',
+    name: '',
+    coverUrl: '',
+    teachers: '',
     college: '',
-    category: '',
-    description: '',
-    displayOrder: 1,
+    types: '',
+    content: '',
     showOnFrontend: true
   }
 }
+
+// 组件挂载时加载数据
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>
@@ -834,6 +884,35 @@ const closeDialog = () => {
 .empty-state p {
   margin: 16px 0 0;
   font-size: 14px;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.loading-state p {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #e31e24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 对话框 */
@@ -1135,4 +1214,3 @@ const closeDialog = () => {
   color: #999;
 }
 </style>
-

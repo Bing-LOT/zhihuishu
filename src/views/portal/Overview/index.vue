@@ -120,7 +120,7 @@
             <img src="/images/xiaohui2.png" alt="" class="overview__courses-icon" />
           </div>
           
-          <button class="overview__courses-more">
+          <button class="overview__courses-more" @click="handleViewMore">
             <span>查看更多</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -245,6 +245,11 @@ const fetchCourseExpoList = async () => {
 // 处理课程卡片点击
 const handleCourseClick = (course: CourseWithBadge) => {
   router.push(`/study/video/${course.id}`)
+}
+
+// 处理查看更多点击
+const handleViewMore = () => {
+  router.push('/study/courses')
 }
 
 onMounted(() => {

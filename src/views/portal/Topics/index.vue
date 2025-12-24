@@ -89,6 +89,7 @@
             v-for="course in list1"
             :key="course.id"
             :course="course"
+            @click="handleCourseClick(course)"
           />
         </div>
       </section>
@@ -114,6 +115,7 @@
             v-for="course in list2"
             :key="course.id"
             :course="course"
+            @click="handleCourseClick(course)"
           />
         </div>
       </section>
@@ -222,10 +224,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import { getXiThoughtTitles, getXiThoughtVideoTopList } from '@/api/redCulture'
 import type { XiThoughtTitle, XiThoughtVideo } from '@/api/redCulture'
 import type { Course } from '@/types'
+
+const router = useRouter()
 
 /**
  * 习思想的伟大实践页面
@@ -249,6 +254,12 @@ const scrollToContent = () => {
   if (section1) {
     section1.scrollIntoView({ behavior: 'smooth' })
   }
+}
+
+// 处理课程卡片点击
+const handleCourseClick = (course: Course) => {
+  console.log('点击课程：', course)
+  router.push(`/topics/video/${course.id}`)
 }
 
 // 将 API 数据转换为 Course 格式

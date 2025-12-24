@@ -187,3 +187,15 @@ export function getXiThoughtVideoTopList(): Promise<XiThoughtVideo[]> {
   })
 }
 
+/**
+ * 获取习思想视频详情
+ * @param id 视频ID
+ * @returns 视频详情
+ */
+export function getXiThoughtVideoDetail(id: string | number): Promise<XiThoughtVideo> {
+  return request({
+    url: `/api/xiThought/videoExpo/${id}`,
+    method: 'get'
+  })
+}
+

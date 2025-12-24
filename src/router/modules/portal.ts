@@ -64,7 +64,17 @@ const portalRoutes: RouteRecordRaw[] = [
         name: 'Topics',
         component: () => import('@/views/portal/Topics/index.vue'),
         meta: {
-          title: '大主题',
+          title: '习思想的伟大实践',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
+        path: 'topics/video/:id',
+        name: 'TopicsVideoDetail',
+        component: () => import('@/views/portal/Topics/VideoDetail.vue'),
+        meta: {
+          title: '视频详情',
           requiresAuth: false,
           roles: []
         }

@@ -77,7 +77,7 @@
               <img src="/images/xiaohui2.png" alt="" />
             </div>
           </div>
-          <button class="more-btn">
+          <button class="more-btn" @click="goToVideoList">
             <span>查看更多</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -103,7 +103,7 @@
               <img src="/images/xiaohui2.png" alt="" />
             </div>
           </div>
-          <button class="more-btn">
+          <button class="more-btn" @click="goToVideoList">
             <span>查看更多</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -191,7 +191,7 @@
                 <img src="/images/gailanmulu_icon.png" alt="" class="list-icon" />
                 <h3 class="list-title">足迹目录</h3>
               </div>
-              <button class="more-btn">
+              <button class="more-btn" @click="goToVideoList">
                 <span>查看更多</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -254,6 +254,11 @@ const scrollToContent = () => {
   if (section1) {
     section1.scrollIntoView({ behavior: 'smooth' })
   }
+}
+
+// 跳转到视频列表页面
+const goToVideoList = () => {
+  router.push('/topics/videos')
 }
 
 // 处理课程卡片点击

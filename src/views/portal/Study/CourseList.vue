@@ -149,13 +149,13 @@ import type { Course } from '@/types'
 const router = useRouter()
 
 // 筛选状态
-const activeType = ref('普通本科课程')
+const activeType = ref('示范课程')
 const activeLevel = ref('全部')
 const activeDepartment = ref('全部')
 const searchQuery = ref('')
 
 // 筛选选项
-const typeOptions = ['普通本科课程', '研究生课程', '职业教育课程', '继续教育课程']
+const typeOptions = ['示范课程', '建设发展', '一院一品', '思政微视频']
 const levelOptions = ['全部', '国家示范', '省级示范']
 const departmentOptions = [
   '全部',
@@ -177,7 +177,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '教师课程',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   },
   {
     id: '2',
@@ -188,7 +188,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '成果展播',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   },
   {
     id: '3',
@@ -199,7 +199,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '成果展播',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   },
   {
     id: '4',
@@ -210,7 +210,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '海洋学院',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   },
   {
     id: '5',
@@ -221,7 +221,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '教师课程',
     level: '国家示范',
-    type: '研究生课程'
+    type: '建设发展'
   },
   {
     id: '6',
@@ -232,7 +232,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '福州大学',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   },
   {
     id: '7',
@@ -243,7 +243,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '安徽大学',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   },
   {
     id: '8',
@@ -254,7 +254,7 @@ const courseList = ref<any[]>([
     badge: '国家示范',
     department: '上海交通大学',
     level: '国家示范',
-    type: '普通本科课程'
+    type: '示范课程'
   }
 ])
 

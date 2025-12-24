@@ -115,7 +115,7 @@
             v-for="course in list2"
             :key="course.id"
             :course="course"
-            @click="handleCourseClick(course)"
+            @click="handleExampleClick(course)"
           />
         </div>
       </section>
@@ -261,10 +261,16 @@ const goToVideoList = () => {
   router.push('/topics/videos')
 }
 
-// 处理课程卡片点击
+// 处理课程卡片点击（list1：视频展播）
 const handleCourseClick = (course: Course) => {
-  console.log('点击课程：', course)
+  console.log('点击视频：', course)
   router.push(`/topics/video/${course.id}`)
+}
+
+// 处理示例案例点击（list2：示范案例展播）
+const handleExampleClick = (course: Course) => {
+  console.log('点击案例：', course)
+  router.push(`/topics/example/${course.id}`)
 }
 
 // 将 API 数据转换为 Course 格式

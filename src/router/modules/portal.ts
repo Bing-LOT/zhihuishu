@@ -80,6 +80,16 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'topics/example/:id',
+        name: 'TopicsExampleDetail',
+        component: () => import('@/views/portal/Topics/ExampleDetail.vue'),
+        meta: {
+          title: '示范案例详情',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
         path: 'topics/videos',
         name: 'TopicsVideoList',
         component: () => import('@/views/portal/Topics/VideoList.vue'),

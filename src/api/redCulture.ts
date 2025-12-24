@@ -265,3 +265,15 @@ export function getXiThoughtExampleTopList(): Promise<XiThoughtExampleVideo[]> {
   })
 }
 
+/**
+ * 获取习思想示例案例展播详情
+ * @param id 案例ID
+ * @returns 案例详情
+ */
+export function getXiThoughtExampleDetail(id: string | number): Promise<XiThoughtExampleVideo> {
+  return request({
+    url: `/api/xiThought/exampleExpo/get/${id}`,
+    method: 'get'
+  })
+}
+

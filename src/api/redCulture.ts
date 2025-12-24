@@ -279,6 +279,41 @@ export function getXiThoughtExampleDetail(id: string | number): Promise<XiThough
 }
 
 /**
+ * 习思想示例案例展播分页查询参数
+ */
+export interface XiThoughtExamplePageParams {
+  pageIndex: number    // 页码（必需）
+  pageSize: number     // 每页大小，默认10条（必需）
+  property?: string    // 课程性质（可选）
+  direction?: string   // 入选方向（可选）
+  college?: string     // 所在学院（可选）
+}
+
+/**
+ * 习思想示例案例展播分页响应数据结构
+ */
+export interface XiThoughtExamplePageResponse {
+  records: XiThoughtExampleVideo[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+
+/**
+ * 获取习思想示例案例展播分页列表
+ * @param params 分页查询参数
+ * @returns 分页数据
+ */
+export function getXiThoughtExamplePageList(params: XiThoughtExamplePageParams): Promise<XiThoughtExamplePageResponse> {
+  return request({
+    url: '/api/xiThought/exampleExpo/page/list',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 足迹列表数据结构
  */
 export interface FootprintItem {

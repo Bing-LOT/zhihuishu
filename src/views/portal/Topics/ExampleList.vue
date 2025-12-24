@@ -168,6 +168,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getXiThoughtExamplePageList } from '@/api/redCulture'
 import type { XiThoughtExampleVideo } from '@/api/redCulture'
 
 const router = useRouter()
@@ -236,30 +237,36 @@ const handleFilterChange = (filterType: string, value: string) => {
   fetchExampleList()
 }
 
-// 获取案例列表（模拟接口，需要根据实际API调整）
+// 获取案例列表
 const fetchExampleList = async () => {
   loading.value = true
   try {
-    // TODO: 调用真实的API
-    // 这里暂时使用模拟数据
+    // 构建请求参数
+    const params: any = {
+      pageIndex: 1,
+      pageSize: 16
+    }
     
-    // 模拟延迟
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 添加筛选条件（"全部"对应空字符串或不传）
+    if (filters.value.direction && filters.value.direction !== '') {
+      params.direction = filters.value.direction
+    }
+    if (filters.value.property && filters.value.property !== '') {
+      params.property = filters.value.property
+    }
+    if (filters.value.college && filters.value.college !== '全部') {
+      params.college = filters.value.college
+    }
     
-    // 模拟数据
-    const mockData: XiThoughtExampleVideo[] = Array.from({ length: 16 }).map((_, i) => ({
-      id: i + 1,
-      name: i % 2 === 0 ? '重磅会议利好！要活跃资本市场，提振投资者信心！' : '为什么现在中端机更受欢迎？看了这几款我完全懂了',
-      coverUrl: `/images/home/video-${(i % 4) + 1}.jpg`,
-      createTime: '2024-12-24',
-      teachers: [{ name: '张三' }],
-      statPv: 3456
-    }))
+    // 调用API
+    const response = await getXiThoughtExamplePageList(params)
     
-    exampleList.value = mockData
-    totalCount.value = mockData.length
+    exampleList.value = response.records
+    totalCount.value = response.total
   } catch (error) {
     console.error('获取案例列表失败：', error)
+    exampleList.value = []
+    totalCount.value = 0
   } finally {
     loading.value = false
   }

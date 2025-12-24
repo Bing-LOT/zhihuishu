@@ -400,6 +400,17 @@ export function getExampleExpoList(params: ExampleExpoListParams): Promise<Examp
 }
 
 /**
+ * 获取实践案例详情
+ * @param id 案例ID
+ */
+export function getExampleExpoDetail(id: string | number): Promise<ExampleExpoListItem> {
+  return request({
+    url: `/xiThought/exampleExpo/detail/${id}`,
+    method: 'GET'
+  })
+}
+
+/**
  * 实践案例数据结构（新增）
  */
 export interface ExampleExpoItem {

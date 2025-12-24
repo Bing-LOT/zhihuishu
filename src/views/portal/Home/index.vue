@@ -496,6 +496,7 @@ const loadCourses = async () => {
         title: '教师',
         department: college.college
       })),
+      video: '/videos/hero-video.mp4', // 添加默认视频
       sort: index + 1,
       status: 'published' as const,
       studentCount: college.statPv || 0,
@@ -516,7 +517,13 @@ const loadCourses = async () => {
 }
 
 const handleCourseClick = (course: Course) => {
-  router.push(`/study/${course.id}`)
+  // 跳转到学院案例详情页，并传递数据
+  console.log('🚀 跳转到详情页，传递数据:', course)
+  
+  // 使用 sessionStorage 临时存储数据
+  sessionStorage.setItem(`college-video-${course.id}`, JSON.stringify(course))
+  
+  router.push(`/study/college-video/${course.id}`)
 }
 
 const viewMoreCourses = () => {

@@ -100,6 +100,16 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'study/college-video/:id',
+        name: 'CollegeVideoDetail',
+        component: () => import('@/views/portal/Study/CollegeVideoDetail.vue'),
+        meta: {
+          title: '学院案例详情',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
         path: 'exam',
         name: 'Exam',
         redirect: '/exam/list',

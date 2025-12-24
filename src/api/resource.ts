@@ -337,14 +337,14 @@ export interface NiceCoursePageParams {
 export interface NiceCourseItem {
   id: string | number
   title: string                   // 标题
-  teacher: string                 // 教师姓名
-  college: string                 // 所属单位
-  category: string                // 课程分类
-  description: string             // 详情内容
-  cover?: string                  // 封面图片
-  showFront: number               // 是否前台显示
-  displayOrder?: number           // 显示顺序
-  publishTime?: string            // 发布时间
+  name: string                    // 课程名称
+  teacher: string                 // 授课教师
+  picUrls: string[]               // 教师图片
+  director: string                // 推荐督导
+  teachingTime: string            // 授课时间
+  brief: string                   // 简介
+  playUrl: string                 // 观看链接
+  showFront: number               // 前台显示
   createTime?: string             // 创建时间
   updateTime?: string             // 更新时间
 }
@@ -371,13 +371,14 @@ export function getNiceCoursePageList(params: NiceCoursePageParams): Promise<Nic
  */
 export interface NiceCourseAddParams {
   title: string                   // 标题
-  cover: string                   // 封面图片
-  teacher: string                 // 教师姓名
-  college: string                 // 所属单位
-  category: string                // 课程分类
-  description: string             // 详情内容
-  displayOrder?: number           // 显示顺序
-  showFront: number               // 是否前台显示：1=显示；0=不显示
+  name: string                    // 课程名称
+  teacher: string                 // 授课教师
+  picUrls: string[]               // 教师图片，多个
+  director: string                // 推荐督导
+  teachingTime: string            // 授课时间
+  brief: string                   // 简介
+  playUrl: string                 // 观看链接
+  showFront: number               // 前台显示：1=显示；0=隐藏
 }
 
 export function addNiceCourse(data: NiceCourseAddParams): Promise<any> {

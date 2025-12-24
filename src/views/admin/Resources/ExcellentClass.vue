@@ -63,12 +63,13 @@
       >
         <!-- 缩略图 -->
         <div class="item-thumbnail">
-          <img :src="item.cover || '/images/home/video-1.jpg'" :alt="item.title" />
+          <img :src="item.picUrls?.[0] || '/images/home/video-1.jpg'" :alt="item.title" />
         </div>
 
         <!-- 内容信息 -->
         <div class="item-content">
           <h3 class="item-title">{{ item.title }}</h3>
+          <p class="item-subtitle">{{ item.name }}</p>
           
           <div class="item-meta">
             <div class="meta-item">
@@ -81,19 +82,26 @@
 
             <div class="meta-item">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M12 5.5L7 2L2 5.5V11C2 11.2652 2.10536 11.5196 2.29289 11.7071C2.48043 11.8946 2.73478 12 3 12H11C11.2652 12 11.5196 11.8946 11.7071 11.7071C11.8946 11.5196 12 11.2652 12 11V5.5Z" stroke="#d4a574" stroke-width="1.2" fill="none"/>
+                <circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2" fill="none"/>
+                <path d="M7 3V7L10 9" stroke="#999" stroke-width="1.2" stroke-linecap="round"/>
               </svg>
-              <span style="color: #d4a574;">{{ item.college }}</span>
+              <span>{{ formatDisplayTime(item.teachingTime) }}</span>
             </div>
 
-            <span class="category-tag">{{ item.category }}</span>
+            <div class="meta-item">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2L2 5L7 8L12 5L7 2Z" stroke="#d4a574" stroke-width="1.2" fill="none"/>
+                <path d="M2 10L7 13L12 10" stroke="#d4a574" stroke-width="1.2" fill="none"/>
+              </svg>
+              <span style="color: #d4a574;">{{ item.director }}</span>
+            </div>
           </div>
 
-          <div class="item-description" v-html="getPlainText(item.description)"></div>
+          <div class="item-description" v-html="getPlainText(item.brief)"></div>
 
           <div class="item-footer">
             <div class="footer-info">
-              <span class="time-info">发布时间：{{ item.publishTime || item.createTime || '-' }}</span>
+              <span class="time-info">创建时间：{{ item.createTime || '-' }}</span>
               <span :class="['status-badge', item.showFront === 1 ? 'status-badge--active' : 'status-badge--inactive']">
                 {{ item.showFront === 1 ? '已显示' : '已隐藏' }}
               </span>
@@ -193,22 +201,51 @@
           </div>
 
           <div class="form-group">
-            <label>封面图片 <span class="required">*</span></label>
-            <div class="image-upload-box">
+            <label>课程名称 <span class="required">*</span></label>
+            <input
+              v-model="formData.name"
+              type="text"
+              placeholder="请输入课程名称"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>授课教师 <span class="required">*</span></label>
+            <input
+              v-model="formData.teacher"
+              type="text"
+              placeholder="请输入授课教师"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>教师图片 <span class="required">*</span></label>
+            <div class="image-upload-box multiple">
               <input
-                ref="coverInput"
+                ref="picUrlsInput"
                 type="file"
                 accept="image/*"
+                multiple
                 style="display: none"
-                @change="handleCoverChange"
+                @change="handlePicUrlsChange"
               />
-              <div v-if="formData.cover" class="image-preview-box">
-                <img :src="formData.cover" alt="预览" />
-                <button class="btn-remove-image" @click="removeCover">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <div v-if="formData.picUrls.length > 0" class="image-preview-list">
+                <div v-for="(url, index) in formData.picUrls" :key="index" class="image-preview-item">
+                  <img :src="url" alt="预览" />
+                  <button class="btn-remove-image" @click="removePicUrl(index)">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="image-add-more" @click="triggerPicUrlsUpload">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <path d="M20 10V30M10 20H30" stroke="#999" stroke-width="2" stroke-linecap="round"/>
                   </svg>
-                </button>
+                  <p>添加更多</p>
+                </div>
               </div>
               <div v-else class="image-upload-empty">
                 <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
@@ -216,64 +253,33 @@
                   <circle cx="30" cy="32" r="6" stroke="#999" stroke-width="2" fill="none"/>
                   <path d="M10 55L25 40L35 50L50 35L70 55" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <p class="upload-hint">上传封面图片</p>
-                <button class="btn-upload-blue" type="button" @click="triggerCoverUpload">选择图片</button>
+                <p class="upload-hint">上传教师图片（可多选）</p>
+                <button class="btn-upload-blue" type="button" @click="triggerPicUrlsUpload">选择图片</button>
               </div>
             </div>
           </div>
 
           <div class="form-group">
-            <label>教师姓名 <span class="required">*</span></label>
+            <label>推荐督导 <span class="required">*</span></label>
             <input
-              v-model="formData.teacher"
+              v-model="formData.director"
               type="text"
-              placeholder="请输入教师姓名"
+              placeholder="请输入推荐督导"
               class="form-input"
             />
           </div>
 
           <div class="form-group">
-            <label>所属单位 <span class="required">*</span></label>
-            <select v-model="formData.college" class="form-input">
-              <option value="">请选择学院</option>
-              <option value="计算机与大数据学院">计算机与大数据学院</option>
-              <option value="机械工程学院">机械工程学院</option>
-              <option value="材料科学与工程学院">材料科学与工程学院</option>
-              <option value="化学化工学院">化学化工学院</option>
-              <option value="土木工程学院">土木工程学院</option>
-              <option value="经济与管理学院">经济与管理学院</option>
-              <option value="法学院">法学院</option>
-              <option value="外国语学院">外国语学院</option>
-              <option value="数学与统计学院">数学与统计学院</option>
-              <option value="物理与信息工程学院">物理与信息工程学院</option>
-              <option value="生物科学与工程学院">生物科学与工程学院</option>
-              <option value="环境与安全工程学院">环境与安全工程学院</option>
-              <option value="建筑与城乡规划学院">建筑与城乡规划学院</option>
-              <option value="紫金矿业学院">紫金矿业学院</option>
-              <option value="海洋学院">海洋学院</option>
-              <option value="石油化工学院">石油化工学院</option>
-              <option value="交通运输学院">交通运输学院</option>
-              <option value="马克思主义学院">马克思主义学院</option>
-              <option value="人文社会科学学院">人文社会科学学院</option>
-            </select>
+            <label>授课时间 <span class="required">*</span></label>
+            <input
+              v-model="formData.teachingTime"
+              type="datetime-local"
+              class="form-input"
+            />
           </div>
 
           <div class="form-group">
-            <label>课程分类 <span class="required">*</span></label>
-            <select v-model="formData.category" class="form-input">
-              <option value="">请选择课程分类</option>
-              <option value="通识教育课程">通识教育课程</option>
-              <option value="学科基础课程">学科基础课程</option>
-              <option value="专业必修课程">专业必修课程</option>
-              <option value="专业选修课程">专业选修课程</option>
-              <option value="跨学科或本硕博课程">跨学科或本硕博课程</option>
-              <option value="双创实践与素质拓展课程">双创实践与素质拓展课程</option>
-              <option value="集中性实践课程">集中性实践课程</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>详情内容 <span class="required">*</span></label>
+            <label>简介 <span class="required">*</span></label>
             <div class="editor-container">
               <Toolbar
                 :editor="editorRef"
@@ -282,7 +288,7 @@
                 class="editor-toolbar"
               />
               <Editor
-                v-model="formData.description"
+                v-model="formData.brief"
                 :defaultConfig="editorConfig"
                 mode="default"
                 class="editor-content"
@@ -292,13 +298,12 @@
           </div>
 
           <div class="form-group">
-            <label>显示顺序</label>
+            <label>观看链接 <span class="required">*</span></label>
             <input
-              v-model.number="formData.displayOrder"
-              type="number"
-              min="1"
+              v-model="formData.playUrl"
+              type="text"
+              placeholder="请输入观看链接"
               class="form-input"
-              placeholder="1"
             />
           </div>
 
@@ -337,17 +342,21 @@
         
         <div class="dialog__body">
           <div v-if="previewData" class="preview-content">
-            <div v-if="previewData.cover" class="preview-cover">
-              <img :src="previewData.cover" alt="封面" />
+            <div v-if="previewData.picUrls && previewData.picUrls.length > 0" class="preview-images">
+              <img v-for="(url, index) in previewData.picUrls" :key="index" :src="url" alt="教师图片" />
             </div>
             <h2>{{ previewData.title }}</h2>
+            <h3 class="preview-name">{{ previewData.name }}</h3>
             <div class="preview-meta">
-              <span>教师：{{ previewData.teacher }}</span>
-              <span>学院：{{ previewData.college }}</span>
-              <span>类别：{{ previewData.category }}</span>
+              <span>授课教师：{{ previewData.teacher }}</span>
+              <span>推荐督导：{{ previewData.director }}</span>
+              <span>授课时间：{{ formatDisplayTime(previewData.teachingTime) }}</span>
             </div>
-            <div class="preview-description" v-html="previewData.description"></div>
-            <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
+            <div class="preview-meta">
+              <span>观看链接：<a :href="previewData.playUrl" target="_blank" style="color: #1890ff;">{{ previewData.playUrl }}</a></span>
+            </div>
+            <div class="preview-description" v-html="previewData.brief"></div>
+            <div class="preview-time">创建时间：{{ previewData.createTime }}</div>
           </div>
         </div>
       </div>
@@ -391,18 +400,19 @@ const statusFilter = ref<'all' | 'active' | 'inactive'>('all')
 const showAddDialog = ref(false)
 const showEditDialog = ref(false)
 const showPreviewDialog = ref(false)
-const coverInput = ref<HTMLInputElement | null>(null)
+const picUrlsInput = ref<HTMLInputElement | null>(null)
 
 // 表单数据
 const formData = ref({
   id: '',
   title: '',
-  cover: '',
+  name: '',
   teacher: '',
-  college: '',
-  category: '',
-  description: '',
-  displayOrder: 1,
+  picUrls: [] as string[],
+  director: '',
+  teachingTime: '',
+  brief: '',
+  playUrl: '',
   showOnFrontend: true
 })
 
@@ -478,6 +488,22 @@ const getPlainText = (html: string) => {
   // 移除HTML标签，只保留文本内容，限制长度
   const text = html.replace(/<[^>]+>/g, '').substring(0, 150)
   return text + (html.length > 150 ? '...' : '')
+}
+
+// 格式化时间显示
+const formatDisplayTime = (dateString: string): string => {
+  if (!dateString) return '-'
+  try {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hours}:${minutes}`
+  } catch {
+    return dateString
+  }
 }
 
 // 计算可见的页码
@@ -591,29 +617,53 @@ const handlePageChange = (page: number) => {
   loadDataList()
 }
 
-// 触发封面上传
-const triggerCoverUpload = () => {
-  coverInput.value?.click()
+// 触发教师图片上传
+const triggerPicUrlsUpload = () => {
+  picUrlsInput.value?.click()
 }
 
-// 处理封面选择
-const handleCoverChange = (event: Event) => {
+// 处理教师图片选择（支持多选）
+const handlePicUrlsChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      formData.value.cover = e.target?.result as string
+  const files = target.files
+  if (!files || files.length === 0) return
+
+  try {
+    // 上传所有选中的文件
+    const uploadPromises = Array.from(files).map(file => uploadFile(file))
+    const results = await Promise.all(uploadPromises)
+    
+    // 将上传成功的URL添加到数组中
+    formData.value.picUrls.push(...results.map(r => r.url))
+    
+    // 清空input
+    if (picUrlsInput.value) {
+      picUrlsInput.value.value = ''
     }
-    reader.readAsDataURL(file)
+  } catch (error) {
+    console.error('图片上传失败：', error)
+    alert('图片上传失败，请重试')
   }
 }
 
-// 移除封面
-const removeCover = () => {
-  formData.value.cover = ''
-  if (coverInput.value) {
-    coverInput.value.value = ''
+// 移除指定的教师图片
+const removePicUrl = (index: number) => {
+  formData.value.picUrls.splice(index, 1)
+}
+
+// 格式化时间为 datetime-local 格式
+const formatDateTimeLocal = (dateString: string): string => {
+  if (!dateString) return ''
+  try {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  } catch {
+    return dateString
   }
 }
 
@@ -622,12 +672,13 @@ const editItem = (item: NiceCourseItem) => {
   formData.value = {
     id: item.id.toString(),
     title: item.title,
-    cover: item.cover || '',
+    name: item.name,
     teacher: item.teacher,
-    college: item.college,
-    category: item.category,
-    description: item.description,
-    displayOrder: item.displayOrder || 1,
+    picUrls: [...(item.picUrls || [])],
+    director: item.director,
+    teachingTime: formatDateTimeLocal(item.teachingTime),
+    brief: item.brief,
+    playUrl: item.playUrl,
     showOnFrontend: item.showFront === 1
   }
   showEditDialog.value = true
@@ -658,42 +709,67 @@ const deleteItem = async (id: string | number) => {
 // 保存项目
 const saveItem = async () => {
   // 验证必填项
-  if (!formData.value.title) {
+  if (!formData.value.title.trim()) {
     alert('请输入标题')
     return
   }
-  if (!formData.value.cover) {
-    alert('请上传封面图片')
+  if (!formData.value.name.trim()) {
+    alert('请输入课程名称')
     return
   }
-  if (!formData.value.teacher) {
-    alert('请输入教师姓名')
+  if (!formData.value.teacher.trim()) {
+    alert('请输入授课教师')
     return
   }
-  if (!formData.value.college) {
-    alert('请选择所属单位')
+  if (formData.value.picUrls.length === 0) {
+    alert('请上传教师图片')
     return
   }
-  if (!formData.value.category) {
-    alert('请选择课程分类')
+  if (!formData.value.director.trim()) {
+    alert('请输入推荐督导')
     return
   }
-  if (!formData.value.description) {
-    alert('请输入详情内容')
+  if (!formData.value.teachingTime.trim()) {
+    alert('请输入授课时间')
+    return
+  }
+  
+  // 验证简介内容（去除HTML标签后检查）
+  const briefText = formData.value.brief.replace(/<[^>]+>/g, '').trim()
+  if (!briefText) {
+    alert('请输入简介内容')
+    return
+  }
+  
+  if (!formData.value.playUrl.trim()) {
+    alert('请输入观看链接')
     return
   }
 
   try {
+    // 格式化授课时间为标准格式（如果后端需要特定格式可以调整）
+    let teachingTime = formData.value.teachingTime
+    if (teachingTime) {
+      // datetime-local 格式：2024-12-24T14:30
+      // 可以转换为 ISO 格式：2024-12-24T14:30:00 或保持原样
+      teachingTime = teachingTime.replace('T', ' ') // 转换为 "2024-12-24 14:30" 格式
+    }
+    
     const requestData = {
-      title: formData.value.title,
-      cover: formData.value.cover,
-      teacher: formData.value.teacher,
-      college: formData.value.college,
-      category: formData.value.category,
-      description: formData.value.description,
-      displayOrder: formData.value.displayOrder,
+      title: formData.value.title.trim(),
+      name: formData.value.name.trim(),
+      teacher: formData.value.teacher.trim(),
+      picUrls: formData.value.picUrls,
+      director: formData.value.director.trim(),
+      teachingTime: teachingTime,
+      brief: formData.value.brief,
+      playUrl: formData.value.playUrl.trim(),
       showFront: formData.value.showOnFrontend ? 1 : 0
     }
+
+    console.log('========== 提交数据 ==========')
+    console.log('请求数据：', JSON.stringify(requestData, null, 2))
+    console.log('============================')
 
     if (showEditDialog.value) {
       // 编辑
@@ -710,9 +786,15 @@ const saveItem = async () => {
 
     closeDialog()
     loadDataList() // 重新加载列表
-  } catch (error) {
-    console.error('保存失败：', error)
-    alert('保存失败，请稍后重试')
+  } catch (error: any) {
+    console.error('========== 保存失败 ==========')
+    console.error('错误对象：', error)
+    console.error('错误响应：', error.response)
+    console.error('错误消息：', error.message)
+    console.error('============================')
+    
+    const errorMsg = error.response?.data?.msg || error.message || '保存失败，请稍后重试'
+    alert(`保存失败：${errorMsg}`)
   }
 }
 
@@ -723,12 +805,13 @@ const closeDialog = () => {
   formData.value = {
     id: '',
     title: '',
-    cover: '',
+    name: '',
     teacher: '',
-    college: '',
-    category: '',
-    description: '',
-    displayOrder: 1,
+    picUrls: [],
+    director: '',
+    teachingTime: '',
+    brief: '',
+    playUrl: '',
     showOnFrontend: true
   }
 }
@@ -901,10 +984,16 @@ onBeforeUnmount(() => {
 }
 
 .item-title {
-  margin: 0 0 12px;
+  margin: 0 0 4px;
   font-size: 16px;
   font-weight: 500;
   color: #333;
+}
+
+.item-subtitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #666;
 }
 
 .item-meta {
@@ -1172,12 +1261,75 @@ onBeforeUnmount(() => {
   object-fit: contain;
 }
 
+/* 多图片预览列表 */
+.image-preview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.image-preview-item {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.image-preview-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-add-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 100%;
+  position: relative;
+  border: 2px dashed #d9d9d9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.image-add-more:hover {
+  border-color: #1890ff;
+  background: #f0f7ff;
+}
+
+.image-add-more svg,
+.image-add-more p {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.image-add-more svg {
+  margin-top: -16px;
+}
+
+.image-add-more p {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+}
+
 .btn-remove-image {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 28px;
-  height: 28px;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1186,6 +1338,7 @@ onBeforeUnmount(() => {
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.3s;
+  z-index: 10;
 }
 
 .btn-remove-image:hover {
@@ -1295,22 +1448,31 @@ onBeforeUnmount(() => {
   gap: 16px;
 }
 
-.preview-cover {
+.preview-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
   width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
-.preview-cover img {
+.preview-images img {
   width: 100%;
-  max-height: 400px;
+  height: 200px;
   object-fit: cover;
+  border-radius: 8px;
 }
 
 .preview-content h2 {
   margin: 0;
   font-size: 24px;
   color: #333;
+}
+
+.preview-name {
+  margin: 0;
+  font-size: 18px;
+  color: #666;
+  font-weight: normal;
 }
 
 .preview-meta {

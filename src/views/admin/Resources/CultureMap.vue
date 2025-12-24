@@ -575,13 +575,9 @@ const previewData = ref<CultureItem | null>(null)
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
 
-// 计算属性 - 根据状态筛选显示的项
+// 计算属性 - 显示的项（后端已筛选）
 const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    if (statusFilter.value === 'active') return item.showFront === 1
-    if (statusFilter.value === 'inactive') return item.showFront === 0
-    return true
-  })
+  return items.value
 })
 
 /**
@@ -599,6 +595,13 @@ const loadData = async () => {
     // 添加搜索关键词（如果有）
     if (searchKeyword.value.trim()) {
       params.keyword = searchKeyword.value.trim()
+    }
+    
+    // 添加状态筛选（如果不是全部）
+    if (statusFilter.value === 'active') {
+      params.showFront = 1
+    } else if (statusFilter.value === 'inactive') {
+      params.showFront = 0
     }
     
     console.log('请求参数:', params)
@@ -635,7 +638,8 @@ const handleSearch = () => {
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑通过 computed 实现，不需要重新加载数据
+  currentPage.value = 1 // 重置到第一页
+  loadData()
 }
 
 // 页码变化

@@ -40,6 +40,7 @@ export interface RedCulturePageParams {
   pageIndex: number // 页码，默认1
   pageSize: number // 每页大小，默认10条
   keyword?: string // 搜索关键词（可选）
+  showFront?: number // 前台显示状态筛选：1=显示；0=隐藏（可选）
 }
 
 /**

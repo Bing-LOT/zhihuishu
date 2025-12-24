@@ -286,7 +286,7 @@ onMounted(() => {
 .info-card {
   width: 364px;
   flex-shrink: 0;
-  background: linear-gradient(90deg, #ecddb9 0%, #ecddb9 100%);
+  /* background: rgba(236, 221, 185, 0.9); */
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
@@ -307,6 +307,7 @@ onMounted(() => {
   background-image: url('/images/Frame_1000015326.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: 0.2;
   pointer-events: none;
   z-index: 0;
@@ -378,7 +379,7 @@ onMounted(() => {
 /* 右侧视频卡片 */
 .video-card {
   flex: 1;
-  background: linear-gradient(90deg, #ecddb9 0%, #ecddb9 100%);
+  /* background: rgba(236, 221, 185, 0.9); */
   border: 1px solid #fdd4a6;
   border-radius: 16px;
   padding: 24px;
@@ -396,9 +397,10 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/Frame_1000015326.png');
+  background-image: url('/images/Frame_1000015327.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: 0.2;
   pointer-events: none;
   z-index: 0;

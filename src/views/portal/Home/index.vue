@@ -216,6 +216,26 @@
         />
       </div>
     </section>
+
+    <!-- 视频播放器弹窗 -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showVideoPlayer" class="video-player-modal" @click.self="closeVideoPlayer">
+          <div class="video-player-modal__content">
+            <button class="video-player-modal__close" @click="closeVideoPlayer" aria-label="关闭">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path d="M24 8L8 24M8 8L24 24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <VideoPlayer
+              :src="currentPlayingVideoUrl"
+              :poster="currentPlayingVideoPoster"
+              :autoplay="true"
+            />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -224,6 +244,7 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import VideoCard from '@/components/common/VideoCard/index.vue'
+import VideoPlayer from '@/components/common/VideoPlayer/index.vue'
 import type { Course } from '@/types'
 import { getBannerList, type BannerItem } from '@/api/banner'
 import { getVideoList, type VideoItem } from '@/api/video'
@@ -418,9 +439,24 @@ const selectVideo = (index: number) => {
   currentVideo.value = index
 }
 
+// ===== 视频播放器弹窗 =====
+const showVideoPlayer = ref(false)
+const currentPlayingVideoUrl = ref('')
+const currentPlayingVideoPoster = ref('')
+
 const playVideo = () => {
-  // TODO: 实现视频播放功能
-  console.log('播放视频')
+  const video = videoList.value[currentVideo.value]
+  if (video && video.videoUrl) {
+    currentPlayingVideoUrl.value = video.videoUrl
+    currentPlayingVideoPoster.value = video.thumbnail
+    showVideoPlayer.value = true
+  }
+}
+
+const closeVideoPlayer = () => {
+  showVideoPlayer.value = false
+  currentPlayingVideoUrl.value = ''
+  currentPlayingVideoPoster.value = ''
 }
 
 // ===== 课程列表 =====
@@ -1171,5 +1207,60 @@ onUnmounted(() => {
   display: flex;
   gap: 48px;
   align-items: center;
+}
+
+/* ===== 视频播放器弹窗 ===== */
+.video-player-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 40px;
+}
+
+.video-player-modal__content {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-player-modal__close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-player-modal__close:hover {
+  opacity: 0.7;
+}
+
+/* 过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -298,10 +298,10 @@ export interface VideoExpoListItem {
  * 习思想优秀视频展播列表响应
  */
 export interface VideoExpoListResponse {
-  list: VideoExpoListItem[]
+  records: VideoExpoListItem[]  // API实际返回的是 records 而不是 list
   total: number
-  pageIndex: number
-  pageSize: number
+  size: number
+  current: number
 }
 
 /**
@@ -342,6 +342,109 @@ export function editVideoExpo(data: VideoExpoEditItem): Promise<void> {
 export function deleteVideoExpo(id: number): Promise<void> {
   return request({
     url: `/xiThought/videoExpo/remove/${id}`,
+    method: 'DELETE'
+  })
+}
+
+/**
+ * 实践案例列表查询参数
+ */
+export interface ExampleExpoListParams {
+  pageIndex: number
+  pageSize: number
+  keyword?: string
+  showFront?: number
+}
+
+/**
+ * 实践案例列表项
+ */
+export interface ExampleExpoListItem {
+  id: number
+  title: string
+  coverUrl: string
+  category: string
+  college: string
+  presenter: string
+  content: string
+  showFront: number
+  createTime?: string
+  updateTime?: string
+}
+
+/**
+ * 实践案例列表响应
+ */
+export interface ExampleExpoListResponse {
+  records: ExampleExpoListItem[]  // API实际返回的是 records 而不是 list
+  total: number
+  size: number
+  current: number
+}
+
+/**
+ * 获取实践案例列表（分页）
+ * @param params 查询参数
+ */
+export function getExampleExpoList(params: ExampleExpoListParams): Promise<ExampleExpoListResponse> {
+  return request({
+    url: '/xiThought/exampleExpo/page/list',
+    method: 'POST',
+    data: params
+  })
+}
+
+/**
+ * 实践案例数据结构
+ */
+export interface ExampleExpoItem {
+  title: string
+  coverUrl: string
+  category: string
+  college: string
+  presenter: string
+  content: string
+  showFront: number
+}
+
+/**
+ * 新增实践案例
+ * @param data 实践案例数据
+ */
+export function addExampleExpo(data: ExampleExpoItem): Promise<{ id: number }> {
+  return request({
+    url: '/xiThought/exampleExpo/add',
+    method: 'POST',
+    data
+  })
+}
+
+/**
+ * 编辑实践案例数据结构
+ */
+export interface ExampleExpoEditItem extends ExampleExpoItem {
+  id: number
+}
+
+/**
+ * 编辑实践案例
+ * @param data 实践案例数据（包含id）
+ */
+export function editExampleExpo(data: ExampleExpoEditItem): Promise<void> {
+  return request({
+    url: '/xiThought/exampleExpo/edit',
+    method: 'PUT',
+    data
+  })
+}
+
+/**
+ * 删除实践案例
+ * @param id 案例ID
+ */
+export function deleteExampleExpo(id: number): Promise<void> {
+  return request({
+    url: `/xiThought/exampleExpo/remove/${id}`,
     method: 'DELETE'
   })
 }

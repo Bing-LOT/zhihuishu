@@ -45,7 +45,7 @@
 
     <!-- 数据统计 -->
     <div class="data-stats">
-      共 {{ totalCount }} 条，筛选结果 {{ filteredItems.length }} 条
+      共 {{ totalCount }} 条
     </div>
 
     <!-- 列表内容 -->
@@ -132,12 +132,73 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredItems.length === 0" class="empty-state">
+      <div v-if="filteredItems.length === 0 && !loading" class="empty-state">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
           <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <p>暂无数据</p>
+      </div>
+
+      <!-- 加载状态 -->
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <!-- 分页组件 -->
+    <div v-if="totalCount > 0" class="pagination">
+      <div class="pagination-info">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+          <path d="M8 2V8L12 10" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="8" cy="8" r="6" stroke="#666" stroke-width="1.5"/>
+        </svg>
+        显示第 <strong>{{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalCount) }}</strong> 条，共 <strong>{{ totalCount }}</strong> 条
+      </div>
+      <div class="pagination-controls">
+        <button 
+          class="pagination-btn pagination-btn--prev" 
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+          title="上一页"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 11L5 7L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          上一页
+        </button>
+        
+        <button
+          v-for="page in visiblePages"
+          :key="page"
+          class="pagination-btn pagination-btn--page"
+          :class="{ 'pagination-btn--active': page === currentPage }"
+          @click="handlePageChange(page)"
+        >
+          {{ page }}
+        </button>
+        
+        <button 
+          class="pagination-btn pagination-btn--next" 
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+          title="下一页"
+        >
+          下一页
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M5 3L9 7L5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        
+        <div class="pagination-divider"></div>
+        
+        <select v-model="pageSize" class="pagination-size" @change="handlePageSizeChange" title="每页显示条数">
+          <option :value="10">10 条/页</option>
+          <option :value="20">20 条/页</option>
+          <option :value="50">50 条/页</option>
+          <option :value="100">100 条/页</option>
+        </select>
       </div>
     </div>
 
@@ -307,10 +368,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { 
+  getExampleExpoList, 
+  addExampleExpo, 
+  editExampleExpo, 
+  deleteExampleExpo,
+  type ExampleExpoListItem,
+  type ExampleExpoItem,
+  type ExampleExpoEditItem
+} from '@/api/banner'
+import { uploadFile } from '@/api/banner'
 
 interface CaseItem {
-  id: string
+  id: number
   title: string
   teacher: string
   college: string
@@ -323,32 +394,15 @@ interface CaseItem {
 }
 
 // 数据列表
-const items = ref<CaseItem[]>([
-  {
-    id: '1',
-    title: '新时代中国特色社会主义思想融入专业课程实践',
-    teacher: '张教授',
-    college: '计算机学院',
-    category: '专业必修课程',
-    description: '本课程将新时代中国特色社会主义思想与专业教学深度融合。',
-    status: 'active',
-    publishTime: '2024-11-20',
-    cover: '/images/home/video-1.jpg',
-    sort: 1
-  },
-  {
-    id: '2',
-    title: '工程伦理与职业道德',
-    teacher: '王教授',
-    college: '机械学院',
-    category: '通识教育课程',
-    description: '通过案例教学，引导学生树立正确的工程伦理观。',
-    status: 'active',
-    publishTime: '2024-11-18',
-    cover: '/images/home/video-2.jpg',
-    sort: 2
-  }
-])
+const items = ref<CaseItem[]>([])
+
+// 加载状态
+const loading = ref(false)
+
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalCount = ref(0)
 
 // 搜索和筛选
 const searchKeyword = ref('')
@@ -362,7 +416,7 @@ const coverInput = ref<HTMLInputElement | null>(null)
 
 // 表单数据
 const formData = ref({
-  id: '',
+  id: 0,
   title: '',
   cover: '',
   teacherName: '',
@@ -379,27 +433,108 @@ const previewData = ref<CaseItem | null>(null)
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
 
-// 计算属性
-const totalCount = computed(() => items.value.length)
+// 计算总页数
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
 
-const filteredItems = computed(() => {
-  return items.value.filter(item => {
-    const matchSearch = !searchKeyword.value || 
-      item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    const matchStatus = statusFilter.value === 'all' || item.status === statusFilter.value
-    return matchSearch && matchStatus
-  }).sort((a, b) => a.sort - b.sort)
+// 计算可见的页码
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const maxVisible = 5
+  const half = Math.floor(maxVisible / 2)
+  
+  let start = Math.max(1, currentPage.value - half)
+  let end = Math.min(totalPages.value, start + maxVisible - 1)
+  
+  if (end - start < maxVisible - 1) {
+    start = Math.max(1, end - maxVisible + 1)
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+  
+  return pages
 })
+
+// 过滤后的列表
+const filteredItems = computed(() => items.value)
+
+// 转换 API 数据为组件数据格式
+const convertApiToItem = (apiItem: ExampleExpoListItem): CaseItem => {
+  return {
+    id: apiItem.id,
+    title: apiItem.title,
+    teacher: apiItem.presenter,
+    college: apiItem.college,
+    category: apiItem.category,
+    description: apiItem.content,
+    status: apiItem.showFront === 1 ? 'active' : 'inactive',
+    publishTime: apiItem.createTime ? apiItem.createTime.split(' ')[0] : '',
+    cover: apiItem.coverUrl,
+    sort: 0
+  }
+}
+
+// 获取列表数据
+const fetchList = async () => {
+  try {
+    loading.value = true
+    
+    const params = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value,
+      keyword: searchKeyword.value || undefined,
+      showFront: statusFilter.value === 'all' ? undefined : (statusFilter.value === 'active' ? 1 : 0)
+    }
+    
+    console.log('📤 请求参数:', params)
+    const response = await getExampleExpoList(params)
+    console.log('📥 API响应数据:', response)
+    
+    // 安全检查：确保响应数据结构正确（API返回的是records字段）
+    if (response && Array.isArray(response.records)) {
+      items.value = response.records.map(convertApiToItem)
+      totalCount.value = response.total || 0
+      console.log('✅ 数据加载成功，共', totalCount.value, '条')
+    } else {
+      console.error('❌ 响应数据格式错误:', response)
+      items.value = []
+      totalCount.value = 0
+      alert('数据格式错误，请联系管理员')
+    }
+  } catch (error) {
+    console.error('获取列表失败:', error)
+    alert('获取列表失败，请稍后重试')
+    items.value = []
+    totalCount.value = 0
+  } finally {
+    loading.value = false
+  }
+}
 
 // 搜索处理
 const handleSearch = () => {
-  // 搜索逻辑已通过 computed 实现
+  currentPage.value = 1
+  fetchList()
 }
 
 // 筛选处理
 const handleFilter = () => {
-  // 筛选逻辑已通过 computed 实现
+  currentPage.value = 1
+  fetchList()
+}
+
+// 页码改变
+const handlePageChange = (page: number) => {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  fetchList()
+}
+
+// 每页条数改变
+const handlePageSizeChange = () => {
+  currentPage.value = 1
+  fetchList()
 }
 
 // 拖拽开始
@@ -432,15 +567,21 @@ const triggerCoverUpload = () => {
 }
 
 // 处理封面选择
-const handleCoverChange = (event: Event) => {
+const handleCoverChange = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      formData.value.cover = e.target?.result as string
+    try {
+      loading.value = true
+      const result = await uploadFile(file)
+      formData.value.cover = result.url
+      alert('图片上传成功')
+    } catch (error) {
+      console.error('图片上传失败:', error)
+      alert('图片上传失败，请重试')
+    } finally {
+      loading.value = false
     }
-    reader.readAsDataURL(file)
   }
 }
 
@@ -475,21 +616,25 @@ const previewItem = (item: CaseItem) => {
 }
 
 // 删除项目
-const deleteItem = (id: string) => {
+const deleteItem = async (id: number) => {
   if (confirm('确定要删除这个案例吗？')) {
-    const index = items.value.findIndex(item => item.id === id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // 重新排序
-      items.value.forEach((item, idx) => {
-        item.sort = idx + 1
-      })
+    try {
+      loading.value = true
+      await deleteExampleExpo(id)
+      alert('删除成功')
+      // 重新获取列表
+      await fetchList()
+    } catch (error) {
+      console.error('删除失败:', error)
+      alert('删除失败，请重试')
+    } finally {
+      loading.value = false
     }
   }
 }
 
 // 保存项目
-const saveItem = () => {
+const saveItem = async () => {
   // 验证必填项
   if (!formData.value.title) {
     alert('请输入标题')
@@ -516,40 +661,41 @@ const saveItem = () => {
     return
   }
 
-  if (showEditDialog.value) {
-    // 编辑
-    const index = items.value.findIndex(item => item.id === formData.value.id)
-    if (index > -1) {
-      items.value[index] = {
-        ...items.value[index],
-        title: formData.value.title,
-        teacher: formData.value.teacherName,
-        college: formData.value.unit,
-        category: formData.value.category,
-        description: formData.value.content,
-        status: formData.value.showOnFrontend ? 'active' : 'inactive',
-        cover: formData.value.cover,
-        sort: formData.value.displayOrder
-      }
-    }
-  } else {
-    // 新增
-    const newItem: CaseItem = {
-      id: Date.now().toString(),
+  try {
+    loading.value = true
+    
+    const apiData = {
       title: formData.value.title,
-      teacher: formData.value.teacherName,
-      college: formData.value.unit,
+      coverUrl: formData.value.cover,
       category: formData.value.category,
-      description: formData.value.content,
-      status: formData.value.showOnFrontend ? 'active' : 'inactive',
-      publishTime: new Date().toISOString().split('T')[0],
-      cover: formData.value.cover,
-      sort: formData.value.displayOrder || items.value.length + 1
+      college: formData.value.unit,
+      presenter: formData.value.teacherName,
+      content: formData.value.content,
+      showFront: formData.value.showOnFrontend ? 1 : 0
     }
-    items.value.push(newItem)
-  }
 
-  closeDialog()
+    if (showEditDialog.value) {
+      // 编辑
+      await editExampleExpo({
+        ...apiData,
+        id: formData.value.id
+      })
+      alert('编辑成功')
+    } else {
+      // 新增
+      await addExampleExpo(apiData)
+      alert('新增成功')
+    }
+
+    closeDialog()
+    // 重新获取列表
+    await fetchList()
+  } catch (error) {
+    console.error('保存失败:', error)
+    alert('保存失败，请重试')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 关闭对话框
@@ -557,7 +703,7 @@ const closeDialog = () => {
   showAddDialog.value = false
   showEditDialog.value = false
   formData.value = {
-    id: '',
+    id: 0,
     title: '',
     cover: '',
     teacherName: '',
@@ -568,6 +714,11 @@ const closeDialog = () => {
     showOnFrontend: true
   }
 }
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchList()
+})
 </script>
 
 <style scoped>
@@ -619,11 +770,18 @@ const closeDialog = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: white;
   border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  min-width: 240px;
+  border-radius: 6px;
+  min-width: 280px;
+  transition: all 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-box:focus-within {
+  border-color: #e31e24;
+  box-shadow: 0 0 0 3px rgba(227, 30, 36, 0.1);
 }
 
 .search-input {
@@ -631,42 +789,75 @@ const closeDialog = () => {
   border: none;
   outline: none;
   font-size: 14px;
+  color: #333;
+}
+
+.search-input::placeholder {
+  color: #999;
 }
 
 .filter-select {
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: white;
   border: 1px solid #d9d9d9;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
-  min-width: 120px;
+  min-width: 130px;
+  transition: all 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.filter-select:hover {
+  border-color: #e31e24;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #e31e24;
+  box-shadow: 0 0 0 3px rgba(227, 30, 36, 0.1);
 }
 
 .btn-add {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 20px;
-  background: #e31e24;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #e31e24 0%, #c71b20 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(227, 30, 36, 0.3);
 }
 
 .btn-add:hover {
-  background: #c71b20;
+  background: linear-gradient(135deg, #c71b20 0%, #a81619 100%);
+  box-shadow: 0 4px 16px rgba(227, 30, 36, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-add:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(227, 30, 36, 0.3);
 }
 
 /* 数据统计 */
 .data-stats {
   margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-left: 3px solid #e31e24;
+  border-radius: 4px;
   font-size: 14px;
   color: #666;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* 列表内容 */
@@ -680,16 +871,36 @@ const closeDialog = () => {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  padding: 16px;
+  padding: 20px;
   background: white;
   border: 1px solid #e8e8e8;
   border-radius: 8px;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: move;
+  position: relative;
+}
+
+.content-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #e31e24;
+  border-radius: 8px 0 0 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .content-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px rgba(227, 30, 36, 0.08);
+  border-color: #e31e24;
+  transform: translateY(-2px);
+}
+
+.content-item:hover::before {
+  opacity: 1;
 }
 
 .drag-handle {
@@ -705,18 +916,29 @@ const closeDialog = () => {
 }
 
 .item-thumbnail {
-  width: 160px;
-  height: 100px;
+  width: 180px;
+  height: 110px;
   flex-shrink: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
+}
+
+.content-item:hover .item-thumbnail {
+  transform: scale(1.03);
 }
 
 .item-thumbnail img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.content-item:hover .item-thumbnail img {
+  transform: scale(1.05);
 }
 
 .item-content {
@@ -726,9 +948,15 @@ const closeDialog = () => {
 
 .item-title {
   margin: 0 0 12px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.5;
+  transition: color 0.3s;
+}
+
+.content-item:hover .item-title {
+  color: #e31e24;
 }
 
 .item-meta {
@@ -748,11 +976,14 @@ const closeDialog = () => {
 }
 
 .category-tag {
-  padding: 2px 12px;
-  background: #fff7e6;
+  padding: 4px 14px;
+  background: linear-gradient(135deg, #fff7e6 0%, #fffaf0 100%);
   color: #d48806;
-  border-radius: 2px;
+  border-radius: 12px;
   font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #ffe7ba;
+  box-shadow: 0 1px 3px rgba(212, 136, 6, 0.1);
 }
 
 .item-description {
@@ -785,16 +1016,22 @@ const closeDialog = () => {
 }
 
 .action-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
-  border-radius: 4px;
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .action-btn--edit {
@@ -803,14 +1040,16 @@ const closeDialog = () => {
 
 .action-btn--edit:hover {
   background: #e6f7ff;
+  border-color: #91d5ff;
 }
 
 .action-btn--preview {
-  color: #666;
+  color: #52c41a;
 }
 
 .action-btn--preview:hover {
-  background: #f5f5f5;
+  background: #f6ffed;
+  border-color: #b7eb8f;
 }
 
 .action-btn--delete {
@@ -819,6 +1058,7 @@ const closeDialog = () => {
 
 .action-btn--delete:hover {
   background: #fff1f0;
+  border-color: #ffa39e;
 }
 
 /* 空状态 */
@@ -827,13 +1067,21 @@ const closeDialog = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 20px;
+  padding: 100px 20px;
+  background: white;
+  border-radius: 8px;
   color: #999;
 }
 
+.empty-state svg {
+  opacity: 0.6;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
 .empty-state p {
-  margin: 16px 0 0;
-  font-size: 14px;
+  margin: 20px 0 0;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 /* 对话框 */
@@ -1142,6 +1390,171 @@ textarea.form-input {
 .preview-time {
   font-size: 14px;
   color: #999;
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-info strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: #e31e24;
+  border-color: #e31e24;
+}
+
+.pagination-btn:disabled {
+  color: #d9d9d9;
+  background: #f5f5f5;
+  cursor: not-allowed;
+  border-color: #d9d9d9;
+}
+
+.pagination-btn--page {
+  min-width: 36px;
+  padding: 0;
+}
+
+.pagination-btn--active {
+  background: #e31e24;
+  color: white;
+  border-color: #e31e24;
+  font-weight: 600;
+}
+
+.pagination-btn--active:hover {
+  background: #c71b20;
+  border-color: #c71b20;
+}
+
+.pagination-btn--prev,
+.pagination-btn--next {
+  padding: 0 16px;
+  gap: 6px;
+}
+
+.pagination-btn--prev svg {
+  margin-right: 4px;
+}
+
+.pagination-btn--next svg {
+  margin-left: 4px;
+}
+
+.pagination-divider {
+  width: 1px;
+  height: 20px;
+  background: #d9d9d9;
+  margin: 0 4px;
+}
+
+.pagination-size {
+  height: 36px;
+  padding: 0 12px;
+  margin-left: 8px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-size:hover {
+  border-color: #e31e24;
+}
+
+.pagination-size:focus {
+  outline: none;
+  border-color: #e31e24;
+  box-shadow: 0 0 0 2px rgba(227, 30, 36, 0.1);
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #666;
+}
+
+.loading-state p {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #e31e24;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .pagination {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .pagination-info {
+    text-align: center;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 </style>
 

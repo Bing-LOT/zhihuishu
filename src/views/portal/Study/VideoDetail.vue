@@ -82,8 +82,33 @@
             </div>
             
             <!-- 教学设计 -->
-            <div v-else-if="currentTab === 'design'" class="course-design text-content">
-              <div v-if="course.docUrl" class="doc-download">
+            <div v-else-if="currentTab === 'design'" class="course-design">
+              <div v-if="pdfLoading" class="pdf-loading">
+                <div class="loading-spinner"></div>
+                <p>正在加载PDF文档...</p>
+              </div>
+              <div v-else-if="pdfPages.length > 0" class="pdf-viewer">
+                <!-- 第一页独占一行 -->
+                <div class="pdf-page-row first-page">
+                  <div class="pdf-page-wrapper first">
+                    <img :src="pdfPages[0]" alt="第1页" class="pdf-page-image" />
+                    <div class="pdf-page-number">第 1 页</div>
+                  </div>
+                </div>
+                
+                <!-- 其他页面两页一行 -->
+                <template v-if="pdfPages.length > 1">
+                  <div 
+                    v-for="(page, index) in pdfPages.slice(1)" 
+                    :key="index + 1"
+                    class="pdf-page-wrapper"
+                  >
+                    <img :src="page" :alt="`第${index + 2}页`" class="pdf-page-image" />
+                    <div class="pdf-page-number">第 {{ index + 2 }} 页</div>
+                  </div>
+                </template>
+              </div>
+              <div v-else-if="course.docUrl" class="doc-download">
                 <h3>教学设计文档</h3>
                 <a :href="course.docUrl" target="_blank" class="download-btn">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -93,7 +118,7 @@
                   <span>下载教学设计文档</span>
                 </a>
               </div>
-              <p v-else style="text-indent: 0; opacity: 0.5;">暂无教学设计文档</p>
+              <p v-else style="text-indent: 0; opacity: 0.5; text-align: center;">暂无教学设计文档</p>
             </div>
             
             <!-- 教学视频 -->
@@ -116,9 +141,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { getCourseExpoDetail, type CourseExpoItem } from '@/api/course'
+import * as pdfjsLib from 'pdfjs-dist'
+
+// 配置 PDF.js worker - 使用 jsDelivr CDN
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 
 /**
  * 课程详情页
@@ -140,6 +169,50 @@ const course = ref({
   videoUrl: ''
 })
 
+// PDF 相关状态
+const pdfPages = ref<string[]>([])
+const pdfLoading = ref(false)
+
+// 渲染 PDF
+const renderPDF = async (url: string) => {
+  if (!url) return
+  
+  pdfLoading.value = true
+  pdfPages.value = []
+  
+  try {
+    const loadingTask = pdfjsLib.getDocument(url)
+    const pdf = await loadingTask.promise
+    const numPages = pdf.numPages
+    
+    // 渲染每一页
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum)
+      const viewport = page.getViewport({ scale: 1.5 })
+      
+      // 创建 canvas
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      canvas.height = viewport.height
+      canvas.width = viewport.width
+      
+      if (context) {
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise
+        
+        // 将 canvas 转为图片
+        pdfPages.value.push(canvas.toDataURL())
+      }
+    }
+  } catch (error) {
+    console.error('PDF渲染失败:', error)
+  } finally {
+    pdfLoading.value = false
+  }
+}
+
 // 获取课程详情
 const fetchCourseDetail = async () => {
   try {
@@ -158,6 +231,12 @@ const fetchCourseDetail = async () => {
       brief: data.brief,
       docUrl: data.docUrl,
       videoUrl: data.videoUrl
+    }
+    
+    // 如果有文档URL，渲染PDF
+    if (data.docUrl) {
+      await nextTick()
+      await renderPDF(data.docUrl)
     }
   } catch (error) {
     console.error('获取课程详情失败:', error)
@@ -218,7 +297,7 @@ onMounted(() => {
   font-size: 16px;
   color: #333;
   margin-bottom: 32px;
-  justify-content: flex-end; /* 右对齐 */
+  justify-content: flex-start; /* 左对齐 */
 }
 
 .course-detail__breadcrumb .label,
@@ -247,7 +326,7 @@ onMounted(() => {
 /* 左侧信息卡片 */
 .course-info-card {
   width: 364px;
-  min-height: 750px;
+  height: 750px;
   flex-shrink: 0;
   background: #fff;
   background-image: url('/images/Frame_1000015326.png');
@@ -256,12 +335,23 @@ onMounted(() => {
   background-repeat: no-repeat;
   border: 1px solid #fdd4a6;
   border-radius: 16px;
-  padding: 24px;
+  padding: 24px 24px 20px 24px; /* 底部 20px */
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* 隐藏滚动条 */
+.course-info-card::-webkit-scrollbar {
+  display: none;
+}
+
+.course-info-card {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
 .card-bg-decoration {
@@ -354,21 +444,25 @@ onMounted(() => {
   flex: 1;
   border: 1px solid #fdd4a6;
   border-radius: 16px;
-  padding: 48px 24px 24px; /* 顶部留多一点给 tabs */
+  padding: 48px 24px 24px; /* 顶部留空间给 tabs，底部无 padding */
   background: rgba(255, 255, 255, 0.6);
   background-image: url('/images/Frame_1000015327.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  min-height: 750px;
+  height: 750px;
+  overflow: hidden; /* 外层不滚动 */
+  display: flex;
+  flex-direction: column;
 }
 
 .course-tabs {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+  flex-shrink: 0; /* 不收缩 */
 }
 
 .course-tab-btn {
@@ -409,15 +503,44 @@ onMounted(() => {
   opacity: 1;
 }
 
+/* 标签页内容容器 - 可滚动 */
+.course-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+/* 隐藏滚动条 */
+.course-tab-content::-webkit-scrollbar {
+  display: none;
+}
+
+.course-tab-content {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
 .text-content {
   font-size: 16px;
   line-height: 1.75;
   color: #333;
   text-indent: 2em;
+  padding-bottom: 20px; /* 底部 20px 间距 */
 }
 
 .text-content p {
   margin-bottom: 1em;
+}
+
+/* 教学设计容器 */
+.course-design {
+  text-indent: 0;
+}
+
+/* 视频容器 */
+.course-video {
+  padding-bottom: 20px; /* 底部 20px 间距 */
 }
 
 /* 视频列表样式 (简易) */
@@ -470,12 +593,101 @@ onMounted(() => {
   color: #666;
 }
 
+/* PDF 加载状态 */
+.pdf-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #bc2220;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pdf-loading p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* PDF 查看器容器 */
+.pdf-viewer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 0 20px 0; /* 底部 20px 间距 */
+}
+
+/* 第一页独占一行 */
+.pdf-page-row.first-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+/* PDF 页面包装器 */
+.pdf-page-wrapper {
+  position: relative;
+  width: calc(50% - 5px); /* 两页一行，减去间隔的一半 */
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 第一页特殊样式 */
+.pdf-page-row.first-page .pdf-page-wrapper.first {
+  width: 100%;
+  max-width: 800px;
+}
+
+.pdf-page-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* PDF 页面图片 */
+.pdf-page-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 页码标签 */
+.pdf-page-number {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* 文档下载样式 */
 .doc-download {
   display: flex;
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  padding: 40px 20px;
 }
 
 .doc-download h3 {

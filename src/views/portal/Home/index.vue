@@ -106,7 +106,7 @@
       </div>
 
       <!-- 视频缩略图轮播 -->
-      <div class="home__video-carousel">
+      <div v-if="!videosLoading && videoList.length > 0" class="home__video-carousel">
         <div class="home__video-list">
           <VideoCard
             v-for="(video, index) in videoList"
@@ -131,6 +131,11 @@
             </svg>
           </button>
         </div>
+      </div>
+      
+      <!-- 视频加载状态 -->
+      <div v-else-if="videosLoading" class="home__video-loading">
+        <span>加载视频中...</span>
       </div>
     </section>
 
@@ -220,6 +225,7 @@ import CourseCard from '@/components/common/CourseCard/index.vue'
 import VideoCard from '@/components/common/VideoCard/index.vue'
 import type { Course } from '@/types'
 import { getBannerList, type BannerItem } from '@/api/banner'
+import { getVideoList, type VideoItem } from '@/api/video'
 
 /**
  * 首页组件
@@ -290,6 +296,15 @@ const scrollToVideo = () => {
 // ===== 视频展示 =====
 const backgroundVideo = ref<HTMLVideoElement | null>(null)
 const currentVideo = ref(0)
+const videosLoading = ref(true)
+const videoList = ref<Array<{
+  id: string
+  thumbnail: string
+  title: string
+  videoUrl?: string
+  college?: string
+  createTime?: string
+}>>([])
 
 const featuredVideo = {
   date: '2025-06-25',
@@ -299,28 +314,52 @@ const featuredVideo = {
   description: '谨以此片献给福州大学2025届毕业生'
 }
 
-const videoList = [
-  {
-    id: '1',
-    thumbnail: '/images/home/video-1.jpg',
-    title: '福州大学2025毕业季微电影《干杯》'
-  },
-  {
-    id: '2',
-    thumbnail: '/images/home/video-2.jpg',
-    title: '每个人都是青春的C位'
-  },
-  {
-    id: '3',
-    thumbnail: '/images/home/video-3.jpg',
-    title: '下一站，10386'
-  },
-  {
-    id: '4',
-    thumbnail: '/images/home/video-4.jpg',
-    title: '每个人都是青春的C位'
+/**
+ * 加载视频列表数据
+ */
+const loadVideos = async () => {
+  try {
+    videosLoading.value = true
+    const data = await getVideoList()
+    // 将API数据映射到组件需要的格式
+    videoList.value = data.map(video => ({
+      id: String(video.id),
+      thumbnail: video.coverUrl,
+      title: video.title,
+      videoUrl: video.videoUrl,
+      college: video.college,
+      createTime: video.createTime
+    }))
+    console.log('✅ 视频列表加载成功:', videoList.value)
+  } catch (error) {
+    console.error('❌ 视频列表加载失败:', error)
+    // 失败时使用默认数据
+    videoList.value = [
+      {
+        id: '1',
+        thumbnail: '/images/home/video-1.jpg',
+        title: '福州大学2025毕业季微电影《干杯》'
+      },
+      {
+        id: '2',
+        thumbnail: '/images/home/video-2.jpg',
+        title: '每个人都是青春的C位'
+      },
+      {
+        id: '3',
+        thumbnail: '/images/home/video-3.jpg',
+        title: '下一站，10386'
+      },
+      {
+        id: '4',
+        thumbnail: '/images/home/video-4.jpg',
+        title: '每个人都是青春的C位'
+      }
+    ]
+  } finally {
+    videosLoading.value = false
   }
-]
+}
 
 const nextVideo = () => {
   currentVideo.value = (currentVideo.value + 1) % videoList.length
@@ -539,6 +578,7 @@ const viewMoreCourses = () => {
 onMounted(async () => {
   window.scrollTo(0, 0) // 强制滚动到顶部，防止浏览器恢复滚动位置
   await loadBanners() // 加载轮播图数据
+  await loadVideos() // 加载视频列表数据
   if (banners.value.length > 0) {
     startBannerAutoplay() // 只有当有轮播图数据时才启动自动播放
   }
@@ -931,6 +971,19 @@ onUnmounted(() => {
 
 .home__video-control:hover {
   opacity: 0.8;
+}
+
+/* 视频加载状态 */
+.home__video-loading {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  color: #ffffff;
+  font-size: 18px;
+  font-family: 'Source Han Sans CN', sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* ===== 学院案例展示区 ===== */

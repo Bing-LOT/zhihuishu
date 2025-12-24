@@ -10,4 +10,5 @@ export * from './analysis'
 export * from './ai'
 export * from './college'
 export * from './redCulture'
+export * from './video'
 

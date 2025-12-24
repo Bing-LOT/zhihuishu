@@ -100,6 +100,16 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'topics/examples',
+        name: 'TopicsExampleList',
+        component: () => import('@/views/portal/Topics/ExampleList.vue'),
+        meta: {
+          title: '示范案例展播列表',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
         path: 'study',
         name: 'Study',
         component: () => import('@/views/portal/Study/index.vue'),

@@ -23,9 +23,9 @@
         <!-- 左侧：课程信息卡片 -->
         <div class="info-card">
           <div class="card-cover">
-            <img :src="exampleDetail?.coverUrl || '/images/home/video-1.jpg'" alt="" />
+            <img :src="exampleDetail?.coverUrl" alt="" />
           </div>
-          <h3 class="card-title">{{ exampleDetail?.name || '加载中...' }}</h3>
+          <h3 class="card-title">{{ exampleDetail?.name }}</h3>
           <div class="card-info">
             <div class="info-row">
               <span class="info-label">主讲教师：</span>
@@ -67,9 +67,9 @@
         <div class="video-card">
           <!-- 标题和观看次数 -->
           <div class="video-header">
-            <h2 class="video-title">{{ exampleDetail?.name || '加载中...' }}</h2>
+            <h2 class="video-title">{{ exampleDetail?.name }}</h2>
             <div class="view-count">
-              观看次数：<span class="count-number">{{ formatViewCount(exampleDetail?.statPv || 0) }}</span>
+              观看次数：<span class="count-number">{{ formatViewCount(exampleDetail?.statPv) }}</span>
             </div>
           </div>
 
@@ -85,9 +85,6 @@
             >
               您的浏览器不支持视频播放
             </video>
-            <div v-else class="video-placeholder">
-              <p>视频加载中...</p>
-            </div>
           </div>
         </div>
       </div>
@@ -133,7 +130,10 @@ const recommendList = ref<Course[]>([])
 const videoPlayerRef = ref<HTMLVideoElement>()
 
 // 格式化观看次数
-const formatViewCount = (count: number): string => {
+const formatViewCount = (count?: number): string => {
+  if (count === undefined || count === null) {
+    return '0'
+  }
   if (count >= 10000) {
     return (count / 10000).toFixed(1) + 'w+'
   }

@@ -239,19 +239,20 @@ export function getXiThoughtVideoPageList(params: XiThoughtVideoPageParams): Pro
  */
 export interface XiThoughtExampleVideo {
   id: number          // 业务id
-  name: string        // 课程名称
-  coverUrl: string    // 封面
+  name: string        // 案例/课程名称
+  coverUrl: string    // 封面图片
   createTime: string  // 发布时间
   teachers?: Array<{  // 主讲教师信息
     name: string
     title?: string
   }>
-  property?: string   // 课程性质
-  direction?: string  // 入选方向
   college?: string    // 所在学院
+  direction?: string  // 入选方向：面向产出、教学有道
+  property?: string   // 课程性质
   content?: string    // 思政元素
-  videoUrl?: string   // 案例视频
+  videoUrl?: string   // 教学视频
   statPv?: number     // 浏览量
+  showFront?: number  // 前台显示：1=显示；0=不显示
 }
 
 /**

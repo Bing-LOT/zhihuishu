@@ -88,7 +88,7 @@
             <div class="header-info">
               <img src="/images/gailanmulu_icon.png" alt="" class="header-icon" />
               <h3>文件目录</h3>
-              <span class="header-count">共计收录 <span class="highlight">19467个</span> 文件</span>
+              <span class="header-count">共计收录 <span class="highlight">{{ total }}个</span> 文件</span>
             </div>
             <div class="header-search">
               <div class="search-icon">
@@ -97,14 +97,26 @@
                   <path d="M17.5 17.5L13.875 13.875" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
-              <input type="text" placeholder="请输入" v-model="searchQuery" />
-              <button class="search-btn">搜索</button>
+              <input 
+                type="text" 
+                placeholder="请输入" 
+                v-model="searchQuery"
+                @keyup.enter="handleSearch"
+              />
+              <button class="search-btn" @click="handleSearch">搜索</button>
             </div>
           </div>
 
           <!-- 资源列表 -->
           <div class="resource-list">
+            <div v-if="loading" class="loading-state">
+              <p>加载中...</p>
+            </div>
+            <div v-else-if="resourceList.length === 0" class="empty-state">
+              <p>暂无数据</p>
+            </div>
             <div 
+              v-else
               v-for="item in resourceList" 
               :key="item.id"
               class="resource-item"
@@ -114,25 +126,40 @@
                 <span class="bullet"></span>
                 {{ item.title }}
               </div>
-              <span class="resource-date">{{ item.date }}</span>
+              <span class="resource-date">{{ formatDate(item.createTime) }}</span>
             </div>
           </div>
 
           <!-- 分页 -->
-          <div class="pagination">
-            <span class="page-info">共 749 条，每页 20 条</span>
-            <button class="page-btn" disabled>上一页</button>
+          <div class="pagination" v-if="total > 0">
+            <span class="page-info">共 {{ total }} 条，每页 {{ pageSize }} 条</span>
+            <button 
+              class="page-btn" 
+              :disabled="currentPage <= 1"
+              @click="handlePrevPage"
+            >
+              上一页
+            </button>
             <div class="page-numbers">
-              <button class="page-num active">1</button>
-              <button class="page-num">2</button>
-              <button class="page-num">3</button>
-              <button class="page-num">4</button>
-              <span class="page-ellipsis">...</span>
-              <button class="page-num">21</button>
-              <button class="page-num">22</button>
-              <button class="page-num">23</button>
+              <template v-for="(page, index) in pageNumbers" :key="index">
+                <button 
+                  v-if="typeof page === 'number'"
+                  class="page-num"
+                  :class="{ active: currentPage === page }"
+                  @click="handlePageChange(page)"
+                >
+                  {{ page }}
+                </button>
+                <span v-else class="page-ellipsis">{{ page }}</span>
+              </template>
             </div>
-            <button class="page-btn">下一页</button>
+            <button 
+              class="page-btn"
+              :disabled="currentPage >= totalPages"
+              @click="handleNextPage"
+            >
+              下一页
+            </button>
           </div>
         </div>
       </div>
@@ -141,38 +168,150 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { getPoliticalResourceList } from '@/api/resource'
+import type { PoliticalResourceItem } from '@/types'
 
 /**
  * 门户 - 大资源（思政资源）
  */
 const router = useRouter()
 
-const currentCategory = ref('policy')
+// 当前分类：'policy'=政策文件(0), 'material'=思政素材(1)
+const currentCategory = ref<'policy' | 'material'>('policy')
 const searchQuery = ref('')
+const loading = ref(false)
 
-// 模拟资源列表数据
-const resourceList = ref([
-  { id: 1, title: '中国正能量，为奋进的中国吹响号角', date: '2025-09-03' },
-  { id: 2, title: '一文看懂，居民的钱都投资去了哪里？', date: '2025-09-03' },
-  { id: 3, title: '联播+｜事关你我，这场会议释放4大民生信号', date: '2025-09-03' },
-  { id: 4, title: '为什么现在中端机更受欢迎？看了这几款我完全懂了', date: '2025-09-03' },
-  { id: 5, title: 'A股暴力拉升，人民币狂涨，牛市要来了吗？', date: '2025-09-03' },
-  { id: 6, title: '无人机全程拍摄！时隔三十多年再探切尔诺贝利核电站 如今变成什么样', date: '2025-09-03' },
-  { id: 7, title: '进北大每人交10800元，研学还是打劫？', date: '2025-09-03' },
-  { id: 8, title: '马斯克：如果没有外星人，那么我们就只是黑暗深渊中一根小蜡烛', date: '2025-09-03' },
-  { id: 9, title: '“棚改2.0”？中信证券：这一轮“城中村改造”不一样', date: '2025-09-03' },
-  { id: 10, title: '银行业危机风波未完：仍有一颗定时炸弹滴滴作响！', date: '2025-09-03' },
-  { id: 11, title: '水果不甜也会高糖？山楂到底会不会让人长胖？', date: '2025-09-03' },
-  { id: 12, title: 'A股暴力拉升，人民币狂涨，牛市要来了吗？', date: '2025-09-03' },
-  { id: 13, title: '基金取消净值估算，有什么影响？会不会影响基金的收益？', date: '2025-09-03' },
-  { id: 14, title: '女子去银行取15万现金，工作人员细查后报警，民警顺线抓洗钱团伙', date: '2025-09-03' }
-])
+// 分页数据
+const currentPage = ref(1)
+const pageSize = ref(20)
+const total = ref(0)
+const totalPages = ref(0)
 
-const handleResourceClick = (item: any) => {
+// 资源列表数据
+const resourceList = ref<PoliticalResourceItem[]>([])
+
+// 计算分类对应的数字值
+const categoryValue = computed(() => {
+  return currentCategory.value === 'policy' ? 0 : 1
+})
+
+// 获取资源列表
+const fetchResourceList = async () => {
+  try {
+    loading.value = true
+    const params = {
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value,
+      category: categoryValue.value,
+      keyword: searchQuery.value || undefined
+    }
+    
+    const response = await getPoliticalResourceList(params)
+    resourceList.value = response.records || []
+    total.value = response.total || 0
+    totalPages.value = response.pages || 0
+  } catch (error) {
+    console.error('获取资源列表失败:', error)
+    resourceList.value = []
+    total.value = 0
+    totalPages.value = 0
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听分类变化，重置页码并刷新列表
+watch(currentCategory, () => {
+  currentPage.value = 1
+  fetchResourceList()
+})
+
+// 搜索处理
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchResourceList()
+}
+
+// 分页处理
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  fetchResourceList()
+}
+
+const handlePrevPage = () => {
+  if (currentPage.value > 1) {
+    handlePageChange(currentPage.value - 1)
+  }
+}
+
+const handleNextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    handlePageChange(currentPage.value + 1)
+  }
+}
+
+// 生成分页按钮
+const pageNumbers = computed(() => {
+  const pages: (number | string)[] = []
+  const showPages = 7 // 显示的页码数量
+  
+  if (totalPages.value <= showPages) {
+    // 总页数较少，显示所有页码
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    // 总页数较多，显示部分页码
+    if (currentPage.value <= 4) {
+      // 当前页靠前
+      for (let i = 1; i <= 4; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(totalPages.value - 2)
+      pages.push(totalPages.value - 1)
+      pages.push(totalPages.value)
+    } else if (currentPage.value >= totalPages.value - 3) {
+      // 当前页靠后
+      pages.push(1)
+      pages.push(2)
+      pages.push(3)
+      pages.push('...')
+      for (let i = totalPages.value - 3; i <= totalPages.value; i++) {
+        pages.push(i)
+      }
+    } else {
+      // 当前页在中间
+      pages.push(1)
+      pages.push(2)
+      pages.push('...')
+      pages.push(currentPage.value - 1)
+      pages.push(currentPage.value)
+      pages.push(currentPage.value + 1)
+      pages.push('...')
+      pages.push(totalPages.value - 1)
+      pages.push(totalPages.value)
+    }
+  }
+  
+  return pages
+})
+
+// 资源点击处理
+const handleResourceClick = (item: PoliticalResourceItem) => {
   router.push(`/resources/detail/${item.id}`)
 }
+
+// 格式化日期
+const formatDate = (dateStr: string | undefined) => {
+  if (!dateStr) return ''
+  return dateStr.split(' ')[0] // 只取日期部分
+}
+
+// 初始化加载
+fetchResourceList()
 </script>
 
 <style scoped>
@@ -475,6 +614,17 @@ const handleResourceClick = (item: any) => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 500px;
+}
+
+.loading-state,
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 16px;
 }
 
 .resource-item {

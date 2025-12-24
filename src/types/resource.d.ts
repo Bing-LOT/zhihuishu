@@ -140,6 +140,8 @@ export interface PoliticalResourceListParams {
   pageIndex: number
   /** 每页大小，默认10条 */
   pageSize: number
+  /** 分类：0=政策文件；1=思政素材 */
+  category: 0 | 1
   /** 搜索关键词（可选） */
   keyword?: string
   /** 显示状态：1=显示；0=隐藏；不传显示所有（可选） */

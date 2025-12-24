@@ -63,13 +63,13 @@
 
         <!-- 课程轮播 -->
         <div class="courses-carousel">
-          <button class="carousel-btn carousel-btn--prev" @click="prevSlide">
+          <button class="carousel-btn carousel-btn--prev" @click="prevSlide" :disabled="loading">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <path d="M20 24L12 16L20 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
 
-          <div class="courses-carousel__content">
+          <div class="courses-carousel__content" v-if="!loading && excellentCourses.length > 0">
             <!-- 第一行 -->
             <div class="courses-row">
               <div
@@ -161,7 +161,22 @@
             </div>
           </div>
 
-          <button class="carousel-btn carousel-btn--next" @click="nextSlide">
+          <!-- 加载状态 -->
+          <div class="courses-carousel__content" v-else-if="loading">
+            <div class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>加载中...</p>
+            </div>
+          </div>
+
+          <!-- 空状态 -->
+          <div class="courses-carousel__content" v-else>
+            <div class="empty-state">
+              <p>暂无课程数据</p>
+            </div>
+          </div>
+
+          <button class="carousel-btn carousel-btn--next" @click="nextSlide" :disabled="loading">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <path d="M12 24L20 16L12 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -436,8 +451,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getNiceCourseTopList } from '@/api/course'
+import type { NiceCourseItem } from '@/api/course'
 
 const router = useRouter()
 
@@ -454,59 +471,70 @@ const nextSlide = () => {
 }
 
 // 优秀思政课堂数据
-const excellentCourses = ref([
-  {
-    id: '1',
-    title: '教学督导表扬的优秀本科课堂第二十四期',
-    cover: '/images/home/video-1.jpg',
-    courseName: '马克思主义基本原理',
-    teacher: '董海峰-副教授',
-    semester: '2025年春季学期',
-    supervisor: '戴力芬',
-    publishTime: '2025-12-11',
-    views: 3456,
-    description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。本期教学督导表扬的优秀课堂授课教师，在课堂教学中大胆改革与创新，将AI技术融入教学实践，实现课堂"赋能"。她通过动态问题链激发学生探索兴趣，'
-  },
-  {
-    id: '2',
-    title: '教学督导表扬的优秀本科课堂第二十四期',
-    cover: '/images/home/video-2.jpg',
-    courseName: '军事理论',
-    teacher: '吴美川',
-    supervisor: '吴美川',
-    semester: '2025年春季学期',
-    college: '信息学院',
-    publishTime: '2025-12-11 12:00',
-    views: 3456,
-    description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。本期教学督导表扬的优秀课堂授课教师，在课堂教学中大胆改革与创新，将AI技术融入教学实践，实现课堂"赋能"。她通过动态问题链激发学生探索兴趣，'
-  },
-  {
-    id: '3',
-    title: '教学督导表扬的优秀本科课堂第二十四期',
-    cover: '/images/home/video-1.jpg',
-    courseName: '这里是课程名称',
-    teacher: '吴美川',
-    supervisor: '吴美川',
-    semester: '2025年春季学期',
-    college: '信息学院',
-    publishTime: '2025-12-11 12:00',
-    views: 3456,
-    description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。本期教学督导表扬的优秀课堂授课教师，在课堂教学中大胆改革与创新，将AI技术融入教学实践，实现课堂"赋能"。她通过动态问题链激发学生探索兴趣，'
-  },
-  {
-    id: '4',
-    title: '教学督导表扬的优秀本科课堂第二十四期',
-    cover: '/images/home/video-2.jpg',
-    courseName: '军事理论',
-    teacher: '吴美川',
-    supervisor: '吴美川',
-    semester: '2025年春季学期',
-    college: '信息学院',
-    publishTime: '2025-12-11 12:00',
-    views: 3456,
-    description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。本期教学督导表扬的优秀课堂授课教师，在课堂教学中大胆改革与创新，将AI技术融入教学实践，实现课堂"赋能"。她通过动态问题链激发学生探索兴趣，'
+interface CourseItem {
+  id: string
+  title: string
+  cover: string
+  courseName: string
+  teacher: string
+  semester: string
+  supervisor: string
+  publishTime: string
+  views: number
+  description: string
+  college?: string
+  playUrl?: string
+}
+
+const excellentCourses = ref<CourseItem[]>([])
+const loading = ref(false)
+
+// 获取优秀思政课堂数据
+const fetchNiceCourses = async () => {
+  try {
+    loading.value = true
+    const data = await getNiceCourseTopList()
+    
+    // 数据映射：将API返回的数据转换为组件使用的格式
+    excellentCourses.value = data.map((item: NiceCourseItem) => ({
+      id: String(item.id),
+      title: item.title,
+      cover: item.picUrls && item.picUrls.length > 0 ? item.picUrls[0] : '/images/home/video-1.jpg',
+      courseName: item.name,
+      teacher: item.teacher,
+      semester: item.teachingTime,
+      supervisor: item.director,
+      publishTime: item.createTime,
+      views: 0, // API 返回中没有观看人数，设置默认值
+      description: item.brief || '',
+      playUrl: item.playUrl
+    }))
+  } catch (error) {
+    console.error('获取优秀思政课堂数据失败:', error)
+    // 如果接口失败，使用默认数据
+    excellentCourses.value = [
+      {
+        id: '1',
+        title: '教学督导表扬的优秀本科课堂第二十四期',
+        cover: '/images/home/video-1.jpg',
+        courseName: '马克思主义基本原理',
+        teacher: '董海峰-副教授',
+        semester: '2025年春季学期',
+        supervisor: '戴力芬',
+        publishTime: '2025-12-11',
+        views: 3456,
+        description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。'
+      }
+    ]
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchNiceCourses()
+})
 
 // "一院一品"专题数据
 const collegeCourses = ref([
@@ -757,7 +785,7 @@ const selectResource = (resource: any) => {
 
 .section-title-left {
   position: absolute;
-  bottom: 21.94%;
+  bottom: -15%;
   left: 0;
   right: 60.44%;
   top: 30.77%;
@@ -770,7 +798,7 @@ const selectResource = (resource: any) => {
 
 .section-title-right {
   position: absolute;
-  bottom: 21.94%;
+  bottom: -15%;
   left: 60.44%;
   right: 0;
   top: 30.77%;
@@ -1017,6 +1045,60 @@ const selectResource = (resource: any) => {
 
 .course-card-horizontal__watch-btn:hover {
   transform: scale(1.05);
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: white;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  margin: 0;
+  font-size: 16px;
+  color: white;
+  opacity: 0.8;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: white;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+  color: white;
+  opacity: 0.8;
+}
+
+.carousel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ===== "一院一品"专题区块 ===== */

@@ -256,3 +256,29 @@ export function getCourseExpoDetail(id: string | number): Promise<CourseExpoItem
   })
 }
 
+/**
+ * 优秀思政课堂项
+ */
+export interface NiceCourseItem {
+  id: number
+  createTime: string
+  title: string
+  name: string
+  teacher: string
+  picUrls: string[]
+  director: string
+  teachingTime: string
+  brief: string
+  playUrl: string
+}
+
+/**
+ * 获取优秀思政课堂列表
+ */
+export function getNiceCourseTopList(): Promise<NiceCourseItem[]> {
+  return request({
+    url: '/api/special/niceCourse/top/list',
+    method: 'GET'
+  })
+}
+

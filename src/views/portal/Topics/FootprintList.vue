@@ -113,15 +113,16 @@
       </div>
 
       <!-- 加载更多 -->
-      <div v-if="footprintList.length > 0 && hasMore" class="load-more">
+      <div v-if="footprintList.length > 0" class="load-more">
         <button 
-          v-if="!loading"
+          v-if="!loading && hasMore"
           class="load-more-btn" 
           @click="loadMore"
         >
           点击加载更多...
         </button>
-        <div v-else class="loading-text">加载中...</div>
+        <div v-else-if="loading" class="loading-text">加载中...</div>
+        <div v-else-if="!hasMore" class="all-loaded-text">已全部加载</div>
       </div>
     </div>
   </div>
@@ -506,14 +507,18 @@ onMounted(() => {
 }
 
 .load-more-btn,
-.loading-text {
+.loading-text,
+.all-loaded-text {
   font-size: 18px;
   color: #333;
   opacity: 0.5;
   background: transparent;
   border: none;
-  cursor: pointer;
   transition: opacity 0.3s;
+}
+
+.load-more-btn {
+  cursor: pointer;
 }
 
 .load-more-btn:hover {

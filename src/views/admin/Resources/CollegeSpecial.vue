@@ -216,54 +216,68 @@
             <input
               v-model="formData.teachers"
               type="text"
-              placeholder="请输入教师姓名，多个教师用顿号（、）分隔"
+              placeholder="请输入教师姓名"
               class="form-input"
             />
-            <small class="field-hint">
-              多个教师请用顿号（、）分隔，例如：张三、李四
-            </small>
           </div>
 
           <div class="form-group">
             <label>所属单位 <span class="required">*</span></label>
             <select v-model="formData.college" class="form-input">
               <option value="">请选择学院</option>
-              <option value="计算机学院">计算机学院</option>
-              <option value="机械学院">机械学院</option>
-              <option value="电气工程与自动学院">电气工程与自动学院</option>
-              <option value="化学学院">化学学院</option>
-              <option value="数学与统计学院">数学与统计学院</option>
-              <option value="物理与信息工程学院">物理与信息工程学院</option>
+              <option value="计算机与大数据学院">计算机与大数据学院</option>
+              <option value="机械工程学院">机械工程学院</option>
+              <option value="材料科学与工程学院">材料科学与工程学院</option>
+              <option value="化学化工学院">化学化工学院</option>
               <option value="土木工程学院">土木工程学院</option>
               <option value="经济与管理学院">经济与管理学院</option>
+              <option value="法学院">法学院</option>
+              <option value="外国语学院">外国语学院</option>
+              <option value="数学与统计学院">数学与统计学院</option>
+              <option value="物理与信息工程学院">物理与信息工程学院</option>
+              <option value="生物科学与工程学院">生物科学与工程学院</option>
+              <option value="环境与安全工程学院">环境与安全工程学院</option>
+              <option value="建筑与城乡规划学院">建筑与城乡规划学院</option>
+              <option value="紫金矿业学院">紫金矿业学院</option>
+              <option value="海洋学院">海洋学院</option>
+              <option value="石油化工学院">石油化工学院</option>
+              <option value="交通运输学院">交通运输学院</option>
               <option value="马克思主义学院">马克思主义学院</option>
+              <option value="人文社会科学学院">人文社会科学学院</option>
             </select>
           </div>
 
           <div class="form-group">
             <label>课程分类 <span class="required">*</span></label>
-            <input
-              v-model="formData.types"
-              type="text"
-              placeholder="请输入课程分类，多个分类用顿号（、）分隔"
-              class="form-input"
-            />
-            <small class="field-hint">
-              多个分类请用顿号（、）分隔，例如：专业必修课程、实践课程
-            </small>
+            <select v-model="formData.types" class="form-input">
+              <option value="">请选择课程分类</option>
+              <option value="通识教育课程">通识教育课程</option>
+              <option value="学科基础课程">学科基础课程</option>
+              <option value="专业必修课程">专业必修课程</option>
+              <option value="专业选修课程">专业选修课程</option>
+              <option value="跨学科或本硕博课程">跨学科或本硕博课程</option>
+              <option value="双创实践与素质拓展课程">双创实践与素质拓展课程</option>
+              <option value="集中性实践课程">集中性实践课程</option>
+            </select>
           </div>
 
           <div class="form-group">
             <label>课程详细内容 <span class="required">*</span></label>
-            <textarea
-              v-model="formData.content"
-              rows="10"
-              placeholder="请输入课程详细内容（支持富文本）"
-              class="form-textarea"
-            ></textarea>
-            <small class="field-hint">
-              提示：实际使用时可集成富文本编辑器
-            </small>
+            <div class="editor-container">
+              <Toolbar
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                mode="default"
+                class="editor-toolbar"
+              />
+              <Editor
+                v-model="formData.content"
+                :defaultConfig="editorConfig"
+                mode="default"
+                class="editor-content"
+                @onCreated="handleCreated"
+              />
+            </div>
           </div>
 
           <div class="form-group">
@@ -321,9 +335,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { getCollegePageList, type CollegeItem } from '@/api/college'
+import { ref, onMounted, onBeforeUnmount, shallowRef } from 'vue'
+import { getCollegePageList, addCollege, type CollegeItem } from '@/api/college'
+import { uploadFile } from '@/api/banner'
 import Pagination from '@/components/common/Pagination/index.vue'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import '@wangeditor/editor/dist/css/style.css'
 
 // 数据列表
 const items = ref<CollegeItem[]>([])
@@ -366,6 +384,81 @@ const previewData = ref<CollegeItem | null>(null)
 
 // 拖拽相关
 const draggedIndex = ref<number | null>(null)
+
+// 富文本编辑器相关
+const editorRef = shallowRef<IDomEditor>()
+
+// 编辑器配置
+const toolbarConfig: Partial<IToolbarConfig> = {
+  toolbarKeys: [
+    'headerSelect',
+    'bold',
+    'italic',
+    'underline',
+    'through',
+    '|',
+    'color',
+    'bgColor',
+    '|',
+    'fontSize',
+    'fontFamily',
+    'lineHeight',
+    '|',
+    'bulletedList',
+    'numberedList',
+    'todo',
+    '|',
+    'justifyLeft',
+    'justifyCenter',
+    'justifyRight',
+    'justifyJustify',
+    '|',
+    'emotion',
+    'insertLink',
+    'insertImage',
+    'insertTable',
+    'codeBlock',
+    'divider',
+    '|',
+    'undo',
+    'redo',
+    '|',
+    'fullScreen'
+  ]
+}
+
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '请输入课程详细内容...',
+  MENU_CONF: {
+    // 配置上传图片
+    uploadImage: {
+      // 单个文件的最大体积限制，默认为 2M
+      maxFileSize: 5 * 1024 * 1024, // 5M
+      // 最多可上传几个文件，默认为 100
+      maxNumberOfFiles: 10,
+      // 选择文件时的类型限制，默认为 ['image/*']
+      allowedFileTypes: ['image/*'],
+      // 自定义上传
+      async customUpload(file: File, insertFn: any) {
+        try {
+          console.log('富文本编辑器上传图片:', file.name)
+          const result = await uploadFile(file)
+          console.log('图片上传成功:', result.url)
+          // 插入图片到编辑器
+          insertFn(result.url, '', result.url)
+        } catch (error) {
+          console.error('图片上传失败:', error)
+          alert('图片上传失败，请重试')
+        }
+      }
+    }
+  }
+}
+
+// 编辑器创建完成
+const handleCreated = (editor: IDomEditor) => {
+  editorRef.value = editor
+}
 
 // 加载数据
 const loadData = async () => {
@@ -501,7 +594,7 @@ const editItem = (item: CollegeItem) => {
     coverUrl: item.coverUrl || '',
     teachers: item.teachers.join('、'),
     college: item.college,
-    types: item.types.join('、'),
+    types: item.types[0] || '', // 取数组第一个元素
     content: item.content,
     showOnFrontend: item.showFront === 1
   }
@@ -550,25 +643,38 @@ const saveItem = async () => {
     return
   }
   if (!formData.value.types) {
-    alert('请输入课程分类')
+    alert('请选择课程分类')
     return
   }
   if (!formData.value.content) {
-    alert('请输入详情内容')
+    alert('请输入课程详细内容')
     return
   }
 
   try {
+    loading.value = true
+    
+    // 处理封面图片：如果是 base64，需要先上传
+    let coverUrl = formData.value.coverUrl
+    if (coverUrl.startsWith('data:image/')) {
+      // base64 图片，需要先转换为 File 对象并上传
+      const blob = await fetch(coverUrl).then(r => r.blob())
+      const file = new File([blob], 'cover.jpg', { type: blob.type })
+      const uploadResult = await uploadFile(file)
+      coverUrl = uploadResult.url
+      console.log('封面图片上传成功:', coverUrl)
+    }
+    
     // 将字符串转换为数组
     const teachersArray = formData.value.teachers.split('、').filter(t => t.trim())
-    const typesArray = formData.value.types.split('、').filter(t => t.trim())
+    const typesArray = [formData.value.types] // 单选值转为数组
     
     if (showEditDialog.value) {
       // TODO: 调用编辑API
       // await updateCollege({
       //   id: Number(formData.value.id),
       //   name: formData.value.name,
-      //   coverUrl: formData.value.coverUrl,
+      //   coverUrl: coverUrl,
       //   teachers: teachersArray,
       //   college: formData.value.college,
       //   types: typesArray,
@@ -576,26 +682,32 @@ const saveItem = async () => {
       //   showFront: formData.value.showOnFrontend ? 1 : 0
       // })
       alert('编辑功能暂未实现，需要调用API接口')
+      closeDialog()
     } else {
-      // TODO: 调用新增API
-      // await addCollege({
-      //   name: formData.value.name,
-      //   coverUrl: formData.value.coverUrl,
-      //   teachers: teachersArray,
-      //   college: formData.value.college,
-      //   types: typesArray,
-      //   content: formData.value.content,
-      //   showFront: formData.value.showOnFrontend ? 1 : 0
-      // })
-      alert('新增功能暂未实现，需要调用API接口')
+      // 调用新增API
+      await addCollege({
+        name: formData.value.name,
+        coverUrl: coverUrl,
+        teachers: teachersArray,
+        college: formData.value.college,
+        types: typesArray,
+        content: formData.value.content,
+        showFront: formData.value.showOnFrontend ? 1 : 0
+      })
+      
+      console.log('新增成功')
+      alert('新增成功！')
+      closeDialog()
+      
+      // 保存成功后重新加载数据
+      await loadData()
     }
-    
-    closeDialog()
-    // 保存成功后重新加载数据
-    // await loadData()
-  } catch (error) {
+  } catch (error: any) {
     console.error('保存失败:', error)
-    alert('保存失败，请稍后重试')
+    const errorMsg = error?.message || '保存失败，请稍后重试'
+    alert(errorMsg)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -618,6 +730,14 @@ const closeDialog = () => {
 // 组件挂载时加载数据
 onMounted(() => {
   loadData()
+})
+
+// 组件销毁前
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor) {
+    editor.destroy()
+  }
 })
 </script>
 
@@ -1125,6 +1245,39 @@ onMounted(() => {
   margin-top: 6px;
   font-size: 12px;
   color: #999;
+}
+
+/* 富文本编辑器 */
+.editor-container {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.editor-container:focus-within {
+  border-color: #e31e24;
+}
+
+.editor-toolbar {
+  border-bottom: 1px solid #d9d9d9;
+  background-color: #fafafa;
+}
+
+.editor-content {
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* 编辑器内容区域样式 */
+.editor-content :deep(.w-e-text-container) {
+  background-color: white;
+}
+
+.editor-content :deep(.w-e-text-placeholder) {
+  color: #999;
+  font-style: normal;
 }
 
 .dialog__footer {

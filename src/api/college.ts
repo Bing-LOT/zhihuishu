@@ -50,9 +50,22 @@ export function getCollegePageList(params: CollegePageParams) {
 }
 
 /**
+ * 新增一院一品参数
+ */
+export interface AddCollegeParams {
+  coverUrl: string // 封面图片（必需）
+  name: string // 课程名称（必需）
+  college: string // 所在学院（必需）
+  teachers: string[] // 主讲教师，多个（必需）
+  types: string[] // 建设课程类型，多个（必需）
+  content: string // 课程详情内容（必需）
+  showFront: number // 前台显示：1=显示；0=隐藏（必需）
+}
+
+/**
  * 新增一院一品
  */
-export function addCollege(data: Partial<CollegeItem>) {
+export function addCollege(data: AddCollegeParams) {
   return request.post('/college/add', data)
 }
 

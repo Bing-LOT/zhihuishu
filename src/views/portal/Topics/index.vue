@@ -202,15 +202,15 @@
             <div class="footprint-list">
               <div 
                 v-for="(item, index) in footprintList"
-                :key="index"
+                :key="item.id"
                 class="footprint-item"
               >
-                <div class="item-content">
+                <div class="item-content" @click="handleFootprintClick(item)">
                   <div class="item-left">
                     <span class="item-dot"></span>
                     <span class="item-title">{{ item.title }}</span>
                   </div>
-                  <span class="item-date">{{ item.date }}</span>
+                  <span class="item-date">{{ item.createTime }}</span>
                 </div>
                 <div v-if="index < footprintList.length - 1" class="item-divider"></div>
               </div>
@@ -386,7 +386,7 @@ const generateList = (count: number, prefix: string) => {
 list3.value = generateList(8, 's3')
 
 // 足迹目录数据
-const footprintList = ref<Array<{ title: string; date: string }>>([])
+const footprintList = ref<FootprintItem[]>([])
 
 // 获取足迹列表
 const fetchFootprintList = async () => {
@@ -394,14 +394,23 @@ const fetchFootprintList = async () => {
     const response = await getFootprintTopList()
     console.log('获取足迹列表成功：', response)
     if (response && Array.isArray(response)) {
-      // 将返回的数据转换为组件需要的格式
-      footprintList.value = response.map(item => ({
-        title: item.title,
-        date: item.createTime
-      }))
+      footprintList.value = response
     }
   } catch (error) {
     console.error('获取足迹列表失败：', error)
+  }
+}
+
+// 处理足迹项点击
+const handleFootprintClick = (item: FootprintItem) => {
+  if (item.footprintType === 0) {
+    // 富文本内容，跳转到详情页
+    router.push(`/topics/footprint/${item.id}`)
+  } else if (item.footprintType === 1) {
+    // URL地址，打开外部链接
+    if (item.content) {
+      window.open(item.content, '_blank')
+    }
   }
 }
 
@@ -765,6 +774,19 @@ onMounted(() => {
   justify-content: space-between;
   height: 24px;
   margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 8px;
+  margin: -8px -8px 16px;
+  border-radius: 4px;
+}
+
+.item-content:hover {
+  background: rgba(188, 34, 32, 0.05);
+}
+
+.item-content:hover .item-title {
+  color: #bc2220;
 }
 
 .item-left {

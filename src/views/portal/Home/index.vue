@@ -4,15 +4,31 @@
     <section class="home__hero">
       <!-- 背景图容器 -->
       <div class="home__hero-background">
-        <img src="/images/image 947.png" alt="背景" class="home__hero-bg-image" />
+        <img 
+          v-if="!bannersLoading && banners.length > 0" 
+          :src="banners[currentBanner]?.picUrl || '/images/image 947.png'" 
+          alt="背景" 
+          class="home__hero-bg-image" 
+        />
+        <img 
+          v-else-if="!bannersLoading"
+          src="/images/image 947.png" 
+          alt="背景" 
+          class="home__hero-bg-image" 
+        />
       </div>
 
       <!-- 主标题图 -->
       <div class="home__hero-title">
       </div>
 
+      <!-- 加载状态 -->
+      <div v-if="bannersLoading" class="home__hero-loading">
+        <span>加载中...</span>
+      </div>
+
       <!-- 轮播指示器 -->
-      <div class="home__hero-indicators">
+      <div v-if="!bannersLoading && banners.length > 0" class="home__hero-indicators">
         <button
           v-for="(banner, index) in banners"
           :key="banner.id"
@@ -23,14 +39,24 @@
       </div>
 
       <!-- 左侧箭头按钮 -->
-      <button class="home__hero-prev" @click="prevBanner" aria-label="上一张">
+      <button 
+        v-if="!bannersLoading && banners.length > 1" 
+        class="home__hero-prev" 
+        @click="prevBanner" 
+        aria-label="上一张"
+      >
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
           <path d="M20 24L12 16L20 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
 
       <!-- 右侧箭头按钮 -->
-      <button class="home__hero-next" @click="nextBanner" aria-label="下一张">
+      <button 
+        v-if="!bannersLoading && banners.length > 1" 
+        class="home__hero-next" 
+        @click="nextBanner" 
+        aria-label="下一张"
+      >
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
           <path d="M12 24L20 16L12 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -193,6 +219,7 @@ import { useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import VideoCard from '@/components/common/VideoCard/index.vue'
 import type { Course } from '@/types'
+import { getBannerList, type BannerItem } from '@/api/banner'
 
 /**
  * 首页组件
@@ -201,32 +228,37 @@ const router = useRouter()
 
 // ===== 英雄横幅轮播 =====
 const currentBanner = ref(0)
+const banners = ref<BannerItem[]>([])
+const bannersLoading = ref(true)
 let bannerTimer: number | null = null
 
-const banners = [
-  {
-    id: '1',
-    image: '/images/home/hero-banner-1.jpg',
-    title: '不忘初心 牢记使命'
-  },
-  {
-    id: '2',
-    image: '/images/home/hero-banner-2.jpg',
-    title: '学习贯彻党的二十大精神'
-  },
-  {
-    id: '3',
-    image: '/images/home/hero-banner-3.jpg',
-    title: '习近平新时代中国特色社会主义思想'
+/**
+ * 加载轮播图数据
+ */
+const loadBanners = async () => {
+  try {
+    bannersLoading.value = true
+    const data = await getBannerList()
+    // 按 sort 字段排序
+    banners.value = data.sort((a, b) => a.sort - b.sort)
+    console.log('✅ 轮播图加载成功:', banners.value)
+  } catch (error) {
+    console.error('❌ 轮播图加载失败:', error)
+    // 保持空数组，不使用硬编码数据
+    banners.value = []
+  } finally {
+    bannersLoading.value = false
   }
-]
+}
 
 const nextBanner = () => {
-  currentBanner.value = (currentBanner.value + 1) % banners.length
+  if (banners.value.length === 0) return
+  currentBanner.value = (currentBanner.value + 1) % banners.value.length
 }
 
 const prevBanner = () => {
-  currentBanner.value = (currentBanner.value - 1 + banners.length) % banners.length
+  if (banners.value.length === 0) return
+  currentBanner.value = (currentBanner.value - 1 + banners.value.length) % banners.value.length
 }
 
 const goToBanner = (index: number) => {
@@ -504,9 +536,12 @@ const viewMoreCourses = () => {
 }
 
 // ===== 生命周期 =====
-onMounted(() => {
+onMounted(async () => {
   window.scrollTo(0, 0) // 强制滚动到顶部，防止浏览器恢复滚动位置
-  startBannerAutoplay()
+  await loadBanners() // 加载轮播图数据
+  if (banners.value.length > 0) {
+    startBannerAutoplay() // 只有当有轮播图数据时才启动自动播放
+  }
 })
 
 onUnmounted(() => {
@@ -566,6 +601,18 @@ onUnmounted(() => {
   height: 126.98%;
   object-fit: cover;
   object-position: center;
+}
+
+/* 加载状态 */
+.home__hero-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  color: #bc2220;
+  font-size: 18px;
+  font-family: 'Source Han Sans CN', sans-serif;
 }
 
 /* 主标题图 */

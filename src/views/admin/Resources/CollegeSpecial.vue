@@ -84,7 +84,10 @@
 
         <!-- 内容信息 -->
         <div class="item-content">
-          <h3 class="item-title">{{ item.name }}</h3>
+          <h3 class="item-title">
+            {{ item.name }}
+            <span v-if="item.showFront === 0" class="status-badge status-badge--hidden">前台隐藏</span>
+          </h3>
           
           <div class="item-meta">
             <div class="meta-item">
@@ -123,8 +126,19 @@
               <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="action-btn action-btn--preview" @click="previewItem(item)" title="预览">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <button 
+            class="action-btn" 
+            :class="item.showFront === 1 ? 'action-btn--hide' : 'action-btn--show'" 
+            @click="toggleShowFront(item)" 
+            :title="item.showFront === 1 ? '隐藏' : '显示'"
+          >
+            <svg v-if="item.showFront === 1" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛关闭图标 -->
+              <path d="M11.8 11.8L4.2 4.2M11.1 8.6C10.8 9.8 9.9 10.7 8.7 11C7.2 11.4 5.6 10.8 4.8 9.5M8 3C12.5 3 15 8 15 8C14.7 8.5 14.3 9.1 13.8 9.6M1 8C1.5 7.1 2.3 6.1 3.5 5.3C4.6 4.6 6.1 4 8 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <!-- 眼睛睁开图标 -->
               <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
             </svg>
@@ -607,6 +621,44 @@ const previewItem = (item: CollegeItem) => {
   showPreviewDialog.value = true
 }
 
+// 切换显示/隐藏状态
+const toggleShowFront = async (item: CollegeItem) => {
+  const newShowFront = item.showFront === 1 ? 0 : 1
+  const actionText = newShowFront === 1 ? '显示' : '隐藏'
+  
+  if (!confirm(`确定要将该内容设置为${actionText}吗？`)) {
+    return
+  }
+  
+  try {
+    loading.value = true
+    
+    // 调用编辑API，只更新 showFront 字段
+    await updateCollege({
+      id: item.id,
+      name: item.name,
+      coverUrl: item.coverUrl,
+      teachers: item.teachers,
+      college: item.college,
+      types: item.types,
+      content: item.content,
+      showFront: newShowFront
+    })
+    
+    console.log(`${actionText}成功`)
+    alert(`${actionText}成功！`)
+    
+    // 刷新列表
+    await loadData()
+  } catch (error: any) {
+    console.error(`${actionText}失败:`, error)
+    const errorMsg = error?.message || `${actionText}失败，请稍后重试`
+    alert(errorMsg)
+  } finally {
+    loading.value = false
+  }
+}
+
 // 删除项目
 const deleteItem = async (id: number) => {
   if (confirm('确定要删除这条内容吗？')) {
@@ -911,6 +963,27 @@ onBeforeUnmount(() => {
   font-size: 16px;
   font-weight: 500;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 状态标签 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.5;
+}
+
+.status-badge--hidden {
+  background: #fff1f0;
+  color: #cf1322;
+  border: 1px solid #ffccc7;
 }
 
 .item-meta {
@@ -987,12 +1060,20 @@ onBeforeUnmount(() => {
   background: #e6f7ff;
 }
 
-.action-btn--preview {
-  color: #666;
+.action-btn--show {
+  color: #52c41a;
 }
 
-.action-btn--preview:hover {
-  background: #f5f5f5;
+.action-btn--show:hover {
+  background: #f6ffed;
+}
+
+.action-btn--hide {
+  color: #ff9800;
+}
+
+.action-btn--hide:hover {
+  background: #fff7e6;
 }
 
 .action-btn--delete {

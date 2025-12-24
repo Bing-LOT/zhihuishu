@@ -458,10 +458,12 @@ import {
   uploadFile, 
   getFootprintList,
   addFootprint,
+  editFootprint,
   type FootprintBannerItem,
   type FootprintListParams,
   type FootprintListItem,
-  type FootprintAddItem
+  type FootprintAddItem,
+  type FootprintEditItem
 } from '@/api/banner'
 
 interface BannerItem {
@@ -898,8 +900,28 @@ const saveItem = async () => {
 
   try {
     if (showEditDialog.value) {
-      // TODO: 编辑功能待实现后端API
-      alert('编辑功能待实现后端API')
+      // 编辑功能
+      console.log('🔄 开始编辑足迹...')
+      
+      const editData: FootprintEditItem = {
+        id: Number(formData.value.id),
+        title: formData.value.title,
+        footprintType: formData.value.contentType === 'richtext' ? 0 : 1,
+        content: formData.value.content,
+        pinTop: formData.value.isPinned ? 1 : 0,
+        showFront: formData.value.showOnFrontend ? 1 : 0
+      }
+      
+      console.log('请求数据:', editData)
+      
+      await editFootprint(editData)
+      console.log('✅ 足迹编辑成功')
+      
+      alert('编辑成功！')
+      closeDialog()
+      
+      // 重新加载列表
+      await loadFootprintList()
     } else {
       // 新增功能
       console.log('🔄 开始新增足迹...')

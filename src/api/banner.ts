@@ -574,3 +574,22 @@ export function addFootprint(data: FootprintAddItem): Promise<{ id: number }> {
     data
   })
 }
+
+/**
+ * 编辑足迹数据结构
+ */
+export interface FootprintEditItem extends FootprintAddItem {
+  id: number
+}
+
+/**
+ * 编辑总书记的福建足迹
+ * @param data 足迹数据（包含id）
+ */
+export function editFootprint(data: FootprintEditItem): Promise<void> {
+  return request({
+    url: '/xiThought/footprint/edit',
+    method: 'PUT',
+    data
+  })
+}

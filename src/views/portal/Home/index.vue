@@ -197,23 +197,35 @@
         </button>
       </div>
 
-      <!-- 课程卡片网格 -->
-      <div class="home__courses-grid">
-        <CourseCard
-          v-for="course in courseList.slice(0, 4)"
-          :key="course.id"
-          :course="course"
-          @click="handleCourseClick"
-        />
+      <!-- 课程加载状态 -->
+      <div v-if="coursesLoading" class="home__courses-loading">
+        <span>加载学院案例中...</span>
       </div>
 
-      <div class="home__courses-grid">
-        <CourseCard
-          v-for="course in courseList.slice(4, 8)"
-          :key="course.id"
-          :course="course"
-          @click="handleCourseClick"
-        />
+      <!-- 课程卡片网格 -->
+      <template v-else-if="!coursesLoading && courseList.length > 0">
+        <div class="home__courses-grid">
+          <CourseCard
+            v-for="course in courseList.slice(0, 4)"
+            :key="course.id"
+            :course="course"
+            @click="handleCourseClick"
+          />
+        </div>
+
+        <div v-if="courseList.length > 4" class="home__courses-grid">
+          <CourseCard
+            v-for="course in courseList.slice(4, 8)"
+            :key="course.id"
+            :course="course"
+            @click="handleCourseClick"
+          />
+        </div>
+      </template>
+
+      <!-- 空状态 -->
+      <div v-else class="home__courses-empty">
+        <span>暂无学院案例</span>
       </div>
     </section>
 
@@ -248,6 +260,7 @@ import VideoPlayer from '@/components/common/VideoPlayer/index.vue'
 import type { Course } from '@/types'
 import { getBannerList, type BannerItem } from '@/api/banner'
 import { getVideoList, type VideoItem } from '@/api/video'
+import { getTopCollegeList, type CollegeItem } from '@/api/college'
 
 /**
  * 首页组件
@@ -460,192 +473,47 @@ const closeVideoPlayer = () => {
 }
 
 // ===== 课程列表 =====
-const courseList = ref<Course[]>([
-  {
-    id: '1',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 1,
-    status: 'published',
-    studentCount: 3456,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '2',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 2,
-    status: 'published',
-    studentCount: 2563,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '3',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 3,
-    status: 'published',
-    studentCount: 4521,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '4',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 4,
-    status: 'published',
-    studentCount: 3256,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '5',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 5,
-    status: 'published',
-    studentCount: 2845,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '6',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 6,
-    status: 'published',
-    studentCount: 3698,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '7',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 7,
-    status: 'published',
-    studentCount: 2156,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
-  },
-  {
-    id: '8',
-    title: '概率论与数理统计',
-    cover: '/images/home/course-1.jpg',
-    description: '概率论与数理统计课程',
-    level: 'university',
-    teacherList: [
-      {
-        id: '1',
-        name: '刘丽军',
-        title: '教授',
-        department: '电气工程与自动学院'
-      }
-    ],
-    sort: 8,
-    status: 'published',
-    studentCount: 4123,
-    chapterCount: 12,
-    totalDuration: 720,
-    tags: ['数学', '统计'],
-    createTime: '2024-01-01',
-    updateTime: '2024-12-01'
+const courseList = ref<Course[]>([])
+const coursesLoading = ref(true)
+
+/**
+ * 加载学院案例数据
+ */
+const loadCourses = async () => {
+  try {
+    coursesLoading.value = true
+    const data = await getTopCollegeList()
+    // 将API数据映射到Course类型
+    courseList.value = data.map((college: CollegeItem, index: number) => ({
+      id: String(college.id),
+      title: college.name,
+      cover: college.coverUrl,
+      description: college.content,
+      level: 'university' as const,
+      teacherList: college.teachers.map((teacher: string, idx: number) => ({
+        id: String(idx + 1),
+        name: teacher,
+        title: '教师',
+        department: college.college
+      })),
+      sort: index + 1,
+      status: 'published' as const,
+      studentCount: college.statPv || 0,
+      chapterCount: 0,
+      totalDuration: 0,
+      tags: college.types,
+      createTime: college.createTime,
+      updateTime: college.createTime
+    }))
+    console.log('✅ 学院案例加载成功:', courseList.value)
+  } catch (error) {
+    console.error('❌ 学院案例加载失败:', error)
+    // 失败时保持空数组
+    courseList.value = []
+  } finally {
+    coursesLoading.value = false
   }
-])
+}
 
 const handleCourseClick = (course: Course) => {
   router.push(`/study/${course.id}`)
@@ -660,6 +528,7 @@ onMounted(async () => {
   window.scrollTo(0, 0) // 强制滚动到顶部，防止浏览器恢复滚动位置
   await loadBanners() // 加载轮播图数据
   await loadVideos() // 加载视频列表数据
+  await loadCourses() // 加载学院案例数据
   if (banners.value.length > 0) {
     startBannerAutoplay() // 只有当有轮播图数据时才启动自动播放
   }
@@ -1207,6 +1076,26 @@ onUnmounted(() => {
   display: flex;
   gap: 48px;
   align-items: center;
+}
+
+/* 课程加载状态 */
+.home__courses-loading {
+  width: 100%;
+  text-align: center;
+  color: #bc2220;
+  font-size: 18px;
+  font-family: 'Source Han Sans CN', sans-serif;
+  padding: 48px 0;
+}
+
+/* 课程空状态 */
+.home__courses-empty {
+  width: 100%;
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  font-family: 'Source Han Sans CN', sans-serif;
+  padding: 48px 0;
 }
 
 /* ===== 视频播放器弹窗 ===== */

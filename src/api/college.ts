@@ -104,3 +104,10 @@ export function updateCollegeSort(data: { id: number; sort: number }[]) {
   return request.post('/college/sort/batch', data)
 }
 
+/**
+ * 获取TOP学院案例列表（首页展示）
+ */
+export function getTopCollegeList() {
+  return request.get<CollegeItem[]>('/api/special/college/top/list')
+}
+

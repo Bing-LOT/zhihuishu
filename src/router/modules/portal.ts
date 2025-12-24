@@ -110,6 +110,26 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'topics/footprints',
+        name: 'TopicsFootprintList',
+        component: () => import('@/views/portal/Topics/FootprintList.vue'),
+        meta: {
+          title: '总书记的福建足迹',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
+        path: 'topics/footprint/:id',
+        name: 'FootprintDetail',
+        component: () => import('@/views/portal/Topics/FootprintDetail.vue'),
+        meta: {
+          title: '足迹详情',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
         path: 'study',
         name: 'Study',
         component: () => import('@/views/portal/Study/index.vue'),

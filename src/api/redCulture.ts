@@ -327,6 +327,24 @@ export interface FootprintItem {
 }
 
 /**
+ * 足迹分页查询参数
+ */
+export interface FootprintPageParams {
+  pageIndex: number
+  pageSize: number
+  keyword?: string
+}
+
+/**
+ * 足迹分页响应
+ */
+export interface FootprintPageResponse {
+  records: FootprintItem[]
+  total: number
+  pages: number
+}
+
+/**
  * 获取足迹Top列表
  * @returns 足迹列表
  */
@@ -334,6 +352,19 @@ export function getFootprintTopList(): Promise<FootprintItem[]> {
   return request({
     url: '/api/xiThought/footprint/top/list',
     method: 'get'
+  })
+}
+
+/**
+ * 获取总书记的福建足迹分页列表
+ * @param params 分页查询参数
+ * @returns 足迹分页数据
+ */
+export function getFootprintPageList(params: FootprintPageParams): Promise<FootprintPageResponse> {
+  return request({
+    url: '/api/xiThought/footprint/page/list',
+    method: 'post',
+    data: params
   })
 }
 

@@ -191,7 +191,7 @@
                 <img src="/images/gailanmulu_icon.png" alt="" class="list-icon" />
                 <h3 class="list-title">足迹目录</h3>
               </div>
-              <button class="more-btn" @click="goToVideoList">
+              <button class="more-btn" @click="goToFootprintList">
                 <span>查看更多</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -264,6 +264,11 @@ const goToVideoList = () => {
 // 跳转到示范案例列表页面
 const goToExampleList = () => {
   router.push('/topics/examples')
+}
+
+// 跳转到足迹列表页面
+const goToFootprintList = () => {
+  router.push('/topics/footprints')
 }
 
 // 处理课程卡片点击（list1：视频展播）
@@ -633,9 +638,6 @@ onMounted(() => {
 }
 
 .more-btn {
-  position: absolute;
-  right: 0;
-  bottom: 20px;
   display: flex;
   align-items: center;
   gap: 4px;

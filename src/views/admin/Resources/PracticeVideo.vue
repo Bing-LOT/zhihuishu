@@ -39,9 +39,25 @@
 
         <select v-model="unitFilter" class="filter-select" @change="handleFilter">
           <option value="all">全部单位</option>
-          <option value="计算机学院">计算机学院</option>
-          <option value="机械学院">机械学院</option>
-          <option value="电气学院">电气学院</option>
+          <option value="计算机与大数据学院">计算机与大数据学院</option>
+          <option value="机械工程学院">机械工程学院</option>
+          <option value="材料科学与工程学院">材料科学与工程学院</option>
+          <option value="化学化工学院">化学化工学院</option>
+          <option value="土木工程学院">土木工程学院</option>
+          <option value="经济与管理学院">经济与管理学院</option>
+          <option value="法学院">法学院</option>
+          <option value="外国语学院">外国语学院</option>
+          <option value="数学与统计学院">数学与统计学院</option>
+          <option value="物理与信息工程学院">物理与信息工程学院</option>
+          <option value="生物科学与工程学院">生物科学与工程学院</option>
+          <option value="环境与安全工程学院">环境与安全工程学院</option>
+          <option value="建筑与城乡规划学院">建筑与城乡规划学院</option>
+          <option value="紫金矿业学院">紫金矿业学院</option>
+          <option value="海洋学院">海洋学院</option>
+          <option value="石油化工学院">石油化工学院</option>
+          <option value="交通运输学院">交通运输学院</option>
+          <option value="马克思主义学院">马克思主义学院</option>
+          <option value="人文社会科学学院">人文社会科学学院</option>
         </select>
 
         <select v-model="statusFilter" class="filter-select" @change="handleFilter">
@@ -291,15 +307,25 @@
             <label>所在单位 <span class="required">*</span></label>
             <select v-model="formData.unit" class="form-input">
               <option value="">请选择学院</option>
-              <option value="计算机学院">计算机学院</option>
-              <option value="机械学院">机械学院</option>
-              <option value="电气工程与自动学院">电气工程与自动学院</option>
-              <option value="化学学院">化学学院</option>
-              <option value="数学与统计学院">数学与统计学院</option>
-              <option value="物理与信息工程学院">物理与信息工程学院</option>
+              <option value="计算机与大数据学院">计算机与大数据学院</option>
+              <option value="机械工程学院">机械工程学院</option>
+              <option value="材料科学与工程学院">材料科学与工程学院</option>
+              <option value="化学化工学院">化学化工学院</option>
               <option value="土木工程学院">土木工程学院</option>
               <option value="经济与管理学院">经济与管理学院</option>
+              <option value="法学院">法学院</option>
+              <option value="外国语学院">外国语学院</option>
+              <option value="数学与统计学院">数学与统计学院</option>
+              <option value="物理与信息工程学院">物理与信息工程学院</option>
+              <option value="生物科学与工程学院">生物科学与工程学院</option>
+              <option value="环境与安全工程学院">环境与安全工程学院</option>
+              <option value="建筑与城乡规划学院">建筑与城乡规划学院</option>
+              <option value="紫金矿业学院">紫金矿业学院</option>
+              <option value="海洋学院">海洋学院</option>
+              <option value="石油化工学院">石油化工学院</option>
+              <option value="交通运输学院">交通运输学院</option>
               <option value="马克思主义学院">马克思主义学院</option>
+              <option value="人文社会科学学院">人文社会科学学院</option>
             </select>
           </div>
 

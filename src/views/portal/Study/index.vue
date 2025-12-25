@@ -909,7 +909,7 @@ const selectResource = (resource: CultureResource) => {
   left: 0;
   width: 100%;
   height: 1000px;
-  background: linear-gradient(180deg, #a40a0b 0%, #9c090a 100%);
+  background: url('/images/Frame_1000015361.png') center/cover no-repeat, linear-gradient(180deg, #a40a0b 0%, #9c090a 100%);
   z-index: -1;
 }
 

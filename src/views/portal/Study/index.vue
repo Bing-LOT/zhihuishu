@@ -393,7 +393,12 @@
               </div>
             </div>
 
-            <div class="culture-map__list-content">
+            <div 
+              ref="cultureListContainer"
+              class="culture-map__list-content"
+              @scroll="handleScroll"
+            >
+              <!-- 资源列表 -->
               <div
                 v-for="resource in cultureResources"
                 :key="resource.id"
@@ -411,6 +416,22 @@
                   </div>
                   <p class="culture-resource-item__description">{{ resource.description }}</p>
                 </div>
+              </div>
+
+              <!-- 加载状态 -->
+              <div v-if="cultureLoading" class="culture-loading">
+                <div class="loading-spinner"></div>
+                <span>加载中...</span>
+              </div>
+
+              <!-- 没有更多数据 -->
+              <div v-else-if="!cultureHasMore && cultureResources.length > 0" class="culture-no-more">
+                没有更多数据了
+              </div>
+
+              <!-- 空状态 -->
+              <div v-if="!cultureLoading && cultureResources.length === 0" class="culture-empty">
+                <p>暂无文化资源数据</p>
               </div>
             </div>
           </div>
@@ -450,11 +471,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import AMapLoader from '@amap/amap-jsapi-loader'
 import { getNiceCourseTopList, getCollegeSpecialTopList } from '@/api/course'
 import type { NiceCourseItem, CollegeSpecialItem } from '@/api/course'
+import { getRedCultureList, type RedCultureItem } from '@/api/redCulture'
 
 const router = useRouter()
 
@@ -540,6 +562,7 @@ const fetchNiceCourses = async () => {
 onMounted(() => {
   fetchNiceCourses()
   fetchCollegeCourses()
+  fetchCultureResources() // 获取红色文化资源数据
   initMap()
 })
 
@@ -605,7 +628,7 @@ const fetchCollegeCourses = async () => {
   }
 }
 
-// 红色文化资源数据（添加经纬度信息）
+// 红色文化资源数据（API接入）
 interface CultureResource {
   id: string
   name: string
@@ -617,87 +640,106 @@ interface CultureResource {
   address: string
 }
 
-const cultureResources = ref<CultureResource[]>([
-  {
-    id: '1',
-    name: '福建省革命历史纪念馆',
-    type: '博物馆',
-    cover: '/images/indexBg.png',
-    description: '福建省革命历史纪念馆位于福州市鼓楼区，展示了福建革命历史的光辉历程',
-    longitude: 119.300,
-    latitude: 26.075,
-    address: '福州市鼓楼区五四路263号'
-  },
-  {
-    id: '2',
-    name: '林觉民故居',
-    type: '人物故居',
-    cover: '/images/indexBg.png',
-    description: '林觉民故居位于福州市鼓楼区，是辛亥革命烈士林觉民的故居',
-    longitude: 119.305,
-    latitude: 26.080,
-    address: '福州市鼓楼区杨桥东路'
-  },
-  {
-    id: '3',
-    name: '福州文林山革命烈士陵园',
-    type: '烈士陵园',
-    cover: '/images/indexBg.png',
-    description: '福州文林山革命烈士陵园，缅怀革命先烈的重要场所',
-    longitude: 119.310,
-    latitude: 26.085,
-    address: '福州市鼓楼区文林山'
-  },
-  {
-    id: '4',
-    name: '中共福建省委党校',
-    type: '党校',
-    cover: '/images/indexBg.png',
-    description: '中共福建省委党校是培养党员干部的重要基地',
-    longitude: 119.295,
-    latitude: 26.070,
-    address: '福州市鼓楼区柳河路61号'
-  },
-  {
-    id: '5',
-    name: '福州市委党群服务中心',
-    type: '党群中心',
-    cover: '/images/indexBg.png',
-    description: '福州市委党群服务中心提供党建服务和群众服务',
-    longitude: 119.290,
-    latitude: 26.065,
-    address: '福州市鼓楼区古田路'
-  },
-  {
-    id: '6',
-    name: '福州市博物馆',
-    type: '纪念馆',
-    cover: '/images/indexBg.png',
-    description: '福州市博物馆收藏了大量福州历史文物和革命文物',
-    longitude: 119.315,
-    latitude: 26.090,
-    address: '福州市晋安区文博路8号'
-  },
-  {
-    id: '7',
-    name: '闽侯县五虎山革命根据地',
-    type: '革命地址',
-    cover: '/images/indexBg.png',
-    description: '闽侯县五虎山革命根据地是福建重要的革命历史遗址',
-    longitude: 119.280,
-    latitude: 26.060,
-    address: '福州市闽侯县'
-  }
-])
-
+// 资源列表
+const cultureResources = ref<CultureResource[]>([])
 // 当前选中的资源
 const selectedResource = ref<CultureResource | null>(null)
+
+// 分页参数
+const culturePageIndex = ref(1)
+const culturePageSize = ref(10)
+const cultureTotal = ref(0)
+const culturePages = ref(0)
+const cultureLoading = ref(false)
+const cultureHasMore = ref(true)
+
+// 列表容器引用
+const cultureListContainer = ref<HTMLDivElement | null>(null)
 
 // 搜索相关
 const searchQuery = ref('')
 
+// 获取红色文化资源列表
+const fetchCultureResources = async (loadMore = false) => {
+  if (cultureLoading.value) return
+  if (loadMore && !cultureHasMore.value) return
+
+  try {
+    cultureLoading.value = true
+
+    const response = await getRedCultureList({
+      pageIndex: culturePageIndex.value,
+      pageSize: culturePageSize.value,
+      keyword: searchQuery.value || undefined
+    })
+
+    // 数据映射：将API返回的数据转换为组件使用的格式
+    const mappedData = response.records.map((item: RedCultureItem) => ({
+      id: String(item.id),
+      name: item.title,
+      type: item.tags && item.tags.length > 0 ? item.tags[0] : '文化资源',
+      cover: item.coverUrl || '/images/indexBg.png',
+      description: item.content || '',
+      longitude: item.lng || 119.296,
+      latitude: item.lat || 26.075,
+      address: item.address || ''
+    }))
+
+    if (loadMore) {
+      // 加载更多，追加数据
+      cultureResources.value = [...cultureResources.value, ...mappedData]
+    } else {
+      // 首次加载或搜索，替换数据
+      cultureResources.value = mappedData
+    }
+
+    // 更新分页信息
+    cultureTotal.value = response.total
+    culturePages.value = response.pages
+    cultureHasMore.value = culturePageIndex.value < response.pages
+
+    // 默认选中第一个资源（仅首次加载且有数据时）
+    if (!loadMore && cultureResources.value.length > 0 && !selectedResource.value) {
+      selectedResource.value = cultureResources.value[0]
+      // 等待地图初始化后添加标记
+      await nextTick()
+      if (map) {
+        addMarkerToMap(cultureResources.value[0])
+      }
+    }
+  } catch (error) {
+    console.error('获取红色文化资源失败:', error)
+  } finally {
+    cultureLoading.value = false
+  }
+}
+
+// 加载更多
+const loadMoreCulture = () => {
+  if (!cultureHasMore.value || cultureLoading.value) return
+  culturePageIndex.value++
+  fetchCultureResources(true)
+}
+
+// 搜索处理
 const handleSearch = () => {
   console.log('搜索:', searchQuery.value)
+  culturePageIndex.value = 1
+  cultureHasMore.value = true
+  fetchCultureResources(false)
+}
+
+// 滚动事件处理
+const handleScroll = (e: Event) => {
+  const container = e.target as HTMLDivElement
+  const scrollTop = container.scrollTop
+  const scrollHeight = container.scrollHeight
+  const clientHeight = container.clientHeight
+
+  // 滚动到距离底部50px时加载更多
+  if (scrollHeight - scrollTop - clientHeight < 50) {
+    loadMoreCulture()
+  }
 }
 
 // 点击事件
@@ -1519,6 +1561,7 @@ const selectResource = (resource: CultureResource) => {
 .culture-map__list-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* 隐藏横向滚动条 */
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1531,6 +1574,9 @@ const selectResource = (resource: CultureResource) => {
   padding: 12px 24px;
   cursor: pointer;
   transition: background 0.3s ease;
+  width: 100%; /* 占满容器宽度 */
+  box-sizing: border-box; /* 包含padding在宽度内 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .culture-resource-item--active {
@@ -1563,22 +1609,32 @@ const selectResource = (resource: CultureResource) => {
   display: flex;
   flex-direction: column;
   gap: 21px;
+  min-width: 0; /* 允许内容收缩 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .culture-resource-item__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px; /* 名称和类型之间的间距 */
 }
 
 .culture-resource-item__name {
+  flex: 1;
   font-size: 16px;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* 只显示一行，超出显示省略号 */
+  min-width: 0; /* 允许收缩 */
 }
 
 .culture-resource-item__type {
   font-size: 16px;
   color: #bc2220;
+  white-space: nowrap; /* 类型不换行，保证完整显示 */
+  flex-shrink: 0; /* 不允许收缩，保证完整显示 */
 }
 
 .culture-resource-item__description {
@@ -1588,7 +1644,54 @@ const selectResource = (resource: CultureResource) => {
   opacity: 0.5;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: nowrap; /* 只显示一行，超出显示省略号 */
+}
+
+/* 加载状态 */
+.culture-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #666;
+}
+
+.culture-loading .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(188, 34, 32, 0.3);
+  border-top-color: #bc2220;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+.culture-loading span {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 没有更多数据 */
+.culture-no-more {
+  text-align: center;
+  padding: 16px;
+  font-size: 14px;
+  color: #999;
+}
+
+/* 空状态 */
+.culture-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #999;
+  font-size: 14px;
+}
+
+.culture-empty p {
+  margin: 0;
 }
 
 /* 地图 */

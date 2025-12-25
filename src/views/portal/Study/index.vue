@@ -323,7 +323,7 @@
             <div class="section-title-bg">
               <img src="/images/xiaohui1.png" alt="" />
             </div>
-            <div class="section-title-left">
+            <div class="section-title-left" style="opacity: 0.3;">
               <svg xmlns="http://www.w3.org/2000/svg" width="122" height="37" viewBox="0 0 122 37" fill="none">
                 <path d="M55.4995 25.1402C58.5629 25.1402 60.8086 22.6335 60.8086 19.5701C60.8086 16.5068 58.565 14 55.4995 14" stroke="#BC2220" stroke-linejoin="round"/>
                 <path d="M54.8086 36.2809C51.7452 36.2809 49.4995 33.7741 49.4995 30.7108C49.4995 27.6474 51.7431 25.1406 54.8086 25.1406" stroke="#BC2220" stroke-linejoin="round"/>
@@ -336,7 +336,7 @@
                 <path d="M35.4805 13.8691H26.4805V13.4262C26.4805 10.9125 28.4995 8.86914 30.9797 8.86914C33.4599 8.86914 35.4789 10.9141 35.4789 13.4262V13.8691H35.4805ZM27.3806 12.9849H34.5803C34.3648 11.1679 32.8327 9.75501 30.9813 9.75501C29.1299 9.75501 27.5977 11.1679 27.3806 12.9849Z" fill="#BC2220"/>
               </svg>
             </div>
-            <div class="section-title-right">
+            <div class="section-title-right" style="opacity: 0.3;">
               <svg xmlns="http://www.w3.org/2000/svg" width="122" height="37" viewBox="0 0 122 37" fill="none">
                 <path d="M65.7837 25.1402C62.7203 25.1402 60.4746 22.6335 60.4746 19.5701C60.4746 16.5068 62.7182 14 65.7837 14" stroke="#BC2220" stroke-linejoin="round"/>
                 <path d="M66.4746 36.2809C69.538 36.2809 71.7837 33.7741 71.7837 30.7108C71.7837 27.6474 69.5401 25.1406 66.4746 25.1406" stroke="#BC2220" stroke-linejoin="round"/>
@@ -988,6 +988,7 @@ const selectResource = (resource: CultureResource) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 5;
 }
 
 .section-title h2 {

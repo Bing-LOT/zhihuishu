@@ -547,6 +547,16 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: 420px;
+  overflow-y: auto;
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+}
+
+/* 隐藏 Webkit 浏览器的滚动条 (Chrome, Safari) */
+.overview__menu-list::-webkit-scrollbar {
+  display: none;
 }
 
 .overview__menu-item {

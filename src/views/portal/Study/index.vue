@@ -803,7 +803,7 @@ const addMarkerToMap = (resource: CultureResource) => {
   })
   markers = []
 
-  // 创建自定义标记内容
+  // 创建自定义标记内容（使用 SVG 图标）
   const markerContent = `
     <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
       <div style="
@@ -826,25 +826,11 @@ const addMarkerToMap = (resource: CultureResource) => {
         border-top: 8px solid white;
         margin-top: -8px;
       "></div>
-      <div style="
-        width: 30px;
+      <img src="/images/biaoji.svg" alt="marker" style="
+        width: 40px;
         height: 40px;
-        background: #bc2220;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 8px rgba(188,34,32,0.5);
-      ">
-        <div style="
-          width: 12px;
-          height: 12px;
-          background: white;
-          border-radius: 50%;
-          transform: rotate(45deg);
-        "></div>
-      </div>
+        display: block;
+      " />
     </div>
   `
 
@@ -852,36 +838,8 @@ const addMarkerToMap = (resource: CultureResource) => {
   const marker = new AMap.Marker({
     position: [resource.longitude, resource.latitude],
     content: markerContent,
-    offset: new AMap.Pixel(-15, -60),
+    offset: new AMap.Pixel(-20, -80),
     anchor: 'bottom-center'
-  })
-
-  // 创建信息窗口
-  const infoWindow = new AMap.InfoWindow({
-    content: `
-      <div style="padding: 12px; width: 280px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 16px; font-weight: bold; color: #333;">${resource.name}</span>
-          <span style="color: #bc2220;">${resource.type}</span>
-        </div>
-        <p style="margin: 8px 0; font-size: 14px; color: #666; line-height: 1.5;">
-          ${resource.description}
-        </p>
-        <div style="display: flex; align-items: center; gap: 4px; margin-top: 8px; color: #999; font-size: 12px;">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M8 8.66667C8.73638 8.66667 9.33333 8.06971 9.33333 7.33333C9.33333 6.59695 8.73638 6 8 6C7.26362 6 6.66667 6.59695 6.66667 7.33333C6.66667 8.06971 7.26362 8.66667 8 8.66667Z" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M8 14C10 11.3333 13.3333 9.07619 13.3333 6.66667C13.3333 3.72115 10.9455 1.33333 8 1.33333C5.05448 1.33333 2.66667 3.72115 2.66667 6.66667C2.66667 9.07619 6 11.3333 8 14Z" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-          <span>${resource.address}</span>
-        </div>
-      </div>
-    `,
-    offset: new AMap.Pixel(0, -60)
-  })
-
-  // 点击标记显示信息窗口
-  marker.on('click', () => {
-    infoWindow.open(map, marker.getPosition())
   })
 
   // 添加标记到地图
@@ -890,11 +848,6 @@ const addMarkerToMap = (resource: CultureResource) => {
 
   // 地图中心移动到标记位置
   map.setCenter([resource.longitude, resource.latitude])
-
-  // 自动打开信息窗口
-  setTimeout(() => {
-    infoWindow.open(map, marker.getPosition())
-  }, 300)
 }
 
 // 选择资源

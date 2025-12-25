@@ -3,7 +3,7 @@
     <!-- 背景图层 -->
     <div class="overview__bg">
       <!-- 复用首页背景或特定背景 -->
-      <img src="/images/indexBg.png" alt="" />
+      <img src="/images/53efab5bf3ac8beaaa2b78e3fc1d00083edbcbe3.png" alt="" />
     </div>
 
     <div class="overview__container">
@@ -122,9 +122,7 @@
           
           <button class="overview__courses-more" @click="handleViewMore">
             <span>查看更多</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+<img src="/images/arrow-right.svg" alt="">
           </button>
         </div>
 

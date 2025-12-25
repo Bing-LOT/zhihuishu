@@ -191,9 +191,10 @@
 
         <button class="home__courses-more" @click="viewMoreCourses" aria-label="查看更多">
           <span>查看更多</span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <img src="/images/arrow-right.svg" alt="">
+          <!-- <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          </svg> -->
         </button>
       </div>
 
@@ -527,7 +528,7 @@ const handleCourseClick = (course: Course) => {
 }
 
 const viewMoreCourses = () => {
-  router.push('/study')
+  router.push('/study/courses')
 }
 
 // ===== 生命周期 =====
@@ -973,6 +974,7 @@ onUnmounted(() => {
 .home__courses-more {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   background: transparent;
   border: none;

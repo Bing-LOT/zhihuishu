@@ -1265,7 +1265,7 @@ const selectResource = (resource: any) => {
   flex-shrink: 0;
   border: 1px solid #fdd4a6;
   border-radius: 16px;
-  background: linear-gradient(90deg, #ecd9ba 0%, #ecd9ba 100%);
+  background: url('/images/Frame_1000015326.png') center/cover no-repeat;
   display: flex;
   flex-direction: column;
   padding: 16px 0;

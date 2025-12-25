@@ -850,16 +850,16 @@ onUnmounted(() => {
 .home__video-play {
   padding: 12px 48px;
   background: linear-gradient(to right, #ecd9ba, #d4b48f);
-  /* background-image: url('/images/home/button-pattern.png'); */
-  /* background-size: 197px 261.095px; */
-  /* background-position: top left; */
-  /* background-repeat: repeat; */
+  background-image: url('/images/overview__menu_BG1.png');
+  background-size: auto;
+  background-position: center;
+  background-repeat: no-repeat;
   border: none;
   border-radius: 100px;
   color: #bc2220;
   font-size: 16px;
   font-family: 'Source Han Sans CN', sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
   transition: transform 0.3s ease;
   align-self: flex-start;

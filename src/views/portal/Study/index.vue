@@ -1435,6 +1435,7 @@ const selectResource = (resource: CultureResource) => {
   display: flex;
   gap: 16px;
   height: 800px;
+  margin-top: 40px;
 }
 
 /* 浮动图片 */

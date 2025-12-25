@@ -147,7 +147,7 @@
         上一页
       </button>
       <div class="pagination__info">
-        第 {{ currentPage }} / {{ totalPages }} 页
+        第 {{ currentPage }} / {{ totalPages }} 页（共 {{ total }} 条）
       </div>
       <button
         class="pagination__btn"
@@ -162,7 +162,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getNiceCourseTopList, type NiceCourseItem } from '@/api/course'
+import { getNiceCoursePageList, type NiceCourseItem } from '@/api/resource'
 
 // 课程数据
 interface CourseItem {
@@ -186,17 +186,22 @@ const searchKeyword = ref('')
 // 分页
 const currentPage = ref(1)
 const pageSize = ref(10)
-const total = ref(19467)
+const total = ref(0)
 const totalPages = ref(1)
 
 // 获取课程列表
 const fetchCourses = async () => {
   try {
     loading.value = true
-    const data = await getNiceCourseTopList()
+    const response = await getNiceCoursePageList({
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value,
+      keyword: searchKeyword.value || undefined,
+      showFront: 1 // 固定传递1，只显示前台展示的内容
+    })
     
     // 数据映射
-    const mappedData = data.map((item: NiceCourseItem) => ({
+    const mappedData = response.records.map((item: NiceCourseItem) => ({
       id: String(item.id),
       title: item.title,
       cover: item.picUrls && item.picUrls.length > 0 ? item.picUrls[0] : '/images/home/video-1.jpg',
@@ -211,8 +216,8 @@ const fetchCourses = async () => {
     }))
 
     courses.value = mappedData
-    total.value = mappedData.length
-    totalPages.value = Math.ceil(mappedData.length / pageSize.value)
+    total.value = response.total
+    totalPages.value = response.pages
   } catch (error) {
     console.error('获取课程列表失败:', error)
   } finally {
@@ -223,7 +228,7 @@ const fetchCourses = async () => {
 // 搜索
 const handleSearch = () => {
   console.log('搜索关键词:', searchKeyword.value)
-  // TODO: 实现搜索功能
+  currentPage.value = 1 // 搜索时重置到第一页
   fetchCourses()
 }
 

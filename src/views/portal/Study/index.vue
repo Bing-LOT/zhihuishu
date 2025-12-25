@@ -753,7 +753,12 @@ const viewMoreCollege = () => {
 
 const watchCourse = (course: any) => {
   console.log('观看课程:', course)
-  router.push(`/study/video/${course.id}`)
+  // 直接跳转到 playUrl
+  if (course.playUrl) {
+    window.open(course.playUrl, '_blank')
+  } else {
+    console.warn('课程没有播放地址')
+  }
 }
 
 const viewCourseDetail = (course: any) => {

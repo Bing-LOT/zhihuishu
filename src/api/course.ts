@@ -298,11 +298,38 @@ export interface CollegeSpecialItem {
 }
 
 /**
+ * 一院一品专题详情
+ */
+export interface CollegeSpecialDetail {
+  id: number
+  name: string              // 课程名称
+  coverUrl: string          // 封面图片
+  college: string           // 所在学院
+  types: string[]           // 建设课程类型，多个
+  teachers: string[]        // 主讲教师多个
+  content: string           // 课程详情内容
+  createTime: string        // 发布时间
+  statPv: number            // 浏览量
+  showFront: number         // 前台显示：1=显示；0=隐藏
+}
+
+/**
  * 获取一院一品专题列表
  */
 export function getCollegeSpecialTopList(): Promise<CollegeSpecialItem[]> {
   return request({
     url: '/api/special/college/top/list',
+    method: 'GET'
+  })
+}
+
+/**
+ * 获取一院一品专题详情
+ * @param id 专题ID
+ */
+export function getCollegeSpecialDetail(id: string | number): Promise<CollegeSpecialDetail> {
+  return request({
+    url: `/api/special/college/get/${id}`,
     method: 'GET'
   })
 }

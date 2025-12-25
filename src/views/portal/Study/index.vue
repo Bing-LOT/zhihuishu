@@ -1653,7 +1653,7 @@ const selectResource = (resource: CultureResource) => {
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(90deg, #ecd9ba 0%, #ecd9ba 100%);
+  background: url('/images/overview__menu_BG1.png') center/cover no-repeat;
   padding: 16px;
 }
 

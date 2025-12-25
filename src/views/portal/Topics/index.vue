@@ -235,7 +235,7 @@ const titles = ref<XiThoughtTitle[]>([])
 const fetchTitles = async () => {
   try {
     const response = await getXiThoughtTitles()
-    titles.value = response || []
+    // titles.value = response || []
   } catch (error) {
     console.error('获取标题失败：', error)
   }

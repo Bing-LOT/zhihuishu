@@ -291,21 +291,12 @@
 
           <div class="form-group">
             <label>简介 <span class="required">*</span></label>
-            <div class="editor-container">
-              <Toolbar
-                :editor="editorRef"
-                :defaultConfig="toolbarConfig"
-                mode="default"
-                class="editor-toolbar"
-              />
-              <Editor
-                v-model="formData.brief"
-                :defaultConfig="editorConfig"
-                mode="default"
-                class="editor-content"
-                @onCreated="handleEditorCreated"
-              />
-            </div>
+            <textarea
+              v-model="formData.brief"
+              placeholder="请输入简介"
+              class="form-textarea"
+              rows="6"
+            ></textarea>
           </div>
 
           <div class="form-group">
@@ -376,7 +367,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, shallowRef, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { 
   getNiceCoursePageList, 
   addNiceCourse, 
@@ -385,9 +376,6 @@ import {
   type NiceCourseItem 
 } from '@/api/resource'
 import { uploadFile } from '@/api/banner'
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
-import '@wangeditor/editor/dist/css/style.css'
 
 // 数据列表
 const items = ref<NiceCourseItem[]>([])
@@ -429,69 +417,6 @@ const formData = ref({
 
 // 预览数据
 const previewData = ref<NiceCourseItem | null>(null)
-
-// 富文本编辑器
-const editorRef = shallowRef()
-
-// 编辑器配置
-const editorConfig: Partial<IEditorConfig> = {
-  placeholder: '请输入详情内容...',
-  MENU_CONF: {
-    uploadImage: {
-      async customUpload(file: File, insertFn: (url: string) => void) {
-        try {
-          const result = await uploadFile(file)
-          insertFn(result.url)
-        } catch (error) {
-          console.error('图片上传失败：', error)
-          alert('图片上传失败')
-        }
-      }
-    }
-  }
-}
-
-// 工具栏配置
-const toolbarConfig: Partial<IToolbarConfig> = {
-  toolbarKeys: [
-    'headerSelect',
-    'bold',
-    'italic',
-    'underline',
-    'color',
-    'bgColor',
-    '|',
-    'fontSize',
-    'fontFamily',
-    'lineHeight',
-    '|',
-    'bulletedList',
-    'numberedList',
-    'todo',
-    '|',
-    'justifyLeft',
-    'justifyCenter',
-    'justifyRight',
-    'justifyJustify',
-    '|',
-    'emotion',
-    'insertLink',
-    'uploadImage',
-    'insertTable',
-    'codeBlock',
-    'divider',
-    '|',
-    'undo',
-    'redo',
-    '|',
-    'fullScreen'
-  ]
-}
-
-// 编辑器创建完成
-const handleEditorCreated = (editor: any) => {
-  editorRef.value = editor
-}
 
 // 获取纯文本（用于列表显示）
 const getPlainText = (html: string) => {
@@ -862,14 +787,6 @@ const closeDialog = () => {
 // 组件挂载时加载数据
 onMounted(() => {
   loadDataList()
-})
-
-// 组件卸载前销毁编辑器
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor) {
-    editor.destroy()
-  }
 })
 </script>
 
@@ -1262,32 +1179,21 @@ onBeforeUnmount(() => {
   border-color: #e31e24;
 }
 
-/* 富文本编辑器容器 */
-.editor-container {
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
   border: 1px solid #d9d9d9;
   border-radius: 4px;
-  overflow: hidden;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.3s;
+  resize: vertical;
+  min-height: 120px;
 }
 
-.editor-toolbar {
-  border-bottom: 1px solid #d9d9d9;
-  background: #fafafa;
-}
-
-.editor-content {
-  min-height: 400px;
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-/* 编辑器内容样式 */
-:deep(.w-e-text-container) {
-  background: white;
-}
-
-:deep(.w-e-text-placeholder) {
-  color: #999;
-  font-style: normal;
+.form-textarea:focus {
+  outline: none;
+  border-color: #e31e24;
 }
 
 /* 图片上传区域 */

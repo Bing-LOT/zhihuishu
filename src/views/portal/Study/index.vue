@@ -116,9 +116,52 @@
                 </div>
               </div>
             </div>
+            <div class="courses-row">
+              <div
+                v-for="course in excellentCourses.slice(currentSlide * 2 + 2, currentSlide * 2 + 4)"
+                :key="course.id"
+                class="course-card-horizontal"
+              >
+                <div class="course-card-horizontal__image">
+                  <img :src="course.cover" alt="" />
+                  <div class="course-card-horizontal__label">{{ course.courseName }}</div>
+                </div>
+                <div class="course-card-horizontal__content">
+                  <div class="course-card-horizontal__header">
+                    <h3 class="course-card-horizontal__title">{{ course.title }}</h3>
+                    <div class="course-card-horizontal__views">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 7C8.61929 7 7.5 8.11929 7.5 9.5C7.5 10.8807 8.61929 12 10 12C11.3807 12 12.5 10.8807 12.5 9.5C12.5 8.11929 11.3807 7 10 7Z" fill="#333333" fill-opacity="0.5"/>
+                        <path d="M10 4.16667C5.83333 4.16667 2.27500 6.73333 0.833336 10.4167C2.27500 14.1 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.725 14.1 19.1667 10.4167C17.725 6.73333 14.1667 4.16667 10 4.16667ZM10 14.5C7.51667 14.5 5.5 12.4833 5.5 10C5.5 7.51667 7.51667 5.5 10 5.5C12.4833 5.5 14.5 7.51667 14.5 10C14.5 12.4833 12.4833 14.5 10 14.5Z" fill="#333333" fill-opacity="0.5"/>
+                      </svg>
+                      <span>{{ course.views }}人</span>
+                    </div>
+                  </div>
+                  <p class="course-card-horizontal__description">{{ course.description }}</p>
+                  <div class="course-card-horizontal__meta">
+                    <span>课程名称：{{ course.courseName }}</span>
+                  </div>
+                  <div class="course-card-horizontal__meta">
+                    <span>授课教师：{{ course.teacher }}</span>
+                  </div>
+                  <div class="course-card-horizontal__meta">
+                    <span>授课时间：{{ course.semester }}</span>
+                  </div>
+                  <div class="course-card-horizontal__meta">
+                    <span>推荐督导员：{{ course.supervisor }}</span>
+                  </div>
+                  <div class="course-card-horizontal__meta">
+                    <span>发布时间：{{ course.publishTime }}</span>
+                  </div>
+                  <button class="course-card-horizontal__watch-btn" @click="watchCourse(course)">
+                    观看
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <!-- 第二行 -->
-            <div class="courses-row">
+            <!-- <div class="courses-row">
               <div
                 v-for="course in excellentCourses.slice(currentSlide * 2 + 2, currentSlide * 2 + 4)"
                 :key="course.id"
@@ -160,7 +203,7 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <!-- 加载状态 -->

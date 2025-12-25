@@ -1718,11 +1718,17 @@ const selectResource = (resource: CultureResource) => {
 .map-detail-card {
   position: absolute;
   width: 444px;
+  max-width: 444px; /* 确保不超出 */
   background: white;
   border-radius: 8px;
   padding: 8px;
   display: flex;
   gap: 16px;
+  margin-bottom: 10px;
+  margin-right: 20px;
+  box-sizing: border-box; /* padding 包含在宽度内 */
+  overflow: hidden; /* 防止内容溢出 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* 添加阴影增强视觉效果 */
 }
 
 .map-detail-card__image {
@@ -1745,22 +1751,34 @@ const selectResource = (resource: CultureResource) => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0; /* 允许内容收缩 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .map-detail-card__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px; /* 名称和类型之间的间距 */
   font-size: 16px;
   color: #333;
 }
 
+.map-detail-card__header > span:first-child {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* 名称只显示一行，超出省略 */
+  min-width: 0; /* 允许收缩 */
+}
+
 .map-detail-card__type {
   color: #bc2220;
+  white-space: nowrap; /* 类型不换行，保证完整显示 */
+  flex-shrink: 0; /* 不允许收缩，保证完整显示 */
 }
 
 .map-detail-card__description {
-  flex: 1;
   margin: 0;
   font-size: 14px;
   color: #333;
@@ -1768,10 +1786,7 @@ const selectResource = (resource: CultureResource) => {
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
+  white-space: nowrap; /* 只显示一行，超出显示省略号 */
 }
 
 .map-detail-card__location {
@@ -1781,12 +1796,19 @@ const selectResource = (resource: CultureResource) => {
   font-size: 14px;
   color: #333;
   opacity: 0.5;
+  overflow: hidden; /* 防止整体溢出 */
+}
+
+.map-detail-card__location svg {
+  flex-shrink: 0; /* 图标不收缩 */
 }
 
 .map-detail-card__location span {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: nowrap; /* 地址只显示一行，超出省略 */
+  min-width: 0; /* 允许收缩 */
 }
 </style>
 

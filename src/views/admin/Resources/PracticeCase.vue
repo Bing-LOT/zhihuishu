@@ -356,6 +356,17 @@
           </div>
 
           <div class="form-group">
+            <label>教学视频 <span class="required">*</span></label>
+            <input
+              v-model="formData.videoUrl"
+              type="text"
+              placeholder="请输入教学视频URL地址"
+              class="form-input"
+            />
+            <small class="field-hint">提示：请输入完整的视频URL地址</small>
+          </div>
+
+          <div class="form-group">
             <label>显示顺序</label>
             <input
               v-model.number="formData.displayOrder"
@@ -446,6 +457,7 @@ interface CaseItem {
   direction?: string  // 入选方向（原始值）
   description: string  // 摘要文本（用于列表显示）
   fullContent: string  // 完整的HTML内容（用于编辑和预览）
+  videoUrl?: string  // 教学视频URL
   status: 'active' | 'inactive'
   publishTime: string
   cover?: string
@@ -484,6 +496,7 @@ const formData = ref({
   category: '',
   direction: '',  // 入选方向
   content: '',
+  videoUrl: '',  // 教学视频
   displayOrder: 1,
   showOnFrontend: true
 })
@@ -589,6 +602,7 @@ const convertApiToItem = (apiItem: ExampleExpoListItem): CaseItem => {
     direction: apiItem.direction,  // 保存原始值
     description: extractTextFromHtml(apiItem.content, 120),
     fullContent: apiItem.content || '',
+    videoUrl: apiItem.videoUrl || '',  // 保存视频URL
     status: apiItem.showFront === 1 ? 'active' : 'inactive',
     publishTime: apiItem.createTime ? apiItem.createTime.split(' ')[0] : '',
     cover: apiItem.coverUrl || '',
@@ -726,6 +740,7 @@ const editItem = (item: CaseItem) => {
     category: item.property || item.category,  // 使用原始的property值
     direction: item.direction || '',  // 回显入选方向
     content: item.fullContent, // 使用完整的HTML内容
+    videoUrl: (item as any).videoUrl || '',  // 回显视频URL
     displayOrder: item.sort,
     showOnFrontend: item.status === 'active'
   }
@@ -781,7 +796,7 @@ const toggleVisibility = async (item: CaseItem) => {
         direction: item.direction || '面向产出',
         college: item.college,
         content: item.fullContent,
-        videoUrl: '',
+        videoUrl: item.videoUrl || '',
         showFront: newStatus  // 切换状态
       }
       
@@ -838,6 +853,10 @@ const saveItem = async () => {
     alert('请输入详情内容')
     return
   }
+  if (!formData.value.videoUrl) {
+    alert('请输入教学视频URL')
+    return
+  }
 
   try {
     loading.value = true
@@ -854,7 +873,7 @@ const saveItem = async () => {
       direction: formData.value.direction,  // 使用表单的入选方向
       college: formData.value.unit,
       content: formData.value.content,
-      videoUrl: '',  // 默认空视频URL
+      videoUrl: formData.value.videoUrl,  // 使用表单的视频URL
       showFront: formData.value.showOnFrontend ? 1 : 0
     }
 
@@ -898,6 +917,7 @@ const closeDialog = () => {
     category: '',
     direction: '',  // 重置入选方向
     content: '',
+    videoUrl: '',  // 重置视频URL
     displayOrder: 1,
     showOnFrontend: true
   }

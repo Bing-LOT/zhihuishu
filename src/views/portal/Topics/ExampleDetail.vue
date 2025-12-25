@@ -93,7 +93,7 @@
       <div class="recommend-section">
         <div class="recommend-header">
           <h3 class="recommend-title">其他示范案例展播</h3>
-          <button class="more-btn" @click="$router.push('/topics')">
+          <button class="more-btn" @click="$router.push('/topics/examples')">
             <span>查看更多</span>
 <img src="/images/arrow-right.svg" alt="">
           </button>

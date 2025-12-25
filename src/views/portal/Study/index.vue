@@ -744,7 +744,7 @@ const handleScroll = (e: Event) => {
 
 // 点击事件
 const viewMoreExcellent = () => {
-  console.log('查看更多优秀思政课堂')
+  router.push('/study/excellent-courses')
 }
 
 const viewMoreCollege = () => {

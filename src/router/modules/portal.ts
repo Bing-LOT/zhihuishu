@@ -150,6 +150,16 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'study/excellent-courses',
+        name: 'ExcellentCourses',
+        component: () => import('@/views/portal/Study/ExcellentCourses.vue'),
+        meta: {
+          title: '优秀思政课堂',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
         path: 'study/video/:id',
         name: 'VideoDetail',
         component: () => import('@/views/portal/Study/VideoDetail.vue'),

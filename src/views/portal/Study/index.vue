@@ -10,9 +10,10 @@
         <div class="section-header">
           <button class="more-btn" style="opacity: 0;">
             <span>查看更多</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M7.5 15L12.5 10L7.5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 14V0L7 7L0 14Z" fill="white"/>
             </svg>
+
           </button>
 
           <div class="section-title-wrapper">
@@ -55,9 +56,10 @@
 
           <button class="more-btn" @click="viewMoreExcellent">
             <span>查看更多</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M7.5 15L12.5 10L7.5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="7" height="14" viewBox="0 0 7 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 14V0L7 7L0 14Z" fill="white"/>
             </svg>
+
           </button>
         </div>
 
@@ -191,7 +193,7 @@
         <div class="section-header">
           <button class="more-btn" style="opacity: 0;">
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img src="/images/arrow-right.svg" alt="">
           </button>
 
           <div class="section-title-wrapper">
@@ -234,7 +236,7 @@
 
           <button class="more-btn" @click="viewMoreCollege">
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img src="/images/arrow-right.svg" alt="">
           </button>
         </div>
 
@@ -314,7 +316,7 @@
         <div class="section-header">
           <button class="more-btn" style="opacity: 0;">
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img src="/images/arrow-right.svg" alt="">
           </button>
 
           <div class="section-title-wrapper">
@@ -357,7 +359,7 @@
 
           <button class="more-btn" style="opacity: 0;">
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img src="/images/arrow-right.svg" alt="">
           </button>
         </div>
 

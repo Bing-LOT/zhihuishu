@@ -103,7 +103,7 @@
           </div>
           <button class="more-btn" @click="goToExampleList">
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img src="/images/arrow-right.svg" alt="">
           </button>
         </div>
         <div class="course-grid">
@@ -187,9 +187,7 @@
               </div>
               <button class="more-btn" @click="goToFootprintList">
                 <span>查看更多</span>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M7.5 15L12.5 10L7.5 5" stroke="#333333" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <img src="/images/arrow-right.svg" alt="">
               </button>
             </div>
 

@@ -365,6 +365,13 @@
 
         <!-- 地图和列表 -->
         <div class="culture-map__content">
+          <!-- 浮动图片 -->
+          <img 
+            src="/images/ee75327f38c5cfa02649755d0d9d10c99312fc4b.png" 
+            alt="天安门" 
+            class="culture-map__floating-image" 
+          />
+          
           <!-- 左侧资源列表 -->
           <div class="culture-map__list">
             <div class="culture-map__list-header">
@@ -1424,9 +1431,22 @@ const selectResource = (resource: CultureResource) => {
 }
 
 .culture-map__content {
+  position: relative;
   display: flex;
   gap: 16px;
   height: 800px;
+}
+
+/* 浮动图片 */
+.culture-map__floating-image {
+  position: absolute;
+  top: -15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: auto;
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* 资源列表 */
@@ -1439,6 +1459,8 @@ const selectResource = (resource: CultureResource) => {
   display: flex;
   flex-direction: column;
   padding: 16px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .culture-map__list-header {
@@ -1655,6 +1677,7 @@ const selectResource = (resource: CultureResource) => {
   position: relative;
   background: url('/images/overview__menu_BG1.png') center/cover no-repeat;
   padding: 16px;
+  z-index: 1;
 }
 
 .culture-map__map-image {

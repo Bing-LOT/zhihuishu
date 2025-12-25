@@ -395,10 +395,10 @@
 
             <div class="culture-map__list-content">
               <div
-                v-for="(resource, index) in cultureResources"
+                v-for="resource in cultureResources"
                 :key="resource.id"
                 class="culture-resource-item"
-                :class="{ 'culture-resource-item--active': index === 0 }"
+                :class="{ 'culture-resource-item--active': selectedResource?.id === resource.id }"
                 @click="selectResource(resource)"
               >
                 <div class="culture-resource-item__image">
@@ -417,42 +417,28 @@
 
           <!-- 右侧地图 -->
           <div class="culture-map__map">
-            <img src="/images/indexBg.png" alt="福州地区红色文化资源地图" class="culture-map__map-image" />
-            
-            <!-- 地图标记点示例 -->
-            <div class="map-marker" style="top: 22%; left: 51%;">
-              <div class="map-marker__label">展厅地址</div>
-              <div class="map-marker__icon">
-                <img src="/images/zhuzi2.png" alt="" />
-              </div>
-            </div>
-
-            <div class="map-marker" style="top: 41%; left: 65%;">
-              <div class="map-marker__label">展厅地址</div>
-              <div class="map-marker__icon">
-                <img src="/images/zhuzi2.png" alt="" />
-              </div>
-            </div>
+            <!-- 高德地图容器 -->
+            <div ref="mapContainer" class="amap-container"></div>
 
             <!-- 详情卡片 -->
-            <div class="map-detail-card" style="bottom: 16px; right: 16px;">
+            <div v-if="selectedResource" class="map-detail-card" style="bottom: 16px; right: 16px;">
               <div class="map-detail-card__image">
-                <img src="/images/home/video-2.jpg" alt="" />
+                <img :src="selectedResource.cover" alt="" />
               </div>
               <div class="map-detail-card__content">
                 <div class="map-detail-card__header">
-                  <span>展厅地址</span>
-                  <span class="map-detail-card__type">烈士陵园</span>
+                  <span>{{ selectedResource.name }}</span>
+                  <span class="map-detail-card__type">{{ selectedResource.type }}</span>
                 </div>
                 <p class="map-detail-card__description">
-                  实施特岗计划，充实基层教育师资力量；推动营养改善计划提质，确保孩子们吃得放心开心；大力发展职业教育，让更多农村学子拥有"一技之长"……近年来，贵州省实施整体提升教育水平攻坚行动，不断缩小城乡教育差距，保障农村孩子上好学、能就业。
+                  {{ selectedResource.description }}
                 </p>
                 <div class="map-detail-card__location">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M8 8.66667C8.73638 8.66667 9.33333 8.06971 9.33333 7.33333C9.33333 6.59695 8.73638 6 8 6C7.26362 6 6.66667 6.59695 6.66667 7.33333C6.66667 8.06971 7.26362 8.66667 8 8.66667Z" stroke="#333333" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M8 14C10 11.3333 13.3333 9.07619 13.3333 6.66667C13.3333 3.72115 10.9455 1.33333 8 1.33333C5.05448 1.33333 2.66667 3.72115 2.66667 6.66667C2.66667 9.07619 6 11.3333 8 14Z" stroke="#333333" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <span>大红门服饰商贸城</span>
+                  <span>{{ selectedResource.address }}</span>
                 </div>
               </div>
             </div>
@@ -464,12 +450,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import AMapLoader from '@amap/amap-jsapi-loader'
 import { getNiceCourseTopList, getCollegeSpecialTopList } from '@/api/course'
 import type { NiceCourseItem, CollegeSpecialItem } from '@/api/course'
 
 const router = useRouter()
+
+// 高德地图相关
+const mapContainer = ref<HTMLDivElement | null>(null)
+let map: any = null
+let markers: any[] = []
 
 // 轮播相关
 const currentSlide = ref(0)
@@ -548,6 +540,15 @@ const fetchNiceCourses = async () => {
 onMounted(() => {
   fetchNiceCourses()
   fetchCollegeCourses()
+  initMap()
+})
+
+// 组件卸载前销毁地图
+onBeforeUnmount(() => {
+  if (map) {
+    map.destroy()
+    map = null
+  }
 })
 
 // "一院一品"专题数据
@@ -604,58 +605,93 @@ const fetchCollegeCourses = async () => {
   }
 }
 
-// 红色文化资源数据
-const cultureResources = ref([
+// 红色文化资源数据（添加经纬度信息）
+interface CultureResource {
+  id: string
+  name: string
+  type: string
+  cover: string
+  description: string
+  longitude: number  // 经度
+  latitude: number   // 纬度
+  address: string
+}
+
+const cultureResources = ref<CultureResource[]>([
   {
     id: '1',
-    name: '文化遗址',
+    name: '福建省革命历史纪念馆',
     type: '博物馆',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '福建省革命历史纪念馆位于福州市鼓楼区，展示了福建革命历史的光辉历程',
+    longitude: 119.300,
+    latitude: 26.075,
+    address: '福州市鼓楼区五四路263号'
   },
   {
     id: '2',
-    name: '文化遗址',
+    name: '林觉民故居',
     type: '人物故居',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '林觉民故居位于福州市鼓楼区，是辛亥革命烈士林觉民的故居',
+    longitude: 119.305,
+    latitude: 26.080,
+    address: '福州市鼓楼区杨桥东路'
   },
   {
     id: '3',
-    name: '文化遗址',
+    name: '福州文林山革命烈士陵园',
     type: '烈士陵园',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '福州文林山革命烈士陵园，缅怀革命先烈的重要场所',
+    longitude: 119.310,
+    latitude: 26.085,
+    address: '福州市鼓楼区文林山'
   },
   {
     id: '4',
-    name: '文化遗址',
+    name: '中共福建省委党校',
     type: '党校',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '中共福建省委党校是培养党员干部的重要基地',
+    longitude: 119.295,
+    latitude: 26.070,
+    address: '福州市鼓楼区柳河路61号'
   },
   {
     id: '5',
-    name: '文化遗址',
+    name: '福州市委党群服务中心',
     type: '党群中心',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '福州市委党群服务中心提供党建服务和群众服务',
+    longitude: 119.290,
+    latitude: 26.065,
+    address: '福州市鼓楼区古田路'
   },
   {
     id: '6',
-    name: '文化遗址',
+    name: '福州市博物馆',
     type: '纪念馆',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '福州市博物馆收藏了大量福州历史文物和革命文物',
+    longitude: 119.315,
+    latitude: 26.090,
+    address: '福州市晋安区文博路8号'
   },
   {
     id: '7',
-    name: '文化遗址',
+    name: '闽侯县五虎山革命根据地',
     type: '革命地址',
     cover: '/images/indexBg.png',
-    description: '热到融化的马路、无穷无尽的野火'
+    description: '闽侯县五虎山革命根据地是福建重要的革命历史遗址',
+    longitude: 119.280,
+    latitude: 26.060,
+    address: '福州市闽侯县'
   }
 ])
+
+// 当前选中的资源
+const selectedResource = ref<CultureResource | null>(null)
 
 // 搜索相关
 const searchQuery = ref('')
@@ -683,8 +719,147 @@ const viewCourseDetail = (course: any) => {
   router.push(`/study/${course.id}`)
 }
 
-const selectResource = (resource: any) => {
+// 初始化高德地图
+const initMap = async () => {
+  try {
+    const AMap = await AMapLoader.load({
+      key: "aad7d46baacf3216eea254424dbdff2d",  // 高德地图 API Key
+      version: "2.0",
+      plugins: ["AMap.Scale", "AMap.ToolBar", "AMap.Marker"]
+    })
+
+    // 创建地图实例（以福州市为中心）
+    map = new AMap.Map(mapContainer.value, {
+      zoom: 12,  // 缩放级别
+      center: [119.296, 26.075],  // 福州市中心坐标
+      viewMode: "2D",  // 2D视图
+      resizeEnable: true
+    })
+
+    // 添加比例尺
+    map.addControl(new AMap.Scale())
+    // 添加工具栏
+    map.addControl(new AMap.ToolBar())
+
+    // 如果有资源，默认选中第一个
+    if (cultureResources.value.length > 0) {
+      selectedResource.value = cultureResources.value[0]
+      addMarkerToMap(cultureResources.value[0])
+    }
+  } catch (error) {
+    console.error('地图加载失败:', error)
+  }
+}
+
+// 添加地图标记
+const addMarkerToMap = (resource: CultureResource) => {
+  if (!map) return
+
+  // 清除之前的标记
+  markers.forEach(marker => {
+    map.remove(marker)
+  })
+  markers = []
+
+  // 创建自定义标记内容
+  const markerContent = `
+    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+      <div style="
+        padding: 8px 16px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        font-size: 14px;
+        color: #333;
+        white-space: nowrap;
+        margin-bottom: 8px;
+      ">
+        ${resource.name}
+      </div>
+      <div style="
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid white;
+        margin-top: -8px;
+      "></div>
+      <div style="
+        width: 30px;
+        height: 40px;
+        background: #bc2220;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(188,34,32,0.5);
+      ">
+        <div style="
+          width: 12px;
+          height: 12px;
+          background: white;
+          border-radius: 50%;
+          transform: rotate(45deg);
+        "></div>
+      </div>
+    </div>
+  `
+
+  // 创建标记
+  const marker = new AMap.Marker({
+    position: [resource.longitude, resource.latitude],
+    content: markerContent,
+    offset: new AMap.Pixel(-15, -60),
+    anchor: 'bottom-center'
+  })
+
+  // 创建信息窗口
+  const infoWindow = new AMap.InfoWindow({
+    content: `
+      <div style="padding: 12px; width: 280px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 16px; font-weight: bold; color: #333;">${resource.name}</span>
+          <span style="color: #bc2220;">${resource.type}</span>
+        </div>
+        <p style="margin: 8px 0; font-size: 14px; color: #666; line-height: 1.5;">
+          ${resource.description}
+        </p>
+        <div style="display: flex; align-items: center; gap: 4px; margin-top: 8px; color: #999; font-size: 12px;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M8 8.66667C8.73638 8.66667 9.33333 8.06971 9.33333 7.33333C9.33333 6.59695 8.73638 6 8 6C7.26362 6 6.66667 6.59695 6.66667 7.33333C6.66667 8.06971 7.26362 8.66667 8 8.66667Z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 14C10 11.3333 13.3333 9.07619 13.3333 6.66667C13.3333 3.72115 10.9455 1.33333 8 1.33333C5.05448 1.33333 2.66667 3.72115 2.66667 6.66667C2.66667 9.07619 6 11.3333 8 14Z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span>${resource.address}</span>
+        </div>
+      </div>
+    `,
+    offset: new AMap.Pixel(0, -60)
+  })
+
+  // 点击标记显示信息窗口
+  marker.on('click', () => {
+    infoWindow.open(map, marker.getPosition())
+  })
+
+  // 添加标记到地图
+  map.add(marker)
+  markers.push(marker)
+
+  // 地图中心移动到标记位置
+  map.setCenter([resource.longitude, resource.latitude])
+
+  // 自动打开信息窗口
+  setTimeout(() => {
+    infoWindow.open(map, marker.getPosition())
+  }, 300)
+}
+
+// 选择资源
+const selectResource = (resource: CultureResource) => {
   console.log('选择资源:', resource)
+  selectedResource.value = resource
+  addMarkerToMap(resource)
 }
 </script>
 
@@ -1431,6 +1606,14 @@ const selectResource = (resource: any) => {
   height: 100%;
   object-fit: cover;
   border-radius: 16px;
+}
+
+/* 高德地图容器样式 */
+.amap-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 /* 地图标记点 */

@@ -180,7 +180,17 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
-        path: 'study/:id',
+        path: 'study/college-special-more',
+        name: 'CollegeSpecialMore',
+        component: () => import('@/views/portal/Study/CollegeSpecialMore.vue'),
+        meta: {
+          title: '一院一品课程思政优秀示范案例展播',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
+        path: 'study/college-special/:id',
         name: 'CollegeSpecialDetail',
         component: () => import('@/views/portal/Study/CollegeSpecialDetail.vue'),
         meta: {

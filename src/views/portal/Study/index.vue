@@ -748,7 +748,7 @@ const viewMoreExcellent = () => {
 }
 
 const viewMoreCollege = () => {
-  console.log('查看更多一院一品专题')
+  router.push('/study/college-special-more')
 }
 
 const watchCourse = (course: any) => {
@@ -763,7 +763,7 @@ const watchCourse = (course: any) => {
 
 const viewCourseDetail = (course: any) => {
   console.log('查看课程详情:', course)
-  router.push(`/study/${course.id}`)
+  router.push(`/study/college-special/${course.id}`)
 }
 
 // 初始化高德地图

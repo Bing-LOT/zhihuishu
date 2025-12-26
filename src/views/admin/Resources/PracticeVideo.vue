@@ -1667,6 +1667,9 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 500;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status-tag {
@@ -1703,6 +1706,9 @@ onMounted(() => {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-footer {

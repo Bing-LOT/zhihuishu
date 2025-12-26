@@ -512,7 +512,6 @@
     <div
       v-if="showAddDialog || showEditDialog"
       class="dialog-overlay"
-      @click.self="closeDialog"
     >
       <div class="dialog">
         <div class="dialog__header">

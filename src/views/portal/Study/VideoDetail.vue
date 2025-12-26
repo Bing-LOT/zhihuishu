@@ -11,7 +11,7 @@
         <span class="label">您的位置：</span>
         <router-link to="/overview" class="link">思政概览</router-link>
         <span class="separator">>></span>
-        <router-link to="/overview" class="link">党员教师课程思政示范课展播</router-link>
+        <router-link to="/study/courses" class="link">党员教师课程思政示范课展播</router-link>
         <span class="separator">>></span>
         <span class="current">{{ course.title || '课程详情' }}</span>
       </div>

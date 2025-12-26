@@ -23,7 +23,8 @@ const adminRoutes: RouteRecordRaw[] = [
         meta: {
           title: '首页Banner配置',
           requiresAuth: false,
-          roles: []
+          roles: [],
+          keepAlive: true
         }
       },
       {
@@ -31,7 +32,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesPartyCourse',
         component: () => import('@/views/admin/Resources/PartyCourse.vue'),
         meta: {
-          title: '党建+课程思政'
+          title: '党建+课程思政',
+          keepAlive: true
         }
       },
       {
@@ -39,7 +41,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesModelDisplay',
         component: () => import('@/views/admin/Resources/ModelDisplay.vue'),
         meta: {
-          title: '示范展播'
+          title: '示范展播',
+          keepAlive: true
         }
       },
       {
@@ -47,7 +50,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesPracticeAchievement',
         component: () => import('@/views/admin/Resources/PracticeAchievement.vue'),
         meta: {
-          title: '习思想融入成果'
+          title: '习思想融入成果',
+          keepAlive: true
         }
       },
       {
@@ -55,7 +59,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesPracticeVideo',
         component: () => import('@/views/admin/Resources/PracticeVideo.vue'),
         meta: {
-          title: '习思想优秀视频展播'
+          title: '习思想优秀视频展播',
+          keepAlive: true
         }
       },
       {
@@ -63,7 +68,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesPracticeCase',
         component: () => import('@/views/admin/Resources/PracticeCase.vue'),
         meta: {
-          title: '习思想融入学科教学实践示范案例展播'
+          title: '习思想融入学科教学实践示范案例展播',
+          keepAlive: true
         }
       },
       {
@@ -71,7 +77,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesPracticeFootprint',
         component: () => import('@/views/admin/Resources/PracticeFootprint.vue'),
         meta: {
-          title: '总书记的福建足迹'
+          title: '总书记的福建足迹',
+          keepAlive: true
         }
       },
       {
@@ -79,7 +86,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesList',
         component: () => import('@/views/admin/Resources/ResourceList.vue'),
         meta: {
-          title: '思政资源'
+          title: '思政资源',
+          keepAlive: true
         }
       },
       {
@@ -87,7 +95,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesExcellentClass',
         component: () => import('@/views/admin/Resources/ExcellentClass.vue'),
         meta: {
-          title: '优秀思政课堂'
+          title: '优秀思政课堂',
+          keepAlive: true
         }
       },
       {
@@ -95,7 +104,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesCollegeSpecial',
         component: () => import('@/views/admin/Resources/CollegeSpecial.vue'),
         meta: {
-          title: '一院一品'
+          title: '一院一品',
+          keepAlive: true
         }
       },
       {
@@ -103,7 +113,8 @@ const adminRoutes: RouteRecordRaw[] = [
         name: 'AdminResourcesCultureMap',
         component: () => import('@/views/admin/Resources/CultureMap.vue'),
         meta: {
-          title: '红色文化资源地图'
+          title: '红色文化资源地图',
+          keepAlive: true
         }
       },
       {

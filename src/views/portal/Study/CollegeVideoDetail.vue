@@ -104,9 +104,7 @@
           <h2 class="recommend-title">其他教学岗教工视频</h2>
           <button class="view-more-btn" @click="handleViewMore">
             <span>查看更多</span>
-            <svg viewBox="0 0 20 20" width="20" height="20">
-              <path d="M8 5 L13 10 L8 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            <img src="/images/arrow-right.svg" alt="">
           </button>
         </div>
 

@@ -367,7 +367,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { 
   getNiceCoursePageList, 
   addNiceCourse, 
@@ -382,6 +382,9 @@ const items = ref<NiceCourseItem[]>([])
 
 // 加载状态
 const loading = ref(false)
+
+// 是否首次加载（用于缓存优化）
+const isFirstLoad = ref(true)
 
 // 分页信息
 const pagination = ref({
@@ -785,8 +788,18 @@ const closeDialog = () => {
 }
 
 // 组件挂载时加载数据
+// 首次挂载时加载数据
 onMounted(() => {
-  loadDataList()
+  if (isFirstLoad.value) {
+    loadDataList()
+    isFirstLoad.value = false
+  }
+})
+
+// 组件激活时（从缓存恢复）
+onActivated(() => {
+  // 如果需要，可以在这里添加刷新逻辑
+  // 默认使用缓存的数据，不重新加载
 })
 </script>
 

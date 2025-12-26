@@ -33,6 +33,17 @@ const authRoutes: RouteRecordRaw[] = [
 
 // 错误页面路由
 const errorRoutes: RouteRecordRaw[] = [
+  // 处理 index.html 访问，重定向到根路径并保留查询参数
+  {
+    path: '/index.html',
+    redirect: (to) => {
+      // 保留所有查询参数（包括 AuthToken）
+      return {
+        path: '/',
+        query: to.query
+      }
+    }
+  },
   {
     path: '/403',
     name: 'Forbidden',

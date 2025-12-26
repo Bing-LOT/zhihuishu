@@ -43,7 +43,11 @@ server {
 
     # 前台网站路由
     location / {
+        # 处理 Vue Router 的 HTML5 History 模式
         try_files $uri $uri/ /index.html;
+        
+        # 确保 index.html 始终返回，让 Vue Router 处理路由
+        # 这样 /index.html?AuthToken=xxx 也能正确处理
     }
 
     # 后台管理系统路由

@@ -379,11 +379,11 @@ const handleFileChange = (event: Event) => {
       return
     }
     
-    // 验证文件大小（最大5MB）
-    if (file.size > 5 * 1024 * 1024) {
-      alert('图片大小不能超过5MB')
-      return
-    }
+    // // 验证文件大小（最大5MB）
+    // if (file.size > 5 * 1024 * 1024) {
+    //   alert('图片大小不能超过5MB')
+    //   return
+    // }
     
     // 保存文件对象
     selectedFile.value = file

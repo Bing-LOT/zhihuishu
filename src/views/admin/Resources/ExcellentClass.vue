@@ -590,7 +590,7 @@
             <label>授课时间 <span class="required">*</span></label>
             <input
               v-model="formData.teachingTime"
-              type="datetime-local"
+              type="text"
               class="form-input"
             >
           </div>

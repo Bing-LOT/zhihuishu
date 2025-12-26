@@ -910,7 +910,7 @@
                     <span class="culture-resource-item__type">{{ resource.type }}</span>
                   </div>
                   <p class="culture-resource-item__description">
-                    {{ resource.description }}
+                    {{ resource.brief }}
                   </p>
                 </div>
               </div>
@@ -968,7 +968,7 @@
                   <span class="map-detail-card__type">{{ selectedResource.type }}</span>
                 </div>
                 <p class="map-detail-card__description">
-                  {{ selectedResource.description }}
+                  {{ selectedResource.brief }}
                 </p>
                 <div class="map-detail-card__location">
                   <svg
@@ -1169,6 +1169,7 @@ interface CultureResource {
   name: string
   type: string
   cover: string
+  brief: string
   description: string
   longitude: number  // 经度
   latitude: number   // 纬度
@@ -1214,6 +1215,7 @@ const fetchCultureResources = async (loadMore = false) => {
       name: item.title,
       type: item.tags && item.tags.length > 0 ? item.tags[0] : '文化资源',
       cover: item.coverUrl || '/images/indexBg.png',
+      brief: item.brief || '',
       description: item.content || '',
       longitude: item.lng || 119.296,
       latitude: item.lat || 26.075,

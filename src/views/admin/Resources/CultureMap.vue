@@ -542,6 +542,16 @@
           </div>
 
           <div class="form-group">
+            <label>简介</label>
+            <textarea
+              v-model="formData.brief"
+              placeholder="请输入简介"
+              class="form-textarea"
+              rows="4"
+            />
+          </div>
+
+          <div class="form-group">
             <label>标签（建设课程类型） <span class="required">*</span></label>
             <div class="tags-container">
               <div class="selected-tags">
@@ -848,6 +858,7 @@ interface CultureItem {
   id: number
   title: string
   address: string
+  brief: string
   tags: string[]
   lng: number
   lat: number
@@ -966,6 +977,7 @@ const formData = ref({
   title: '',
   coverUrl: '',
   address: '',
+  brief: '',
   tags: [] as string[],
   contentType: 0,
   content: '',
@@ -1199,6 +1211,7 @@ const editItem = (item: CultureItem) => {
     title: item.title,
     coverUrl: item.coverUrl || '',
     address: item.address || '',
+    brief: item.brief || '',
     tags: [...(item.tags || [])],
     contentType: parseInt(item.contentType) || 0,
     content: item.content || '',
@@ -1267,6 +1280,7 @@ const toggleStatus = async (item: CultureItem) => {
         title: item.title,
         coverUrl: item.coverUrl,
         address: item.address,
+        brief: item.brief || '',
         tags: item.tags || [],
         contentType: parseInt(item.contentType) || 0,
         content: item.content || '',
@@ -1343,6 +1357,7 @@ const saveItem = async () => {
         title: formData.value.title.trim(),
         coverUrl: formData.value.coverUrl,
         address: formData.value.address.trim(),
+        brief: formData.value.brief.trim(),
         tags: formData.value.tags,
         contentType: formData.value.contentType,
         content: formData.value.content.trim(),
@@ -1366,6 +1381,7 @@ const saveItem = async () => {
         title: formData.value.title.trim(),
         coverUrl: formData.value.coverUrl,
         address: formData.value.address.trim(),
+        brief: formData.value.brief.trim(),
         tags: formData.value.tags,
         contentType: formData.value.contentType,
         content: formData.value.content.trim(),
@@ -1406,6 +1422,7 @@ const closeDialog = () => {
     title: '',
     coverUrl: '',
     address: '',
+    brief: '',
     tags: [],
     contentType: 0,
     content: '',

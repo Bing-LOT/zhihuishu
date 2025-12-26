@@ -542,7 +542,7 @@
           </div>
 
           <div class="form-group">
-            <label>简介</label>
+            <label>简介 <span class="required">*</span></label>
             <textarea
               v-model="formData.brief"
               placeholder="请输入简介"
@@ -1338,6 +1338,10 @@ const saveItem = async () => {
   }
   if (!formData.value.address.trim()) {
     alert('请输入详细地址')
+    return
+  }
+  if (!formData.value.brief.trim()) {
+    alert('请输入简介')
     return
   }
   if (formData.value.tags.length === 0) {

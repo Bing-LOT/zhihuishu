@@ -817,10 +817,10 @@ onUnmounted(() => {
 
 .home__hero-bg-image {
   position: absolute;
-  top: -19.04%;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 126.98%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
 }

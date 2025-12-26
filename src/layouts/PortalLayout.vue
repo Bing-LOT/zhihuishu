@@ -87,6 +87,7 @@ import Header from '@/components/layout/Header.vue'
 .portal-main {
   flex: 1;
   width: 100%;
+  margin-top: 80px; /* Header 的高度，防止被遮挡 */
 }
 
 /* ===== 页脚 ===== */

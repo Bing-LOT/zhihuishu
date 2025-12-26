@@ -8,11 +8,11 @@ import type { ApiResponse } from '@/types'
 import { useUserStore } from '@/stores/user'
 
 // API基础地址配置
-// 开发环境：空字符串（使用相对路径，通过 Vite 代理转发到 VITE_APP_BASE_URL_DEV）
-// 生产环境：使用 VITE_APP_BASE_API 完整URL
-const API_BASE_URL = import.meta.env.MODE === 'production' 
-  ? (import.meta.env.VITE_APP_BASE_API || 'http://prod-cn.your-api-server.com')
-  : '' // 开发环境使用空字符串，走 Vite 代理
+// 开发服务器（npm run dev）：空字符串（使用相对路径，通过 Vite 代理转发）
+// 打包构建（npm run build 或 build:test）：拼接完整的API地址
+const API_BASE_URL = import.meta.env.DEV
+  ? '' // 开发服务器使用空字符串，走 Vite 代理
+  : `${import.meta.env.VITE_APP_BASE_URL_DEV || 'https://dszk.fzu.edu.cn/'}${import.meta.env.VITE_APP_BASE_API || 'dszk-api'}` // 打包后使用完整地址
 
 // 创建 Axios 实例
 const request: AxiosInstance = axios.create({
@@ -22,10 +22,16 @@ const request: AxiosInstance = axios.create({
 })
 
 console.log('================== API配置 ==================')
-console.log('当前环境:', import.meta.env.MODE)
+console.log('当前模式:', import.meta.env.MODE)
+console.log('是否开发服务器 (DEV):', import.meta.env.DEV)
 console.log('API Base URL:', API_BASE_URL || '(空，使用 Vite 代理)')
-console.log('开发环境代理目标 (VITE_APP_BASE_URL_DEV):', import.meta.env.VITE_APP_BASE_URL_DEV || 'https://dszk.fzu.edu.cn/dszk-api')
-console.log('生产环境地址 (VITE_APP_BASE_API):', import.meta.env.VITE_APP_BASE_API || 'http://prod-cn.your-api-server.com')
+console.log('BASE_URL_DEV:', import.meta.env.VITE_APP_BASE_URL_DEV || 'https://dszk.fzu.edu.cn/')
+console.log('BASE_API:', import.meta.env.VITE_APP_BASE_API || 'dszk-api')
+if (!import.meta.env.DEV) {
+  console.log('✅ 打包模式 - 完整API地址:', API_BASE_URL)
+} else {
+  console.log('🔧 开发服务器 - 使用 Vite 代理')
+}
 console.log('=============================================')
 
 // 请求拦截器

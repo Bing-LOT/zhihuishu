@@ -36,6 +36,10 @@ export default defineConfig(({ mode }) => {
       assetsDir: 'assets',
       sourcemap: false,
       rollupOptions: {
+        input: {
+          main: resolve(__dirname, 'index.html'),
+          admin: resolve(__dirname, 'admin/index.html')
+        },
         output: {
           manualChunks: {
             'vue-vendor': ['vue', 'vue-router', 'pinia'],

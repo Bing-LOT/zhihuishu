@@ -63,10 +63,19 @@ export function uploadFile(file: File): Promise<{ url: string }> {
       redirect: 'follow'
     }
     
-    // 使用代理路径（/upload 会被Vite代理转发到 https://dszk.fzu.edu.cn/dszk-api/upload）
-    const uploadUrl = '/upload'
+    // 根据环境选择正确的上传路径
+    // 开发环境：使用相对路径 /upload（通过 Vite 代理转发）
+    // 生产环境：使用完整路径 /dszk-api/upload
+    const uploadUrl = import.meta.env.DEV 
+      ? '/upload' 
+      : `${import.meta.env.VITE_APP_BASE_URL_DEV || 'https://dszk.fzu.edu.cn/'}${import.meta.env.VITE_APP_BASE_API || 'dszk-api'}/upload`
+    
     console.log('请求URL:', uploadUrl)
-    console.log('通过Vite代理转发到: https://dszk.fzu.edu.cn/dszk-api/upload')
+    if (import.meta.env.DEV) {
+      console.log('开发环境 - 通过Vite代理转发到: https://dszk.fzu.edu.cn/dszk-api/upload')
+    } else {
+      console.log('生产环境 - 直接请求完整URL')
+    }
     console.log('==========================================')
     
     // 使用fetch发送请求

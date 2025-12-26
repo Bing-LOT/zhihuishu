@@ -329,6 +329,14 @@ onMounted(() => {
   z-index: 1;
   max-height: 600px;
   overflow-y: auto;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* 隐藏 Webkit 浏览器滚动条 */
+.transcript-content::-webkit-scrollbar {
+  display: none;
 }
 
 .transcript-content :deep(p) {

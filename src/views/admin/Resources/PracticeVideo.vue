@@ -146,6 +146,9 @@
           <option value="人文社会科学学院">
             人文社会科学学院
           </option>
+          <option value="发规处">
+                发规处
+          </option>
         </select>
 
         <select
@@ -729,6 +732,9 @@
               </option>
               <option value="人文社会科学学院">
                 人文社会科学学院
+              </option>
+              <option value="发规处">
+                发规处
               </option>
             </select>
           </div>

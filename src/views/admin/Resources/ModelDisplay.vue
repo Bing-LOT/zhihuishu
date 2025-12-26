@@ -624,6 +624,9 @@
               <option value="">
                 请选择学院
               </option>
+              <option value="发规处">
+                发规处
+              </option>
               <option value="计算机与大数据学院">
                 计算机与大数据学院
               </option>

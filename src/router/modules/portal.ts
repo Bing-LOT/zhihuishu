@@ -200,6 +200,16 @@ const portalRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'study/culture-detail',
+        name: 'CultureDetail',
+        component: () => import('@/views/portal/Study/RichTextDetail.vue'),
+        meta: {
+          title: '红色文化资源详情',
+          requiresAuth: false,
+          roles: []
+        }
+      },
+      {
         path: 'exam',
         name: 'Exam',
         redirect: '/exam/list',

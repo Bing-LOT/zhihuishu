@@ -954,7 +954,8 @@
             <div
               v-if="selectedResource"
               class="map-detail-card"
-              style="bottom: 16px; right: 16px;"
+              style="bottom: 16px; right: 16px; cursor: pointer;"
+              @click="handleResourceClick"
             >
               <div class="map-detail-card__image">
                 <img
@@ -1174,6 +1175,9 @@ interface CultureResource {
   longitude: number  // 经度
   latitude: number   // 纬度
   address: string
+  contentType?: string  // 内容类型：'0'=富文本，'1'=URL
+  content?: string      // 内容：富文本或URL地址
+  rawData?: RedCultureItem  // 保留完整的原始数据
 }
 
 // 资源列表
@@ -1219,7 +1223,10 @@ const fetchCultureResources = async (loadMore = false) => {
       description: item.content || '',
       longitude: item.lng || 119.296,
       latitude: item.lat || 26.075,
-      address: item.address || ''
+      address: item.address || '',
+      contentType: item.contentType, // 保留内容类型：'0'=富文本，'1'=URL
+      content: item.content, // 保留原始内容
+      rawData: item // 保留完整的原始数据
     }))
 
     if (loadMore) {
@@ -1397,6 +1404,39 @@ const selectResource = (resource: CultureResource) => {
   console.log('选择资源:', resource)
   selectedResource.value = resource
   addMarkerToMap(resource)
+}
+
+// 处理资源卡片点击
+const handleResourceClick = () => {
+  if (!selectedResource.value) return
+
+  console.log('点击资源卡片:', selectedResource.value)
+  console.log('contentType:', selectedResource.value.contentType, 'type:', typeof selectedResource.value.contentType)
+
+  // 判断内容类型（支持字符串'1'和数字1）
+  const isUrl = selectedResource.value.contentType === '1' || 
+                selectedResource.value.contentType === 1 ||
+                String(selectedResource.value.contentType) === '1'
+  
+  if (isUrl) {
+    // URL类型：新窗口打开
+    const url = selectedResource.value.content
+    if (url) {
+      console.log('打开URL:', url)
+      window.open(url, '_blank')
+    } else {
+      console.warn('资源没有URL地址')
+    }
+  } else {
+    // 富文本类型：跳转到详情页面
+    console.log('跳转富文本页面')
+    // 将完整数据通过路由传递
+    const data = encodeURIComponent(JSON.stringify(selectedResource.value.rawData))
+    router.push({
+      path: '/study/culture-detail',
+      query: { data }
+    })
+  }
 }
 </script>
 
@@ -2289,6 +2329,12 @@ const selectResource = (resource: CultureResource) => {
   box-sizing: border-box; /* padding 包含在宽度内 */
   overflow: hidden; /* 防止内容溢出 */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* 添加阴影增强视觉效果 */
+  transition: all 0.3s ease; /* 添加过渡动画 */
+}
+
+.map-detail-card:hover {
+  box-shadow: 0 6px 24px rgba(188, 34, 32, 0.2);
+  transform: translateY(-2px);
 }
 
 .map-detail-card__image {

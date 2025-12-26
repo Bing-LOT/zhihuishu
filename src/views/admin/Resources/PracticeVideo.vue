@@ -874,17 +874,35 @@
         <div class="dialog__footer">
           <button
             class="btn-cancel"
+            :disabled="uploading"
             @click="closeDialog"
           >
             取消
           </button>
           <button
             class="btn-confirm"
+            :disabled="uploading"
             @click="saveItem"
           >
-            保存
+            {{ uploading ? '上传中...' : '保存' }}
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- 上传进度提示 -->
+    <div
+      v-if="uploading"
+      class="upload-overlay"
+    >
+      <div class="upload-modal">
+        <div class="upload-spinner" />
+        <p class="upload-text">
+          {{ uploadingText }}
+        </p>
+        <p class="upload-hint">
+          请勿关闭页面或刷新
+        </p>
       </div>
     </div>
   </div>
@@ -929,6 +947,10 @@ const showAddDialog = ref(false)
 const showEditDialog = ref(false)
 const coverInput = ref<HTMLInputElement | null>(null)
 const videoInput = ref<HTMLInputElement | null>(null)
+
+// 上传状态
+const uploading = ref(false)
+const uploadingText = ref('')
 
 // 表单数据
 const formData = ref({
@@ -1334,6 +1356,8 @@ const saveItem = async () => {
       // 1. 处理封面图片（如果上传了新的封面）
       let coverUrl = originalItem.cover || ''
       if (formData.value.coverFile) {
+        uploading.value = true
+        uploadingText.value = '正在上传封面图片...'
         console.log('正在上传新的封面图片...')
         const coverResult = await uploadFile(formData.value.coverFile)
         console.log('封面上传成功:', coverResult.url)
@@ -1345,6 +1369,8 @@ const saveItem = async () => {
       // 2. 处理视频文件（如果上传了新的视频）
       let videoUrl = originalItem.videoFile?.url || ''
       if (formData.value.videoRawFile) {
+        uploading.value = true
+        uploadingText.value = '正在上传视频文件，请稍候...'
         console.log('正在上传新的视频文件...')
         const videoResult = await uploadFile(formData.value.videoRawFile)
         console.log('视频上传成功:', videoResult.url)
@@ -1385,6 +1411,8 @@ const saveItem = async () => {
         alert('请选择封面图片文件')
         return
       }
+      uploading.value = true
+      uploadingText.value = '正在上传封面图片...'
       console.log('正在上传封面图片...')
       const coverResult = await uploadFile(formData.value.coverFile)
       console.log('封面上传成功:', coverResult.url)
@@ -1394,6 +1422,7 @@ const saveItem = async () => {
         alert('请选择视频文件')
         return
       }
+      uploadingText.value = '正在上传视频文件，请稍候...'
       console.log('正在上传视频文件...')
       const videoResult = await uploadFile(formData.value.videoRawFile)
       console.log('视频上传成功:', videoResult.url)
@@ -1424,6 +1453,9 @@ const saveItem = async () => {
   } catch (error: any) {
     console.error('保存失败:', error)
     alert(`保存失败：${error.message || '未知错误'}`)
+  } finally {
+    uploading.value = false
+    uploadingText.value = ''
   }
 }
 
@@ -2099,9 +2131,14 @@ textarea.form-input {
   border: 1px solid #d9d9d9;
 }
 
-.btn-cancel:hover {
+.btn-cancel:hover:not(:disabled) {
   border-color: #e31e24;
   color: #e31e24;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-confirm {
@@ -2110,8 +2147,14 @@ textarea.form-input {
   border: none;
 }
 
-.btn-confirm:hover {
+.btn-confirm:hover:not(:disabled) {
   background: #c71b20;
+}
+
+.btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e31e24;
 }
 
 /* 加载状态 */
@@ -2232,6 +2275,50 @@ textarea.form-input {
 .page-size-select:focus {
   outline: none;
   border-color: #e31e24;
+}
+
+/* 上传进度提示 */
+.upload-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.upload-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.upload-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #e31e24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.upload-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.upload-hint {
+  margin: 0;
+  font-size: 14px;
+  color: #999;
 }
 </style>
 

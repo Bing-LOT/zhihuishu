@@ -4,16 +4,34 @@
     <header class="admin-header">
       <div class="admin-header__left">
         <div class="admin-logo">
-          <img src="/images/fuzhoudaxue.png" alt="Logo" />
+          <img
+            src="/images/fuzhoudaxue.png"
+            alt="Logo"
+          >
           <span>"大思政课"数智化</span>
         </div>
       </div>
       <div class="admin-header__right">
-        <a href="/" class="admin-header__link" target="_blank">前台首页</a>
+        <a
+          href="/"
+          class="admin-header__link"
+          target="_blank"
+        >前台首页</a>
         <div class="admin-header__user">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z" fill="white"/>
-            <path d="M8 9C4.68629 9 2 10.7909 2 13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13C14 10.7909 11.3137 9 8 9Z" fill="white"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path
+              d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z"
+              fill="white"
+            />
+            <path
+              d="M8 9C4.68629 9 2 10.7909 2 13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13C14 10.7909 11.3137 9 8 9Z"
+              fill="white"
+            />
           </svg>
           <span>账号 | {{ username }}</span>
         </div>
@@ -35,7 +53,10 @@
     <!-- 内容区域 -->
     <div class="admin-content">
       <!-- 左侧菜单（仅在资源管理模块显示） -->
-      <aside v-if="showSidebar" class="admin-sidebar">
+      <aside
+        v-if="showSidebar"
+        class="admin-sidebar"
+      >
         <div
           v-for="menu in sideMenus"
           :key="menu.key"
@@ -54,10 +75,19 @@
               viewBox="0 0 12 12"
               fill="none"
             >
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M3 4.5L6 7.5L9 4.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
-          <div v-if="menu.children && menu.expanded" class="admin-menu-item__children">
+          <div
+            v-if="menu.children && menu.expanded"
+            class="admin-menu-item__children"
+          >
             <div
               v-for="child in menu.children"
               :key="child.key"
@@ -71,19 +101,22 @@
       </aside>
 
       <!-- 主内容区 -->
-      <main class="admin-main" :class="{ 'admin-main--full': !showSidebar }">
+      <main
+        class="admin-main"
+        :class="{ 'admin-main--full': !showSidebar }"
+      >
         <router-view v-slot="{ Component, route: routeSlot }">
           <keep-alive>
             <component 
               :is="Component" 
-              :key="routeSlot.path" 
               v-if="routeSlot.meta.keepAlive" 
+              :key="routeSlot.path" 
             />
           </keep-alive>
           <component 
             :is="Component" 
-            :key="routeSlot.path" 
             v-if="!routeSlot.meta.keepAlive" 
+            :key="routeSlot.path" 
           />
         </router-view>
       </main>

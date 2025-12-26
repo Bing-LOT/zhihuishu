@@ -4,9 +4,14 @@
       <!-- Logo 和平台名称 -->
       <div class="header__brand">
         <div class="header__logo">
-          <img src="/images/fuzhoudaxue.png" alt="福州大学" />
+          <img
+            src="/images/fuzhoudaxue.png"
+            alt="福州大学"
+          >
         </div>
-        <h1 class="header__title">福州大学新时代思政教育平台</h1>
+        <h1 class="header__title">
+          福州大学新时代思政教育平台
+        </h1>
       </div>
 
       <!-- 导航菜单 -->
@@ -24,14 +29,28 @@
 
       <!-- 右侧功能区 -->
       <div class="header__actions">
-        <router-link to="/admin" class="header__btn">
+        <router-link
+          to="/admin"
+          class="header__btn"
+        >
           后台管理系统
         </router-link>
-        <router-link to="/admin/analysis" class="header__btn">
+        <router-link
+          to="/admin/analysis"
+          class="header__btn"
+        >
           教学数据看板
         </router-link>
-        <button class="header__search" @click="handleSearch">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <button
+          class="header__search"
+          @click="handleSearch"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
             <circle 
               cx="9.16667" 
               cy="9.16667" 
@@ -51,9 +70,17 @@
           </svg>
           <span>搜索</span>
         </button>
-        <div class="header__divider"></div>
-        <router-link to="/auth/login" class="header__login">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <div class="header__divider" />
+        <router-link
+          to="/auth/login"
+          class="header__login"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
             <path 
               d="M10 10C12.0711 10 13.75 8.32107 13.75 6.25C13.75 4.17893 12.0711 2.5 10 2.5C7.92893 2.5 6.25 4.17893 6.25 6.25C6.25 8.32107 7.92893 10 10 10Z" 
               stroke="white" 

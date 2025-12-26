@@ -2,16 +2,29 @@
   <div class="college-video-detail">
     <!-- 背景层 -->
     <div class="college-video-detail__bg">
-      <img src="/images/indexBg.png" alt="" />
+      <img
+        src="/images/indexBg.png"
+        alt=""
+      >
     </div>
 
     <div class="college-video-detail__container">
       <!-- 面包屑 -->
       <div class="college-video-detail__breadcrumb">
         <span class="label">您的位置：</span>
-        <router-link to="/" class="link">首页</router-link>
+        <router-link
+          to="/"
+          class="link"
+        >
+          首页
+        </router-link>
         <span class="separator">&gt;&gt;</span>
-        <router-link to="/study" class="link">学院案例</router-link>
+        <router-link
+          to="/study"
+          class="link"
+        >
+          学院案例
+        </router-link>
         <span class="separator">&gt;&gt;</span>
         <span class="current">视频详情</span>
       </div>
@@ -20,18 +33,25 @@
       <div class="college-video-detail__content">
         <!-- 左侧：文字讲稿 -->
         <div class="text-script-card">
-          <div class="card-bg-decoration"></div>
-          <h2 class="text-script-card__title">文字讲稿</h2>
-          <div class="text-script-card__content" v-html="videoDetail.content"></div>
+          <div class="card-bg-decoration" />
+          <h2 class="text-script-card__title">
+            文字讲稿
+          </h2>
+          <div
+            class="text-script-card__content"
+            v-html="videoDetail.content"
+          />
         </div>
 
         <!-- 右侧：视频播放器和信息 -->
         <div class="video-main-card">
-          <div class="card-bg-decoration"></div>
+          <div class="card-bg-decoration" />
           
           <!-- 视频信息 -->
           <div class="video-info-header">
-            <h1 class="video-title">{{ videoDetail.name }}</h1>
+            <h1 class="video-title">
+              {{ videoDetail.name }}
+            </h1>
             <div class="video-stats">
               <span class="label">观看次数：</span>
               <span class="value">{{ formatViewCount(videoDetail.statPv) }}</span>
@@ -47,38 +67,102 @@
               :poster="videoDetail.coverUrl"
               @timeupdate="handleTimeUpdate"
               @loadedmetadata="handleLoadedMetadata"
-            ></video>
+            />
             
             <!-- 自定义视频控制栏 -->
             <div class="video-controls">
               <!-- 进度条 -->
-              <div class="progress-bar" @click="handleProgressClick">
-                <div class="progress-played" :style="{ width: playedProgress + '%' }"></div>
-                <div class="progress-thumb" :style="{ left: playedProgress + '%' }"></div>
+              <div
+                class="progress-bar"
+                @click="handleProgressClick"
+              >
+                <div
+                  class="progress-played"
+                  :style="{ width: playedProgress + '%' }"
+                />
+                <div
+                  class="progress-thumb"
+                  :style="{ left: playedProgress + '%' }"
+                />
               </div>
 
               <!-- 功能条 -->
               <div class="controls-bar">
                 <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
                 
-                <button class="control-btn play-btn" @click="togglePlay">
-                  <svg v-if="!isPlaying" viewBox="0 0 32 32" width="32" height="32">
-                    <circle cx="16" cy="16" r="16" fill="rgba(255,255,255,0.1)" />
-                    <path d="M12 8 L24 16 L12 24 Z" fill="white" />
+                <button
+                  class="control-btn play-btn"
+                  @click="togglePlay"
+                >
+                  <svg
+                    v-if="!isPlaying"
+                    viewBox="0 0 32 32"
+                    width="32"
+                    height="32"
+                  >
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="16"
+                      fill="rgba(255,255,255,0.1)"
+                    />
+                    <path
+                      d="M12 8 L24 16 L12 24 Z"
+                      fill="white"
+                    />
                   </svg>
-                  <svg v-else viewBox="0 0 32 32" width="32" height="32">
-                    <circle cx="16" cy="16" r="16" fill="rgba(255,255,255,0.1)" />
-                    <rect x="11" y="9" width="3" height="14" fill="white" />
-                    <rect x="18" y="9" width="3" height="14" fill="white" />
+                  <svg
+                    v-else
+                    viewBox="0 0 32 32"
+                    width="32"
+                    height="32"
+                  >
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="16"
+                      fill="rgba(255,255,255,0.1)"
+                    />
+                    <rect
+                      x="11"
+                      y="9"
+                      width="3"
+                      height="14"
+                      fill="white"
+                    />
+                    <rect
+                      x="18"
+                      y="9"
+                      width="3"
+                      height="14"
+                      fill="white"
+                    />
                   </svg>
                 </button>
 
                 <div class="controls-right">
-                  <button class="control-btn fullscreen-btn" @click="toggleFullscreen">
-                    <svg viewBox="0 0 32 32" width="32" height="32">
-                      <circle cx="16" cy="16" r="16" fill="rgba(255,255,255,0.1)" />
-                      <path d="M10 10 L10 14 M10 10 L14 10 M22 10 L22 14 M22 10 L18 10 M10 22 L10 18 M10 22 L14 22 M22 22 L22 18 M22 22 L18 22" 
-                            stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" />
+                  <button
+                    class="control-btn fullscreen-btn"
+                    @click="toggleFullscreen"
+                  >
+                    <svg
+                      viewBox="0 0 32 32"
+                      width="32"
+                      height="32"
+                    >
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r="16"
+                        fill="rgba(255,255,255,0.1)"
+                      />
+                      <path
+                        d="M10 10 L10 14 M10 10 L14 10 M22 10 L22 14 M22 10 L18 10 M10 22 L10 18 M10 22 L14 22 M22 22 L22 18 M22 22 L18 22" 
+                        stroke="white"
+                        stroke-width="1.5"
+                        fill="none"
+                        stroke-linecap="round"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -101,10 +185,18 @@
       <!-- 推荐视频列表 -->
       <div class="recommend-section">
         <div class="recommend-header">
-          <h2 class="recommend-title">其他教学岗教工视频</h2>
-          <button class="view-more-btn" @click="handleViewMore">
+          <h2 class="recommend-title">
+            其他教学岗教工视频
+          </h2>
+          <button
+            class="view-more-btn"
+            @click="handleViewMore"
+          >
             <span>查看更多</span>
-            <img src="/images/arrow-right.svg" alt="">
+            <img
+              src="/images/arrow-right.svg"
+              alt=""
+            >
           </button>
         </div>
 
@@ -117,21 +209,47 @@
           >
             <!-- 视频封面 -->
             <div class="video-card__cover">
-              <img :src="video.coverUrl" :alt="video.name" />
-              <div class="video-card__badge" v-if="video.levelName">{{ video.levelName }}</div>
+              <img
+                :src="video.coverUrl"
+                :alt="video.name"
+              >
+              <div
+                v-if="video.levelName"
+                class="video-card__badge"
+              >
+                {{ video.levelName }}
+              </div>
             </div>
 
             <!-- 视频信息 -->
             <div class="video-card__info">
-              <h3 class="video-card__title">{{ video.name }}</h3>
+              <h3 class="video-card__title">
+                {{ video.name }}
+              </h3>
               <div class="video-card__meta">
                 <span class="video-card__description">
                   教师课程<template v-if="video.teachers && video.teachers.length > 0">（教工：{{ video.teachers[0].name }}）</template>
                 </span>
                 <div class="video-card__views">
-                  <svg viewBox="0 0 20 20" width="20" height="20">
-                    <path d="M10 5 C5 5 2 10 2 10 S5 15 10 15 S18 10 18 10 S15 5 10 5 Z" stroke="currentColor" stroke-width="1.5" fill="none" />
-                    <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
+                  <svg
+                    viewBox="0 0 20 20"
+                    width="20"
+                    height="20"
+                  >
+                    <path
+                      d="M10 5 C5 5 2 10 2 10 S5 15 10 15 S18 10 18 10 S15 5 10 5 Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      fill="none"
+                    />
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="3"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      fill="none"
+                    />
                   </svg>
                   <span>{{ video.showStatPv || 3456 }}人</span>
                 </div>

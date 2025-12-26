@@ -1,6 +1,12 @@
 <template>
-  <div v-if="total > 0" class="pagination">
-    <div v-if="showTotal" class="pagination__total">
+  <div
+    v-if="total > 0"
+    class="pagination"
+  >
+    <div
+      v-if="showTotal"
+      class="pagination__total"
+    >
       共 {{ total }} 条
     </div>
 
@@ -12,8 +18,19 @@
         :disabled="page <= 1"
         @click="handlePageChange(page - 1)"
       >
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M7.5 2.5L4 6L7.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+        >
+          <path
+            d="M7.5 2.5L4 6L7.5 9.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
         上一页
       </button>
@@ -40,16 +57,38 @@
         @click="handlePageChange(page + 1)"
       >
         下一页
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+        >
+          <path
+            d="M4.5 2.5L8 6L4.5 9.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
     </div>
 
     <!-- 每页数量选择器 -->
-    <div v-if="showSizeChanger" class="pagination__size-changer">
-      <select :value="pageSize" class="pagination__select" @change="handleSizeChange">
-        <option v-for="size in pageSizes" :key="size" :value="size">
+    <div
+      v-if="showSizeChanger"
+      class="pagination__size-changer"
+    >
+      <select
+        :value="pageSize"
+        class="pagination__select"
+        @change="handleSizeChange"
+      >
+        <option
+          v-for="size in pageSizes"
+          :key="size"
+          :value="size"
+        >
           {{ size }} 条/页
         </option>
       </select>

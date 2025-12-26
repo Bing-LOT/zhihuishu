@@ -6,9 +6,22 @@
     </div>
 
     <div class="page-actions">
-      <button class="btn-primary" @click="showAddDialog = true">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <button
+        class="btn-primary"
+        @click="showAddDialog = true"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="M8 3.5V12.5M3.5 8H12.5"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         添加题目
       </button>
@@ -16,11 +29,26 @@
 
     <div class="content-card">
       <div class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <path d="M32 8V56M8 32H56" stroke="#d9d9d9" stroke-width="3" stroke-linecap="round"/>
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+        >
+          <path
+            d="M32 8V56M8 32H56"
+            stroke="#d9d9d9"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
         </svg>
         <p>暂无题目数据</p>
-        <button class="btn-secondary" @click="showAddDialog = true">立即添加</button>
+        <button
+          class="btn-secondary"
+          @click="showAddDialog = true"
+        >
+          立即添加
+        </button>
       </div>
     </div>
   </div>

@@ -1,16 +1,32 @@
 <template>
   <div class="resource-detail-page">
     <div class="page-bg">
-      <img src="/images/indexBg.png" alt="" />
+      <img
+        src="/images/indexBg.png"
+        alt=""
+      >
     </div>
 
     <div class="page-container">
       <!-- 面包屑 -->
-      <div class="breadcrumb" v-if="detail">
+      <div
+        v-if="detail"
+        class="breadcrumb"
+      >
         <span class="label">您的位置：</span>
-        <router-link to="/" class="link">首页</router-link>
+        <router-link
+          to="/"
+          class="link"
+        >
+          首页
+        </router-link>
         <span class="separator">>></span>
-        <router-link to="/resources" class="link">思政资源</router-link>
+        <router-link
+          to="/resources"
+          class="link"
+        >
+          思政资源
+        </router-link>
         <span class="separator">>></span>
         <span class="link">{{ getCategoryName(detail.category) }}</span>
         <span class="separator">>></span>
@@ -18,16 +34,24 @@
       </div>
 
       <!-- 加载状态 -->
-      <div v-if="loading" class="detail-card">
+      <div
+        v-if="loading"
+        class="detail-card"
+      >
         <div class="loading-state">
           <p>加载中...</p>
         </div>
       </div>
 
       <!-- 详情内容 -->
-      <div v-else-if="detail" class="detail-card">
+      <div
+        v-else-if="detail"
+        class="detail-card"
+      >
         <div class="detail-header">
-          <h1 class="detail-title">{{ detail.title }}</h1>
+          <h1 class="detail-title">
+            {{ detail.title }}
+          </h1>
           <div class="detail-meta">
             <span class="meta-item">发布时间：{{ formatDate(detail.createTime) }}</span>
             <span class="separator">|</span>
@@ -36,11 +60,18 @@
         </div>
 
         <!-- 富文本内容 -->
-        <div class="detail-body" v-if="detail.contentType === 0" v-html="detail.content"></div>
+        <div
+          v-if="detail.contentType === 0"
+          class="detail-body"
+          v-html="detail.content"
+        />
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="detail-card">
+      <div
+        v-else
+        class="detail-card"
+      >
         <div class="empty-state">
           <p>暂无数据</p>
         </div>

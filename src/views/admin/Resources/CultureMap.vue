@@ -4,20 +4,50 @@
     <div class="page-header">
       <div class="page-title">
         <h2>红色文化资源地图（福州地区）</h2>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-left: 8px;">
-          <path d="M12 5.33333L6.66667 10.6667L4 8" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          style="margin-left: 8px;"
+        >
+          <path
+            d="M12 5.33333L6.66667 10.6667L4 8"
+            stroke="#999"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </div>
-      <p class="page-desc">管理红色文化资源内容</p>
+      <p class="page-desc">
+        管理红色文化资源内容
+      </p>
     </div>
 
     <!-- 搜索和筛选栏 -->
     <div class="page-toolbar">
       <div class="toolbar-left">
         <div class="search-box">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.5"/>
-            <path d="M11 11L14 14" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <circle
+              cx="7"
+              cy="7"
+              r="5"
+              stroke="#999"
+              stroke-width="1.5"
+            />
+            <path
+              d="M11 11L14 14"
+              stroke="#999"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
           </svg>
           <input
             v-model="searchKeyword"
@@ -25,19 +55,42 @@
             placeholder="搜索标题..."
             class="search-input"
             @input="handleSearch"
-          />
+          >
         </div>
         
-        <select v-model="statusFilter" class="filter-select" @change="handleFilter">
-          <option value="all">全部状态</option>
-          <option value="active">显示中</option>
-          <option value="inactive">已隐藏</option>
+        <select
+          v-model="statusFilter"
+          class="filter-select"
+          @change="handleFilter"
+        >
+          <option value="all">
+            全部状态
+          </option>
+          <option value="active">
+            显示中
+          </option>
+          <option value="inactive">
+            已隐藏
+          </option>
         </select>
       </div>
 
-      <button class="btn-add" @click="openAddDialog">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 2.33333V11.6667M2.33333 7H11.6667" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <button
+        class="btn-add"
+        @click="openAddDialog"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+        >
+          <path
+            d="M7 2.33333V11.6667M2.33333 7H11.6667"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         新增
       </button>
@@ -61,31 +114,86 @@
       >
         <!-- 拖动手柄 -->
         <div class="drag-handle">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="5" cy="3" r="1" fill="#999"/>
-            <circle cx="11" cy="3" r="1" fill="#999"/>
-            <circle cx="5" cy="8" r="1" fill="#999"/>
-            <circle cx="11" cy="8" r="1" fill="#999"/>
-            <circle cx="5" cy="13" r="1" fill="#999"/>
-            <circle cx="11" cy="13" r="1" fill="#999"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <circle
+              cx="5"
+              cy="3"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="11"
+              cy="3"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="5"
+              cy="8"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="11"
+              cy="8"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="5"
+              cy="13"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="11"
+              cy="13"
+              r="1"
+              fill="#999"
+            />
           </svg>
         </div>
 
         <!-- 缩略图 -->
         <div class="item-thumbnail">
-          <img :src="item.coverUrl || '/images/home/video-1.jpg'" :alt="item.title" />
+          <img
+            :src="item.coverUrl || '/images/home/video-1.jpg'"
+            :alt="item.title"
+          >
         </div>
 
         <!-- 内容信息 -->
         <div class="item-content">
           <div class="item-title-wrapper">
-            <h3 class="item-title">{{ item.title }}</h3>
-            <span v-if="item.pinTop === 1" class="status-badge status-badge--top">置顶</span>
-            <span v-if="item.showFront === 0" class="status-badge status-badge--hidden">前台隐藏</span>
+            <h3 class="item-title">
+              {{ item.title }}
+            </h3>
+            <span
+              v-if="item.pinTop === 1"
+              class="status-badge status-badge--top"
+            >置顶</span>
+            <span
+              v-if="item.showFront === 0"
+              class="status-badge status-badge--hidden"
+            >前台隐藏</span>
           </div>
-          <p class="item-description">{{ item.address }}</p>
-          <div class="item-tags" v-if="item.tags && item.tags.length > 0">
-            <span v-for="tag in item.tags" :key="tag" class="tag">{{ tag }}</span>
+          <p class="item-description">
+            {{ item.address }}
+          </p>
+          <div
+            v-if="item.tags && item.tags.length > 0"
+            class="item-tags"
+          >
+            <span
+              v-for="tag in item.tags"
+              :key="tag"
+              class="tag"
+            >{{ tag }}</span>
           </div>
 
           <div class="item-footer">
@@ -101,56 +209,154 @@
 
         <!-- 操作按钮 -->
         <div class="item-actions">
-          <button class="action-btn action-btn--edit" @click="editItem(item)" title="编辑">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="action-btn action-btn--edit"
+            title="编辑"
+            @click="editItem(item)"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
           <button 
             class="action-btn" 
             :class="item.showFront === 1 ? 'action-btn--hide' : 'action-btn--show'" 
-            @click="toggleStatus(item)" 
-            :title="item.showFront === 1 ? '隐藏' : '显示'"
+            :title="item.showFront === 1 ? '隐藏' : '显示'" 
+            @click="toggleStatus(item)"
           >
-            <svg v-if="item.showFront === 1" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <svg
+              v-if="item.showFront === 1"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
               <!-- 隐藏图标：眼睛带斜线 -->
-              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M2 2L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path
+                d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <circle
+                cx="8"
+                cy="8"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M2 2L14 14"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
             </svg>
-            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <svg
+              v-else
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
               <!-- 显示图标：眼睛 -->
-              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+              <path
+                d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <circle
+                cx="8"
+                cy="8"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
             </svg>
           </button>
-          <button class="action-btn action-btn--delete" @click="deleteItem(item.id)" title="删除">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 4H3.33333H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="action-btn action-btn--delete"
+            title="删除"
+            @click="deleteItem(item.id)"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M2 4H3.33333H14"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-if="!loading && filteredItems.length === 0" class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
-          <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
+      <div
+        v-if="!loading && filteredItems.length === 0"
+        class="empty-state"
+      >
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+        >
+          <circle
+            cx="32"
+            cy="32"
+            r="30"
+            stroke="#d9d9d9"
+            stroke-width="2"
+          />
+          <path
+            d="M32 20V36M32 44H32.02"
+            stroke="#d9d9d9"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         <p>暂无数据</p>
       </div>
 
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
+      <div
+        v-if="loading"
+        class="loading-state"
+      >
+        <div class="loading-spinner" />
         <p>加载中...</p>
       </div>
     </div>
 
     <!-- 分页器 -->
-    <div v-if="!loading && totalCount > 0" class="pagination">
+    <div
+      v-if="!loading && totalCount > 0"
+      class="pagination"
+    >
       <div class="pagination-info">
         共 {{ totalCount }} 条数据，第 {{ currentPage }} / {{ totalPages }} 页
       </div>
@@ -168,8 +374,8 @@
             :key="page"
             class="page-number"
             :class="{ active: page === currentPage }"
-            @click="typeof page === 'number' && handlePageChange(page)"
             :disabled="typeof page === 'string'"
+            @click="typeof page === 'number' && handlePageChange(page)"
           >
             {{ page }}
           </button>
@@ -186,21 +392,44 @@
           class="page-size-select"
           @change="handlePageSizeChange(pageSize)"
         >
-          <option :value="10">10条/页</option>
-          <option :value="20">20条/页</option>
-          <option :value="50">50条/页</option>
+          <option :value="10">
+            10条/页
+          </option>
+          <option :value="20">
+            20条/页
+          </option>
+          <option :value="50">
+            50条/页
+          </option>
         </select>
       </div>
     </div>
 
     <!-- 新增/编辑对话框 -->
-    <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
+    <div
+      v-if="showAddDialog || showEditDialog"
+      class="dialog-overlay"
+      @click.self="closeDialog"
+    >
       <div class="dialog">
         <div class="dialog__header">
           <h3>{{ showEditDialog ? '编辑资源' : '新增资源' }}</h3>
-          <button class="dialog__close" @click="closeDialog">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="closeDialog"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -213,7 +442,7 @@
               type="text"
               placeholder="请输入标题"
               class="form-input"
-            />
+            >
           </div>
 
           <div class="form-group">
@@ -225,23 +454,80 @@
                 accept="image/*"
                 style="display: none"
                 @change="handleCoverChange"
-              />
-              <div v-if="formData.coverUrl" class="image-preview-box">
-                <img :src="formData.coverUrl" alt="预览" />
-                <button class="btn-remove-image" @click="removeCover">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              >
+              <div
+                v-if="formData.coverUrl"
+                class="image-preview-box"
+              >
+                <img
+                  :src="formData.coverUrl"
+                  alt="预览"
+                >
+                <button
+                  class="btn-remove-image"
+                  @click="removeCover"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                  >
+                    <path
+                      d="M12 4L4 12M4 4L12 12"
+                      stroke="white"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </button>
               </div>
-              <div v-else class="image-upload-empty">
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                  <rect x="10" y="15" width="60" height="50" rx="4" stroke="#999" stroke-width="2" fill="none"/>
-                  <circle cx="30" cy="32" r="6" stroke="#999" stroke-width="2" fill="none"/>
-                  <path d="M10 55L25 40L35 50L50 35L70 55" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <div
+                v-else
+                class="image-upload-empty"
+              >
+                <svg
+                  width="80"
+                  height="80"
+                  viewBox="0 0 80 80"
+                  fill="none"
+                >
+                  <rect
+                    x="10"
+                    y="15"
+                    width="60"
+                    height="50"
+                    rx="4"
+                    stroke="#999"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <circle
+                    cx="30"
+                    cy="32"
+                    r="6"
+                    stroke="#999"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <path
+                    d="M10 55L25 40L35 50L50 35L70 55"
+                    stroke="#999"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
-                <p class="upload-hint">上传封面图片</p>
-                <button class="btn-upload-blue" type="button" @click="triggerCoverUpload">选择图片</button>
+                <p class="upload-hint">
+                  上传封面图片
+                </p>
+                <button
+                  class="btn-upload-blue"
+                  type="button"
+                  @click="triggerCoverUpload"
+                >
+                  选择图片
+                </button>
               </div>
             </div>
           </div>
@@ -253,16 +539,24 @@
               type="text"
               placeholder="请输入详细地址"
               class="form-input"
-            />
+            >
           </div>
 
           <div class="form-group">
             <label>标签（建设课程类型） <span class="required">*</span></label>
             <div class="tags-container">
               <div class="selected-tags">
-                <span v-for="(tag, index) in formData.tags" :key="index" class="selected-tag">
+                <span
+                  v-for="(tag, index) in formData.tags"
+                  :key="index"
+                  class="selected-tag"
+                >
                   {{ tag }}
-                  <button type="button" @click="removeTag(index)" class="remove-tag-btn">×</button>
+                  <button
+                    type="button"
+                    class="remove-tag-btn"
+                    @click="removeTag(index)"
+                  >×</button>
                 </span>
               </div>
               <div class="tag-input-row">
@@ -272,8 +566,14 @@
                   placeholder="输入标签后按回车添加"
                   class="form-input"
                   @keypress.enter.prevent="addTag"
-                />
-                <button type="button" class="btn-add-tag" @click="addTag">添加</button>
+                >
+                <button
+                  type="button"
+                  class="btn-add-tag"
+                  @click="addTag"
+                >
+                  添加
+                </button>
               </div>
               <!-- <div class="available-tags">
                 <span>常用标签：</span>
@@ -313,9 +613,16 @@
 
           <div class="form-group">
             <label>内容类型 <span class="required">*</span></label>
-            <select v-model.number="formData.contentType" class="form-input">
-              <option :value="0">富文本</option>
-              <option :value="1">URL地址</option>
+            <select
+              v-model.number="formData.contentType"
+              class="form-input"
+            >
+              <option :value="0">
+                富文本
+              </option>
+              <option :value="1">
+                URL地址
+              </option>
             </select>
           </div>
 
@@ -324,19 +631,22 @@
               {{ formData.contentType === 0 ? '资源详情（富文本）' : 'URL地址' }}
               <span class="required">*</span>
             </label>
-            <div v-if="formData.contentType === 0" class="editor-container">
+            <div
+              v-if="formData.contentType === 0"
+              class="editor-container"
+            >
               <Toolbar
                 :editor="editorRef"
-                :defaultConfig="toolbarConfig"
+                :default-config="toolbarConfig"
                 mode="default"
                 class="editor-toolbar"
               />
               <Editor
                 v-model="formData.content"
-                :defaultConfig="editorConfig"
+                :default-config="editorConfig"
                 mode="default"
                 class="editor-content"
-                @onCreated="handleCreated"
+                @on-created="handleCreated"
               />
             </div>
             <input
@@ -345,30 +655,65 @@
               type="url"
               placeholder="请输入URL地址"
               class="form-input"
-            />
+            >
           </div>
 
           <div class="form-group">
             <label class="checkbox-label">
-              <input v-model="formData.pinTop" type="checkbox" :true-value="1" :false-value="0" />
+              <input
+                v-model="formData.pinTop"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+              >
               <span>置顶显示</span>
             </label>
           </div>
 
           <div class="form-group">
             <label class="checkbox-label">
-              <input v-model="formData.showFront" type="checkbox" :true-value="1" :false-value="0" />
+              <input
+                v-model="formData.showFront"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+              >
               <span>前台显示</span>
             </label>
           </div>
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveItem">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="btn-cancel"
+            @click="closeDialog"
+          >
+            取消
+          </button>
+          <button
+            class="btn-confirm"
+            @click="saveItem"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9.66667 13V8.33333H4.33333V13"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             保存
           </button>
@@ -377,43 +722,106 @@
     </div>
 
     <!-- 预览对话框 -->
-    <div v-if="showPreviewDialog" class="dialog-overlay" @click.self="showPreviewDialog = false">
+    <div
+      v-if="showPreviewDialog"
+      class="dialog-overlay"
+      @click.self="showPreviewDialog = false"
+    >
       <div class="dialog dialog--large">
         <div class="dialog__header">
           <h3>资源预览</h3>
-          <button class="dialog__close" @click="showPreviewDialog = false">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="showPreviewDialog = false"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
         
         <div class="dialog__body">
-          <div v-if="previewData" class="preview-content">
-            <div v-if="previewData.coverUrl" class="preview-cover">
-              <img :src="previewData.coverUrl" alt="封面" />
+          <div
+            v-if="previewData"
+            class="preview-content"
+          >
+            <div
+              v-if="previewData.coverUrl"
+              class="preview-cover"
+            >
+              <img
+                :src="previewData.coverUrl"
+                alt="封面"
+              >
             </div>
             <h2>{{ previewData.title }}</h2>
-            <div class="preview-tags" v-if="previewData.tags && previewData.tags.length > 0">
-              <span v-for="tag in previewData.tags" :key="tag" class="preview-tag">{{ tag }}</span>
+            <div
+              v-if="previewData.tags && previewData.tags.length > 0"
+              class="preview-tags"
+            >
+              <span
+                v-for="tag in previewData.tags"
+                :key="tag"
+                class="preview-tag"
+              >{{ tag }}</span>
             </div>
-            <div v-if="previewData.address" class="preview-address">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 8.66667C8.73638 8.66667 9.33333 8.06971 9.33333 7.33333C9.33333 6.59695 8.73638 6 8 6C7.26362 6 6.66667 6.59695 6.66667 7.33333C6.66667 8.06971 7.26362 8.66667 8 8.66667Z" stroke="#666" stroke-width="1.5"/>
-                <path d="M8 14C10 11.3333 13.3333 9.07619 13.3333 6.66667C13.3333 3.72115 10.9455 1.33333 8 1.33333C5.05448 1.33333 2.66667 3.72115 2.66667 6.66667C2.66667 9.07619 6 11.3333 8 14Z" stroke="#666" stroke-width="1.5"/>
+            <div
+              v-if="previewData.address"
+              class="preview-address"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M8 8.66667C8.73638 8.66667 9.33333 8.06971 9.33333 7.33333C9.33333 6.59695 8.73638 6 8 6C7.26362 6 6.66667 6.59695 6.66667 7.33333C6.66667 8.06971 7.26362 8.66667 8 8.66667Z"
+                  stroke="#666"
+                  stroke-width="1.5"
+                />
+                <path
+                  d="M8 14C10 11.3333 13.3333 9.07619 13.3333 6.66667C13.3333 3.72115 10.9455 1.33333 8 1.33333C5.05448 1.33333 2.66667 3.72115 2.66667 6.66667C2.66667 9.07619 6 11.3333 8 14Z"
+                  stroke="#666"
+                  stroke-width="1.5"
+                />
               </svg>
               <span>{{ previewData.address }}</span>
             </div>
-            <div class="preview-coordinates" v-if="previewData.lng && previewData.lat">
+            <div
+              v-if="previewData.lng && previewData.lat"
+              class="preview-coordinates"
+            >
               坐标：{{ previewData.lng }}, {{ previewData.lat }}
             </div>
-            <div class="preview-description" v-if="previewData.contentType === '0'">
-              <div v-html="previewData.content"></div>
+            <div
+              v-if="previewData.contentType === '0'"
+              class="preview-description"
+            >
+              <div v-html="previewData.content" />
             </div>
-            <div class="preview-description" v-else>
-              <a :href="previewData.content" target="_blank">{{ previewData.content }}</a>
+            <div
+              v-else
+              class="preview-description"
+            >
+              <a
+                :href="previewData.content"
+                target="_blank"
+              >{{ previewData.content }}</a>
             </div>
-            <div class="preview-time">发布时间：{{ previewData.createTime }}</div>
+            <div class="preview-time">
+              发布时间：{{ previewData.createTime }}
+            </div>
           </div>
         </div>
       </div>

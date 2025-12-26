@@ -14,10 +14,16 @@
         <!-- 左侧 Logo 区域 -->
         <div class="portal-footer__brand">
           <div class="portal-footer__logo-placeholder">
-            <img src="/images/fuzhoudaxue.png" alt="福州大学" />
+            <img
+              src="/images/fuzhoudaxue.png"
+              alt="福州大学"
+            >
           </div>
           <div class="portal-footer__emblem-placeholder">
-            <img src="/images/xiaohui.png" alt="福州大学" />
+            <img
+              src="/images/xiaohui.png"
+              alt="福州大学"
+            >
             <!-- <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="40" cy="40" r="38" stroke="white" stroke-width="2" stroke-opacity="0.5"/>
               <text x="40" y="45" text-anchor="middle" fill="white" font-size="14" font-weight="bold">校徽</text>
@@ -26,7 +32,7 @@
         </div>
 
         <!-- 分隔线 -->
-        <div class="portal-footer__divider"></div>
+        <div class="portal-footer__divider" />
 
         <!-- 右侧信息区域 -->
         <div class="portal-footer__info">
@@ -36,12 +42,19 @@
           <div class="portal-footer__copyright">
             <p>
               © 2021 福州大学&nbsp;&nbsp;&nbsp;&nbsp;
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+              <a
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener"
+              >
                 闽ICP备05005463号
               </a>
             </p>
             <div class="portal-footer__beian">
-              <img src="/images/beian.png" alt="备案" />
+              <img
+                src="/images/beian.png"
+                alt="备案"
+              >
               <!-- <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 2L2 5V9C2 13.5 5 17.5 9 19C13 17.5 16 13.5 16 9V5L9 2Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
               </svg> -->

@@ -1,10 +1,19 @@
 <template>
-  <div class="course-card" @click="handleClick">
+  <div
+    class="course-card"
+    @click="handleClick"
+  >
     <!-- 顶部图片区域 -->
     <div class="course-card__image">
-      <img :src="course.cover" :alt="course.title" />
+      <img
+        :src="course.cover"
+        :alt="course.title"
+      >
       <!-- 标签 -->
-      <div v-if="badge" class="course-card__badge">
+      <div
+        v-if="badge"
+        class="course-card__badge"
+      >
         {{ badge }}
       </div>
       <div class="course-card__department">
@@ -14,14 +23,26 @@
 
     <!-- 底部信息区域 -->
     <div class="course-card__content">
-      <h3 class="course-card__title">{{ course.title }}</h3>
+      <h3 class="course-card__title">
+        {{ course.title }}
+      </h3>
       <div class="course-card__meta">
         <span class="course-card__teacher">
           教师：{{ course.teacherList[0]?.name || '刘丽军' }}
         </span>
         <div class="course-card__views">
-          <svg class="course-card__eye-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 5C5.83333 5 2.27583 7.34167 1 10.8333C2.27583 14.3217 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.7242 14.325 19 10.8333C17.7242 7.34167 14.1667 5 10 5ZM10 14.1667C7.7 14.1667 5.83333 12.3 5.83333 10C5.83333 7.7 7.7 5.83333 10 5.83333C12.3 5.83333 14.1667 7.7 14.1667 10C14.1667 12.3 12.3 14.1667 10 14.1667ZM10 7.5C8.61917 7.5 7.5 8.61917 7.5 10C7.5 11.3808 8.61917 12.5 10 12.5C11.3808 12.5 12.5 11.3808 12.5 10C12.5 8.61917 11.3808 7.5 10 7.5Z" fill="#333333" fill-opacity="0.5"/>
+          <svg
+            class="course-card__eye-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
+            <path
+              d="M10 5C5.83333 5 2.27583 7.34167 1 10.8333C2.27583 14.3217 5.83333 16.6667 10 16.6667C14.1667 16.6667 17.7242 14.325 19 10.8333C17.7242 7.34167 14.1667 5 10 5ZM10 14.1667C7.7 14.1667 5.83333 12.3 5.83333 10C5.83333 7.7 7.7 5.83333 10 5.83333C12.3 5.83333 14.1667 7.7 14.1667 10C14.1667 12.3 12.3 14.1667 10 14.1667ZM10 7.5C8.61917 7.5 7.5 8.61917 7.5 10C7.5 11.3808 8.61917 12.5 10 12.5C11.3808 12.5 12.5 11.3808 12.5 10C12.5 8.61917 11.3808 7.5 10 7.5Z"
+              fill="#333333"
+              fill-opacity="0.5"
+            />
           </svg>
           <span>{{ formatCount(course.studentCount) }}人</span>
         </div>

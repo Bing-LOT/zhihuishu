@@ -2,15 +2,32 @@
   <div class="admin-resources">
     <!-- 页面标题 -->
     <div class="admin-resources__header">
-      <h2 class="admin-resources__title">首页Banner配置</h2>
-      <p class="admin-resources__desc">管理首页轮播图，支持上传多张</p>
+      <h2 class="admin-resources__title">
+        首页Banner配置
+      </h2>
+      <p class="admin-resources__desc">
+        管理首页轮播图，支持上传多张
+      </p>
     </div>
 
     <!-- 添加Banner按钮 -->
     <div class="admin-resources__actions">
-      <button class="btn-add-banner" @click="showAddDialog = true">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <button
+        class="btn-add-banner"
+        @click="showAddDialog = true"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="M8 3.5V12.5M3.5 8H12.5"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         添加Banner图
       </button>
@@ -24,17 +41,54 @@
         class="banner-item"
       >
         <div class="banner-item__image">
-          <img :src="banner.image" :alt="banner.title" />
+          <img
+            :src="banner.image"
+            :alt="banner.title"
+          >
           <div class="banner-item__overlay">
-            <button class="banner-item__btn" @click="editBanner(banner)">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <button
+              class="banner-item__btn"
+              @click="editBanner(banner)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
-            <button class="banner-item__btn" @click="deleteBanner(banner.id)">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4H3.33333H14" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <button
+              class="banner-item__btn"
+              @click="deleteBanner(banner.id)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M2 4H3.33333H14"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
             <button
@@ -42,8 +96,19 @@
               :disabled="index === 0"
               @click="moveBanner(index, -1)"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M12 10L8 6L4 10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M12 10L8 6L4 10"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
             <button
@@ -51,36 +116,85 @@
               :disabled="index === banners.length - 1"
               @click="moveBanner(index, 1)"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4 6L8 10L12 6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M4 6L8 10L12 6"
+                  stroke="white"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
           </div>
         </div>
         <div class="banner-item__info">
-          <div class="banner-item__sort">排序：第 {{ index + 1 }} 位</div>
-          <div class="banner-item__title">{{ banner.title || '未设置标题' }}</div>
+          <div class="banner-item__sort">
+            排序：第 {{ index + 1 }} 位
+          </div>
+          <div class="banner-item__title">
+            {{ banner.title || '未设置标题' }}
+          </div>
         </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-if="banners.length === 0" class="banner-list__empty">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <path d="M32 56C45.2548 56 56 45.2548 56 32C56 18.7452 45.2548 8 32 8C18.7452 8 8 18.7452 8 32C8 45.2548 18.7452 56 32 56Z" stroke="#d9d9d9" stroke-width="2"/>
-          <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
+      <div
+        v-if="banners.length === 0"
+        class="banner-list__empty"
+      >
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+        >
+          <path
+            d="M32 56C45.2548 56 56 45.2548 56 32C56 18.7452 45.2548 8 32 8C18.7452 8 8 18.7452 8 32C8 45.2548 18.7452 56 32 56Z"
+            stroke="#d9d9d9"
+            stroke-width="2"
+          />
+          <path
+            d="M32 20V36M32 44H32.02"
+            stroke="#d9d9d9"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         <p>暂无Banner图，请点击上方按钮添加</p>
       </div>
     </div>
 
     <!-- 添加/编辑 Banner 对话框 -->
-    <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
+    <div
+      v-if="showAddDialog || showEditDialog"
+      class="dialog-overlay"
+      @click.self="closeDialog"
+    >
       <div class="dialog">
         <div class="dialog__header">
           <h3>{{ showEditDialog ? '编辑Banner' : '添加Banner' }}</h3>
-          <button class="dialog__close" @click="closeDialog">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="closeDialog"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -92,7 +206,7 @@
               type="text"
               placeholder="请输入Banner标题"
               class="form-input"
-            />
+            >
           </div>
           <div class="form-group">
             <label>Banner图片</label>
@@ -103,18 +217,51 @@
                 accept="image/*"
                 style="display: none"
                 @change="handleFileChange"
-              />
-              <div v-if="formData.image" class="upload-preview">
-                <img :src="formData.image" alt="预览" />
-                <button class="upload-remove" @click="removeImage">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              >
+              <div
+                v-if="formData.image"
+                class="upload-preview"
+              >
+                <img
+                  :src="formData.image"
+                  alt="预览"
+                >
+                <button
+                  class="upload-remove"
+                  @click="removeImage"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                  >
+                    <path
+                      d="M12 4L4 12M4 4L12 12"
+                      stroke="white"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </button>
               </div>
-              <div v-else class="upload-trigger" @click="triggerUpload">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <path d="M24 10V38M10 24H38" stroke="#999" stroke-width="3" stroke-linecap="round"/>
+              <div
+                v-else
+                class="upload-trigger"
+                @click="triggerUpload"
+              >
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                >
+                  <path
+                    d="M24 10V38M10 24H38"
+                    stroke="#999"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
                 </svg>
                 <p>点击上传图片</p>
                 <span>建议尺寸：1920x600px</span>
@@ -129,12 +276,24 @@
               placeholder="请输入排序序号"
               class="form-input"
               min="0"
-            />
+            >
           </div>
         </div>
         <div class="dialog__footer">
-          <button type="button" class="btn-cancel" @click="closeDialog">取消</button>
-          <button type="button" class="btn-confirm" @click="saveBanner">保存</button>
+          <button
+            type="button"
+            class="btn-cancel"
+            @click="closeDialog"
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            class="btn-confirm"
+            @click="saveBanner"
+          >
+            保存
+          </button>
         </div>
       </div>
     </div>

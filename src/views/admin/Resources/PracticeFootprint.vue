@@ -4,42 +4,96 @@
     <div class="page-header">
       <div class="page-title">
         <h2>总书记的福建足迹</h2>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-left: 8px;">
-          <path d="M12 5.33333L6.66667 10.6667L4 8" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          style="margin-left: 8px;"
+        >
+          <path
+            d="M12 5.33333L6.66667 10.6667L4 8"
+            stroke="#999"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </div>
-      <p class="page-desc">管理总书记的福建足迹内容和Banner图</p>
+      <p class="page-desc">
+        管理总书记的福建足迹内容和Banner图
+      </p>
     </div>
 
     <!-- Banner图管理 -->
     <div class="banner-section">
-      <h3 class="section-title">Banner图管理</h3>
-      <button class="btn-add-banner" @click="showBannerDialog = true">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 2.33333V11.6667M2.33333 7H11.6667" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <h3 class="section-title">
+        Banner图管理
+      </h3>
+      <button
+        class="btn-add-banner"
+        @click="showBannerDialog = true"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+        >
+          <path
+            d="M7 2.33333V11.6667M2.33333 7H11.6667"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         添加Banner图
       </button>
 
-      <div v-if="isLoadingBanners" class="loading-state">
+      <div
+        v-if="isLoadingBanners"
+        class="loading-state"
+      >
         <p>加载中...</p>
       </div>
       
-      <div v-else-if="banners.length === 0" class="empty-state">
+      <div
+        v-else-if="banners.length === 0"
+        class="empty-state"
+      >
         <p>暂无 Banner 图片</p>
       </div>
 
-      <div v-else class="banner-list">
+      <div
+        v-else
+        class="banner-list"
+      >
         <div
           v-for="banner in banners"
           :key="banner.id"
           class="banner-card"
         >
           <div class="banner-card__image">
-            <img :src="banner.picUrl" alt="Banner图片" />
-            <button class="banner-card__delete" @click="deleteBanner(banner.id)">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <img
+              :src="banner.picUrl"
+              alt="Banner图片"
+            >
+            <button
+              class="banner-card__delete"
+              @click="deleteBanner(banner.id)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M12 4L4 12M4 4L12 12"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
               </svg>
             </button>
           </div>
@@ -53,9 +107,25 @@
       <div class="page-toolbar">
         <div class="toolbar-left">
           <div class="search-box">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.5"/>
-              <path d="M11 11L14 14" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <circle
+                cx="7"
+                cy="7"
+                r="5"
+                stroke="#999"
+                stroke-width="1.5"
+              />
+              <path
+                d="M11 11L14 14"
+                stroke="#999"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
             </svg>
             <input
               v-model="searchKeyword"
@@ -63,19 +133,42 @@
               placeholder="搜索标题..."
               class="search-input"
               @input="handleSearch"
-            />
+            >
           </div>
           
-          <select v-model="statusFilter" class="filter-select" @change="handleFilter">
-            <option value="all">全部状态</option>
-            <option value="active">显示中</option>
-            <option value="inactive">已隐藏</option>
+          <select
+            v-model="statusFilter"
+            class="filter-select"
+            @change="handleFilter"
+          >
+            <option value="all">
+              全部状态
+            </option>
+            <option value="active">
+              显示中
+            </option>
+            <option value="inactive">
+              已隐藏
+            </option>
           </select>
         </div>
 
-        <button class="btn-add" @click="showAddDialog = true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 2.33333V11.6667M2.33333 7H11.6667" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <button
+          class="btn-add"
+          @click="showAddDialog = true"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+          >
+            <path
+              d="M7 2.33333V11.6667M2.33333 7H11.6667"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
           新增
         </button>
@@ -87,12 +180,18 @@
       </div>
 
       <!-- 加载状态 -->
-      <div v-if="isLoadingItems" class="loading-state">
+      <div
+        v-if="isLoadingItems"
+        class="loading-state"
+      >
         <p>加载中...</p>
       </div>
 
       <!-- 列表内容 -->
-      <div v-else class="content-list">
+      <div
+        v-else
+        class="content-list"
+      >
         <div
           v-for="(item, index) in filteredItems"
           :key="item.id"
@@ -104,27 +203,78 @@
         >
           <!-- 拖动手柄 -->
           <div class="drag-handle">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="5" cy="3" r="1" fill="#999"/>
-              <circle cx="11" cy="3" r="1" fill="#999"/>
-              <circle cx="5" cy="8" r="1" fill="#999"/>
-              <circle cx="11" cy="8" r="1" fill="#999"/>
-              <circle cx="5" cy="13" r="1" fill="#999"/>
-              <circle cx="11" cy="13" r="1" fill="#999"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <circle
+                cx="5"
+                cy="3"
+                r="1"
+                fill="#999"
+              />
+              <circle
+                cx="11"
+                cy="3"
+                r="1"
+                fill="#999"
+              />
+              <circle
+                cx="5"
+                cy="8"
+                r="1"
+                fill="#999"
+              />
+              <circle
+                cx="11"
+                cy="8"
+                r="1"
+                fill="#999"
+              />
+              <circle
+                cx="5"
+                cy="13"
+                r="1"
+                fill="#999"
+              />
+              <circle
+                cx="11"
+                cy="13"
+                r="1"
+                fill="#999"
+              />
             </svg>
           </div>
 
           <!-- 内容信息 -->
           <div class="item-content">
             <div class="item-header">
-              <h3 class="item-title">{{ item.title }}</h3>
-              <span v-if="item.pinTop === 1" class="badge-pinned">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M6 1L7.545 4.13L11 4.635L8.5 7.07L9.09 10.51L6 8.885L2.91 10.51L3.5 7.07L1 4.635L4.455 4.13L6 1Z" fill="white"/>
+              <h3 class="item-title">
+                {{ item.title }}
+              </h3>
+              <span
+                v-if="item.pinTop === 1"
+                class="badge-pinned"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                >
+                  <path
+                    d="M6 1L7.545 4.13L11 4.635L8.5 7.07L9.09 10.51L6 8.885L2.91 10.51L3.5 7.07L1 4.635L4.455 4.13L6 1Z"
+                    fill="white"
+                  />
                 </svg>
                 置顶
               </span>
-              <span class="badge-status" :class="{ 'badge-status--active': item.showFront === 1 }">
+              <span
+                class="badge-status"
+                :class="{ 'badge-status--active': item.showFront === 1 }"
+              >
                 {{ item.showFront === 1 ? '显示中' : '已隐藏' }}
               </span>
             </div>
@@ -138,7 +288,9 @@
               </span>
             </div>
             
-            <p class="item-description">{{ item.content?.substring(0, 100) }}{{ item.content?.length > 100 ? '...' : '' }}</p>
+            <p class="item-description">
+              {{ item.content?.substring(0, 100) }}{{ item.content?.length > 100 ? '...' : '' }}
+            </p>
 
             <div class="item-footer">
               <div class="footer-info">
@@ -152,67 +304,184 @@
           <div class="item-actions">
             <button
               :class="['action-btn', 'action-btn--pin', { 'action-btn--pinned': item.pinTop === 1 }]"
-              @click="togglePin(item)"
               :title="item.pinTop === 1 ? '取消置顶' : '置顶'"
+              @click="togglePin(item)"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L9.545 5.13L13 5.635L10.5 8.07L11.09 11.51L8 9.885L4.91 11.51L5.5 8.07L3 5.635L6.455 5.13L8 2Z" :fill="item.pinTop === 1 ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M8 2L9.545 5.13L13 5.635L10.5 8.07L11.09 11.51L8 9.885L4.91 11.51L5.5 8.07L3 5.635L6.455 5.13L8 2Z"
+                  :fill="item.pinTop === 1 ? 'currentColor' : 'none'"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
               </svg>
             </button>
-            <button class="action-btn action-btn--edit" @click="editItem(item)" title="编辑">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <button
+              class="action-btn action-btn--edit"
+              title="编辑"
+              @click="editItem(item)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
             <button 
               :class="['action-btn', 'action-btn--visibility', { 'action-btn--hidden': item.showFront === 0 }]" 
-              @click="toggleVisibility(item)" 
-              :title="item.showFront === 1 ? '隐藏' : '显示'"
+              :title="item.showFront === 1 ? '隐藏' : '显示'" 
+              @click="toggleVisibility(item)"
             >
-              <svg v-if="item.showFront === 1" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <svg
+                v-if="item.showFront === 1"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
                 <!-- 眼睛图标 - 显示中 -->
-                <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+                <path
+                  d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <circle
+                  cx="8"
+                  cy="8"
+                  r="2"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
               </svg>
-              <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <svg
+                v-else
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
                 <!-- 眼睛斜杠图标 - 已隐藏 -->
-                <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M2 2L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path
+                  d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <circle
+                  cx="8"
+                  cy="8"
+                  r="2"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <path
+                  d="M2 2L14 14"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
               </svg>
             </button>
-            <button class="action-btn action-btn--delete" @click="deleteItem(item.id)" title="删除">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4H3.33333H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <button
+              class="action-btn action-btn--delete"
+              title="删除"
+              @click="deleteItem(item.id)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M2 4H3.33333H14"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
           </div>
         </div>
 
         <!-- 空状态 -->
-        <div v-if="filteredItems.length === 0" class="empty-state">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
-            <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
+        <div
+          v-if="filteredItems.length === 0"
+          class="empty-state"
+        >
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 64 64"
+            fill="none"
+          >
+            <circle
+              cx="32"
+              cy="32"
+              r="30"
+              stroke="#d9d9d9"
+              stroke-width="2"
+            />
+            <path
+              d="M32 20V36M32 44H32.02"
+              stroke="#d9d9d9"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
           <p>暂无数据</p>
         </div>
       </div>
 
       <!-- 分页 -->
-      <div v-if="filteredItems.length > 0" class="pagination">
+      <div
+        v-if="filteredItems.length > 0"
+        class="pagination"
+      >
         <div class="pagination-info">
           显示第 {{ (pagination.current - 1) * pagination.pageSize + 1 }} 到 
           {{ Math.min(pagination.current * pagination.pageSize, pagination.total) }} 条，
           共 {{ pagination.total }} 条
         </div>
         <div class="pagination-controls">
-          <select v-model.number="pagination.pageSize" @change="handlePageSizeChange(pagination.pageSize)" class="page-size-select">
-            <option :value="10">10 条/页</option>
-            <option :value="20">20 条/页</option>
-            <option :value="50">50 条/页</option>
-            <option :value="100">100 条/页</option>
+          <select
+            v-model.number="pagination.pageSize"
+            class="page-size-select"
+            @change="handlePageSizeChange(pagination.pageSize)"
+          >
+            <option :value="10">
+              10 条/页
+            </option>
+            <option :value="20">
+              20 条/页
+            </option>
+            <option :value="50">
+              50 条/页
+            </option>
+            <option :value="100">
+              100 条/页
+            </option>
           </select>
           <button 
             class="page-btn" 
@@ -258,13 +527,30 @@
     </div>
 
     <!-- Banner对话框 -->
-    <div v-if="showBannerDialog" class="dialog-overlay" @click.self="closeBannerDialog">
+    <div
+      v-if="showBannerDialog"
+      class="dialog-overlay"
+      @click.self="closeBannerDialog"
+    >
       <div class="dialog">
         <div class="dialog__header">
           <h3>添加Banner图</h3>
-          <button class="dialog__close" @click="closeBannerDialog">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="closeBannerDialog"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -279,34 +565,116 @@
                 accept="image/*"
                 style="display: none"
                 @change="handleBannerChange"
-              />
-              <div v-if="bannerFormData.image" class="image-preview-box">
-                <img :src="bannerFormData.image" alt="预览" />
-                <button class="btn-remove-image" @click="removeBannerImage">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M12 4L4 12M4 4L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              >
+              <div
+                v-if="bannerFormData.image"
+                class="image-preview-box"
+              >
+                <img
+                  :src="bannerFormData.image"
+                  alt="预览"
+                >
+                <button
+                  class="btn-remove-image"
+                  @click="removeBannerImage"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                  >
+                    <path
+                      d="M12 4L4 12M4 4L12 12"
+                      stroke="white"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </button>
               </div>
-              <div v-else class="image-upload-empty">
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                  <rect x="10" y="15" width="60" height="50" rx="4" stroke="#999" stroke-width="2" fill="none"/>
-                  <circle cx="30" cy="32" r="6" stroke="#999" stroke-width="2" fill="none"/>
-                  <path d="M10 55L25 40L35 50L50 35L70 55" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <div
+                v-else
+                class="image-upload-empty"
+              >
+                <svg
+                  width="80"
+                  height="80"
+                  viewBox="0 0 80 80"
+                  fill="none"
+                >
+                  <rect
+                    x="10"
+                    y="15"
+                    width="60"
+                    height="50"
+                    rx="4"
+                    stroke="#999"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <circle
+                    cx="30"
+                    cy="32"
+                    r="6"
+                    stroke="#999"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                  <path
+                    d="M10 55L25 40L35 50L50 35L70 55"
+                    stroke="#999"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
-                <p class="upload-hint">上传Banner图片</p>
-                <button class="btn-upload-blue" type="button" @click="triggerBannerUpload">选择图片</button>
+                <p class="upload-hint">
+                  上传Banner图片
+                </p>
+                <button
+                  class="btn-upload-blue"
+                  type="button"
+                  @click="triggerBannerUpload"
+                >
+                  选择图片
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeBannerDialog">取消</button>
-          <button class="btn-confirm" @click="saveBanner">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="btn-cancel"
+            @click="closeBannerDialog"
+          >
+            取消
+          </button>
+          <button
+            class="btn-confirm"
+            @click="saveBanner"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9.66667 13V8.33333H4.33333V13"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             保存
           </button>
@@ -315,13 +683,30 @@
     </div>
 
     <!-- 新增/编辑内容对话框 -->
-    <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
+    <div
+      v-if="showAddDialog || showEditDialog"
+      class="dialog-overlay"
+      @click.self="closeDialog"
+    >
       <div class="dialog">
         <div class="dialog__header">
           <h3>{{ showEditDialog ? '编辑内容' : '新增内容' }}</h3>
-          <button class="dialog__close" @click="closeDialog">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="closeDialog"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -334,7 +719,7 @@
               type="text"
               placeholder="定选事件名称"
               class="form-input"
-            />
+            >
           </div>
 
           <div class="form-group">
@@ -346,7 +731,7 @@
                   type="radio"
                   value="richtext"
                   name="contentType"
-                />
+                >
                 <span>富文本内容（内部详情）</span>
               </label>
               <label class="radio-label">
@@ -355,7 +740,7 @@
                   type="radio"
                   value="url"
                   name="contentType"
-                />
+                >
                 <span>URL地址（外部跳转）</span>
               </label>
             </div>
@@ -364,17 +749,20 @@
           <div class="form-group">
             <label>内容配置 <span class="required">*</span></label>
             <!-- 富文本编辑器 -->
-            <div v-if="formData.contentType === 'richtext'" class="editor-wrapper">
+            <div
+              v-if="formData.contentType === 'richtext'"
+              class="editor-wrapper"
+            >
               <Toolbar
                 :editor="editorRef"
-                :defaultConfig="toolbarConfig"
+                :default-config="toolbarConfig"
                 class="editor-toolbar"
               />
               <Editor
                 v-model="formData.content"
-                :defaultConfig="editorConfig"
+                :default-config="editorConfig"
                 class="editor-content"
-                @onCreated="handleCreated"
+                @on-created="handleCreated"
               />
             </div>
             <!-- URL输入框 -->
@@ -384,7 +772,7 @@
               type="text"
               placeholder="请输入URL地址"
               class="form-input"
-            />
+            >
             <small class="field-hint">
               提示：若选择富文本内容，此处输入详情；若选择URL地址，此处输入链接
             </small>
@@ -397,8 +785,11 @@
                 <small>用于控制该足迹是否置顶显示</small>
               </div>
               <label class="toggle-switch">
-                <input v-model="formData.isPinned" type="checkbox" />
-                <span class="toggle-slider"></span>
+                <input
+                  v-model="formData.isPinned"
+                  type="checkbox"
+                >
+                <span class="toggle-slider" />
               </label>
             </label>
           </div>
@@ -410,19 +801,47 @@
                 <small>控制足迹数据在前台的展示状态</small>
               </div>
               <label class="toggle-switch">
-                <input v-model="formData.showOnFrontend" type="checkbox" />
-                <span class="toggle-slider"></span>
+                <input
+                  v-model="formData.showOnFrontend"
+                  type="checkbox"
+                >
+                <span class="toggle-slider" />
               </label>
             </label>
           </div>
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog">取消</button>
-          <button class="btn-confirm" @click="saveItem">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="btn-cancel"
+            @click="closeDialog"
+          >
+            取消
+          </button>
+          <button
+            class="btn-confirm"
+            @click="saveItem"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9.66667 13V8.33333H4.33333V13"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             保存
           </button>
@@ -431,25 +850,55 @@
     </div>
 
     <!-- 预览对话框 -->
-    <div v-if="showPreviewDialog" class="dialog-overlay" @click.self="showPreviewDialog = false">
+    <div
+      v-if="showPreviewDialog"
+      class="dialog-overlay"
+      @click.self="showPreviewDialog = false"
+    >
       <div class="dialog dialog--large">
         <div class="dialog__header">
           <h3>内容预览</h3>
-          <button class="dialog__close" @click="showPreviewDialog = false">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="showPreviewDialog = false"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
         
         <div class="dialog__body">
-          <div v-if="previewData" class="preview-content">
-            <div v-if="previewData.cover" class="preview-cover">
-              <img :src="previewData.cover" alt="封面" />
+          <div
+            v-if="previewData"
+            class="preview-content"
+          >
+            <div
+              v-if="previewData.cover"
+              class="preview-cover"
+            >
+              <img
+                :src="previewData.cover"
+                alt="封面"
+              >
             </div>
             <h2>{{ previewData.title }}</h2>
-            <p class="preview-description">{{ previewData.description }}</p>
-            <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
+            <p class="preview-description">
+              {{ previewData.description }}
+            </p>
+            <div class="preview-time">
+              发布时间：{{ previewData.publishTime }}
+            </div>
           </div>
         </div>
       </div>

@@ -7,7 +7,9 @@
   "author": "前端架构组",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vite build --mode production",
+    "build:test": "vite build --mode development",
+    "build:check": "vue-tsc -b && vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },

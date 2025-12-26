@@ -1,47 +1,67 @@
 <template>
   <div class="college-detail-page">
     <!-- 背景 -->
-    <div class="college-detail-bg"></div>
+    <div class="college-detail-bg" />
 
     <!-- 主要内容 -->
     <div class="college-detail-container">
       <!-- 面包屑导航 -->
       <div class="breadcrumb">
         <span class="breadcrumb-item">您的位置： </span>
-        <span class="breadcrumb-item" @click="$router.push('/study')">特色专题</span>
+        <span
+          class="breadcrumb-item"
+          @click="$router.push('/study')"
+        >特色专题</span>
         <span class="breadcrumb-separator">>> </span>
-        <span class="breadcrumb-item" @click="$router.push('/study')">优秀思政课堂</span>
+        <span
+          class="breadcrumb-item"
+          @click="$router.push('/study')"
+        >优秀思政课堂</span>
         <span class="breadcrumb-separator">>> </span>
         <span class="breadcrumb-item active">教师详情</span>
       </div>
 
       <!-- 详情内容卡片 -->
-      <div class="detail-card" v-if="!loading && detail">
+      <div
+        v-if="!loading && detail"
+        class="detail-card"
+      >
         <!-- 头部信息 -->
         <div class="detail-header">
-          <h1 class="detail-title">{{ detail.name }}</h1>
+          <h1 class="detail-title">
+            {{ detail.name }}
+          </h1>
           <div class="detail-meta">
             <span class="meta-item">发布时间：{{ formatDate(detail.createTime) }}</span>
-            <span class="meta-separator"></span>
+            <span class="meta-separator" />
             <span class="meta-item">浏览人数：{{ detail.statPv || 0 }}</span>
-            <span class="meta-separator"></span>
+            <span class="meta-separator" />
             <span class="meta-item">学院：{{ detail.college }}</span>
           </div>
-          <div class="detail-divider"></div>
+          <div class="detail-divider" />
         </div>
 
         <!-- 富文本内容 -->
-        <div class="detail-content" v-html="detail.content"></div>
+        <div
+          class="detail-content"
+          v-html="detail.content"
+        />
       </div>
 
       <!-- 加载状态 -->
-      <div class="loading-state" v-else-if="loading">
-        <div class="loading-spinner"></div>
+      <div
+        v-else-if="loading"
+        class="loading-state"
+      >
+        <div class="loading-spinner" />
         <p>加载中...</p>
       </div>
 
       <!-- 空状态 -->
-      <div class="empty-state" v-else>
+      <div
+        v-else
+        class="empty-state"
+      >
         <p>暂无数据</p>
       </div>
     </div>

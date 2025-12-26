@@ -2,14 +2,20 @@
   <div class="video-detail-page">
     <!-- 背景图 -->
     <div class="detail-bg">
-      <img src="/images/indexBg.png" alt="" />
+      <img
+        src="/images/indexBg.png"
+        alt=""
+      >
     </div>
 
     <div class="detail-container">
       <!-- 面包屑导航 -->
       <div class="breadcrumb">
         <span class="breadcrumb-item">您的位置：</span>
-        <span class="breadcrumb-item" @click="$router.push('/topics')">习思想的伟大实践</span>
+        <span
+          class="breadcrumb-item"
+          @click="$router.push('/topics')"
+        >习思想的伟大实践</span>
         <span class="breadcrumb-item">&gt;&gt;</span>
         <span class="breadcrumb-item">习思想优秀视频展播</span>
         <span class="breadcrumb-item">&gt;&gt;</span>
@@ -22,15 +28,22 @@
       <div class="main-content">
         <!-- 左侧：文字讲稿 -->
         <div class="transcript-section">
-          <h3 class="section-title">文字讲稿</h3>
-          <div class="transcript-content" v-html="videoDetail?.content || '暂无讲稿内容'"></div>
+          <h3 class="section-title">
+            文字讲稿
+          </h3>
+          <div
+            class="transcript-content"
+            v-html="videoDetail?.content || '暂无讲稿内容'"
+          />
         </div>
 
         <!-- 右侧：视频信息 -->
         <div class="video-section">
           <!-- 标题和观看次数 -->
           <div class="video-header">
-            <h2 class="video-title">{{ videoDetail?.title || '加载中...' }}</h2>
+            <h2 class="video-title">
+              {{ videoDetail?.title || '加载中...' }}
+            </h2>
             <div class="view-count">
               观看次数：<span class="count-number">{{ formatViewCount(videoDetail?.statPv || 0) }}</span>
             </div>
@@ -50,7 +63,10 @@
             >
               您的浏览器不支持视频播放
             </video>
-            <div v-else class="video-placeholder">
+            <div
+              v-else
+              class="video-placeholder"
+            >
               <p>视频加载中...</p>
             </div>
           </div>
@@ -60,7 +76,11 @@
             <div class="info-left">
               <span class="info-label">主持人：</span>
               <div class="presenter-list">
-                <span v-for="(presenter, index) in presenterList" :key="index" class="presenter-name">
+                <span
+                  v-for="(presenter, index) in presenterList"
+                  :key="index"
+                  class="presenter-name"
+                >
                   {{ presenter }}
                 </span>
               </div>
@@ -80,10 +100,18 @@
       <!-- 其他优秀视频展播 -->
       <div class="recommend-section">
         <div class="recommend-header">
-          <h3 class="recommend-title">其他优秀视频展播</h3>
-          <button class="more-btn" @click="$router.push('/topics/videos')">
+          <h3 class="recommend-title">
+            其他优秀视频展播
+          </h3>
+          <button
+            class="more-btn"
+            @click="$router.push('/topics/videos')"
+          >
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img
+              src="/images/arrow-right.svg"
+              alt=""
+            >
           </button>
         </div>
 

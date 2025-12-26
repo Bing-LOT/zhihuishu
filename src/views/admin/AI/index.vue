@@ -9,9 +9,26 @@
       <div class="ai-card">
         <div class="ai-card__header">
           <div class="ai-card__icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#e31e24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="#e31e24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M12 2L2 7L12 12L22 7L12 2Z"
+                stroke="#e31e24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M2 17L12 22L22 17M2 12L12 17L22 12"
+                stroke="#e31e24"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
           <div>
@@ -22,7 +39,11 @@
         <div class="ai-card__content">
           <div class="form-item">
             <label>API密钥</label>
-            <input type="password" placeholder="请输入API密钥" class="form-input" />
+            <input
+              type="password"
+              placeholder="请输入API密钥"
+              class="form-input"
+            >
           </div>
           <div class="form-item">
             <label>模型选择</label>
@@ -34,18 +55,40 @@
           </div>
           <div class="form-item">
             <label>温度参数 (0-1)</label>
-            <input type="number" min="0" max="1" step="0.1" value="0.7" class="form-input" />
+            <input
+              type="number"
+              min="0"
+              max="1"
+              step="0.1"
+              value="0.7"
+              class="form-input"
+            >
           </div>
-          <button class="btn-primary">保存配置</button>
+          <button class="btn-primary">
+            保存配置
+          </button>
         </div>
       </div>
 
       <div class="ai-card">
         <div class="ai-card__header">
           <div class="ai-card__icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#e31e24"/>
-              <path d="M12 6V12L16 14" stroke="#e31e24" stroke-width="2" stroke-linecap="round"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"
+                fill="#e31e24"
+              />
+              <path
+                d="M12 6V12L16 14"
+                stroke="#e31e24"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </div>
           <div>
@@ -57,22 +100,28 @@
           <div class="toggle-item">
             <span>启用个性化推荐</span>
             <label class="toggle">
-              <input type="checkbox" checked />
-              <span class="toggle-slider"></span>
+              <input
+                type="checkbox"
+                checked
+              >
+              <span class="toggle-slider" />
             </label>
           </div>
           <div class="toggle-item">
             <span>基于浏览历史推荐</span>
             <label class="toggle">
-              <input type="checkbox" checked />
-              <span class="toggle-slider"></span>
+              <input
+                type="checkbox"
+                checked
+              >
+              <span class="toggle-slider" />
             </label>
           </div>
           <div class="toggle-item">
             <span>协同过滤推荐</span>
             <label class="toggle">
-              <input type="checkbox" />
-              <span class="toggle-slider"></span>
+              <input type="checkbox">
+              <span class="toggle-slider" />
             </label>
           </div>
         </div>

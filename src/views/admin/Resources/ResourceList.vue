@@ -6,8 +6,17 @@
         <!-- 非编辑状态 -->
         <template v-if="!isEditingPageTitle">
           <h2>{{ pageTitle }}</h2>
-          <button class="page-title-edit-btn" @click="startEditPageTitle" title="编辑标题">
-            <img src="/images/bianji.svg" alt="编辑" width="16" height="16" />
+          <button
+            class="page-title-edit-btn"
+            title="编辑标题"
+            @click="startEditPageTitle"
+          >
+            <img
+              src="/images/bianji.svg"
+              alt="编辑"
+              width="16"
+              height="16"
+            >
           </button>
         </template>
         <!-- 编辑状态 -->
@@ -19,22 +28,50 @@
               class="page-title-edit-input"
               @keyup.enter="savePageTitleEdit"
               @keyup.esc="cancelPageTitleEdit"
-            />
-            <button class="page-title-save-btn" @click="savePageTitleEdit">保存</button>
-            <button class="page-title-cancel-btn" @click="cancelPageTitleEdit">取消</button>
+            >
+            <button
+              class="page-title-save-btn"
+              @click="savePageTitleEdit"
+            >
+              保存
+            </button>
+            <button
+              class="page-title-cancel-btn"
+              @click="cancelPageTitleEdit"
+            >
+              取消
+            </button>
           </div>
         </template>
       </div>
-      <p class="page-desc">管理课程思政资源设施内容</p>
+      <p class="page-desc">
+        管理课程思政资源设施内容
+      </p>
     </div>
 
     <!-- 搜索和筛选栏 -->
     <div class="page-toolbar">
       <div class="toolbar-left">
         <div class="search-box">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.5"/>
-            <path d="M11 11L14 14" stroke="#999" stroke-width="1.5" stroke-linecap="round"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <circle
+              cx="7"
+              cy="7"
+              r="5"
+              stroke="#999"
+              stroke-width="1.5"
+            />
+            <path
+              d="M11 11L14 14"
+              stroke="#999"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
           </svg>
           <input
             v-model="searchKeyword"
@@ -42,19 +79,42 @@
             placeholder="搜索标题..."
             class="search-input"
             @input="handleSearch"
-          />
+          >
         </div>
         
-        <select v-model="statusFilter" class="filter-select" @change="handleFilter">
-          <option value="all">全部状态</option>
-          <option value="active">显示中</option>
-          <option value="inactive">已隐藏</option>
+        <select
+          v-model="statusFilter"
+          class="filter-select"
+          @change="handleFilter"
+        >
+          <option value="all">
+            全部状态
+          </option>
+          <option value="active">
+            显示中
+          </option>
+          <option value="inactive">
+            已隐藏
+          </option>
         </select>
       </div>
 
-      <button class="btn-add" @click="showAddDialog = true">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 2.33333V11.6667M2.33333 7H11.6667" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <button
+        class="btn-add"
+        @click="showAddDialog = true"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+        >
+          <path
+            d="M7 2.33333V11.6667M2.33333 7H11.6667"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         新增
       </button>
@@ -66,13 +126,19 @@
     </div>
 
     <!-- 加载状态 -->
-    <div v-if="isLoading" class="loading-state">
-      <div class="loading-spinner"></div>
+    <div
+      v-if="isLoading"
+      class="loading-state"
+    >
+      <div class="loading-spinner" />
       <p>加载中...</p>
     </div>
 
     <!-- 列表内容 -->
-    <div v-else class="content-list">
+    <div
+      v-else
+      class="content-list"
+    >
       <div
         v-for="(item, index) in items"
         :key="item.id"
@@ -84,13 +150,48 @@
       >
         <!-- 拖动手柄 -->
         <div class="drag-handle">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="5" cy="3" r="1" fill="#999"/>
-            <circle cx="11" cy="3" r="1" fill="#999"/>
-            <circle cx="5" cy="8" r="1" fill="#999"/>
-            <circle cx="11" cy="8" r="1" fill="#999"/>
-            <circle cx="5" cy="13" r="1" fill="#999"/>
-            <circle cx="11" cy="13" r="1" fill="#999"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <circle
+              cx="5"
+              cy="3"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="11"
+              cy="3"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="5"
+              cy="8"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="11"
+              cy="8"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="5"
+              cy="13"
+              r="1"
+              fill="#999"
+            />
+            <circle
+              cx="11"
+              cy="13"
+              r="1"
+              fill="#999"
+            />
           </svg>
         </div>
 
@@ -98,18 +199,32 @@
         <div class="item-content">
           <h3 class="item-title">
             {{ item.title }}
-            <span v-if="item.pinTop === 1 || item.pinTop === 32" class="pin-badge">置顶</span>
-            <span v-if="item.category === 0" class="category-badge">政策文件</span>
-            <span v-else-if="item.category === 1 || item.category === 2" class="category-badge category-badge--material">思政素材</span>
+            <span
+              v-if="item.pinTop === 1 || item.pinTop === 32"
+              class="pin-badge"
+            >置顶</span>
+            <span
+              v-if="item.category === 0"
+              class="category-badge"
+            >政策文件</span>
+            <span
+              v-else-if="item.category === 1 || item.category === 2"
+              class="category-badge category-badge--material"
+            >思政素材</span>
           </h3>
-          <p class="item-description">{{ item.content ? (item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '')) : '-' }}</p>
+          <p class="item-description">
+            {{ item.content ? (item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '')) : '-' }}
+          </p>
 
           <div class="item-footer">
             <div class="footer-info">
               <span class="sort-info">第 {{ (currentPage - 1) * pageSize + index + 1 }} 位</span>
               <span class="time-info">创建时间：{{ item.createTime || '-' }}</span>
               <span class="view-info">浏览量：{{ item.statPv || 0 }}</span>
-              <span class="status-info" :class="{ 'status-info--active': item.showFront === 1 || item.showFront === 64 }">
+              <span
+                class="status-info"
+                :class="{ 'status-info--active': item.showFront === 1 || item.showFront === 64 }"
+              >
                 {{ (item.showFront === 1 || item.showFront === 64) ? '前台显示' : '已隐藏' }}
               </span>
             </div>
@@ -118,43 +233,138 @@
 
         <!-- 操作按钮 -->
         <div class="item-actions">
-          <button class="action-btn action-btn--edit" @click="editItem(item)" title="编辑">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="action-btn action-btn--edit"
+            title="编辑"
+            @click="editItem(item)"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.6663 2.33337L11.333 2.00004Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
           <button 
             class="action-btn" 
             :class="(item.showFront === 1 || item.showFront === 64) ? 'action-btn--visible' : 'action-btn--hidden'"
-            @click="toggleVisibility(item)" 
-            :title="(item.showFront === 1 || item.showFront === 64) ? '点击隐藏' : '点击显示'"
+            :title="(item.showFront === 1 || item.showFront === 64) ? '点击隐藏' : '点击显示'" 
+            @click="toggleVisibility(item)"
           >
             <!-- 显示状态：眼睛图标 -->
-            <svg v-if="item.showFront === 1 || item.showFront === 64" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+            <svg
+              v-if="item.showFront === 1 || item.showFront === 64"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <circle
+                cx="8"
+                cy="8"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
             </svg>
             <!-- 隐藏状态：眼睛斜杠图标 -->
-            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <svg
+              v-else
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <circle
+                cx="8"
+                cy="8"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <line
+                x1="2"
+                y1="2"
+                x2="14"
+                y2="14"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
-          <button class="action-btn action-btn--delete" @click="deleteItem(item.id)" title="删除">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 4H3.33333H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="action-btn action-btn--delete"
+            title="删除"
+            @click="deleteItem(item.id)"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M2 4H3.33333H14"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-if="items.length === 0" class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="30" stroke="#d9d9d9" stroke-width="2"/>
-          <path d="M32 20V36M32 44H32.02" stroke="#d9d9d9" stroke-width="2" stroke-linecap="round"/>
+      <div
+        v-if="items.length === 0"
+        class="empty-state"
+      >
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 64 64"
+          fill="none"
+        >
+          <circle
+            cx="32"
+            cy="32"
+            r="30"
+            stroke="#d9d9d9"
+            stroke-width="2"
+          />
+          <path
+            d="M32 20V36M32 44H32.02"
+            stroke="#d9d9d9"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
         <p>暂无数据</p>
       </div>
@@ -164,20 +374,37 @@
     <Pagination
       v-if="!isLoading && items.length > 0"
       :page="currentPage"
-      :pageSize="pageSize"
+      :page-size="pageSize"
       :total="total"
-      @pageChange="handlePageChange"
-      @sizeChange="handleSizeChange"
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
     />
 
     <!-- 新增/编辑对话框 -->
-    <div v-if="showAddDialog || showEditDialog" class="dialog-overlay" @click.self="closeDialog">
+    <div
+      v-if="showAddDialog || showEditDialog"
+      class="dialog-overlay"
+      @click.self="closeDialog"
+    >
       <div class="dialog">
         <div class="dialog__header">
           <h3>{{ showEditDialog ? '编辑资源' : '新增资源' }}</h3>
-          <button class="dialog__close" @click="closeDialog">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="closeDialog"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -190,40 +417,57 @@
               type="text"
               placeholder="请输入标题"
               class="form-input"
-            />
+            >
           </div>
 
           <div class="form-group">
             <label>分类 <span class="required">*</span></label>
-            <select v-model.number="formData.category" class="form-select">
-              <option :value="0">政策文件</option>
-              <option :value="1">思政素材</option>
+            <select
+              v-model.number="formData.category"
+              class="form-select"
+            >
+              <option :value="0">
+                政策文件
+              </option>
+              <option :value="1">
+                思政素材
+              </option>
             </select>
           </div>
 
           <div class="form-group">
             <label>内容类型 <span class="required">*</span></label>
-            <select v-model.number="formData.contentType" class="form-select">
-              <option :value="0">富文本内容（内部详情）</option>
-              <option :value="1">URL地址（外部跳转）</option>
+            <select
+              v-model.number="formData.contentType"
+              class="form-select"
+            >
+              <option :value="0">
+                富文本内容（内部详情）
+              </option>
+              <option :value="1">
+                URL地址（外部跳转）
+              </option>
             </select>
           </div>
 
           <div class="form-group">
             <label>详情内容 <span class="required">*</span></label>
-            <div v-if="formData.contentType === 0" class="editor-container">
+            <div
+              v-if="formData.contentType === 0"
+              class="editor-container"
+            >
               <Toolbar
                 :editor="editorRef"
-                :defaultConfig="{}"
+                :default-config="{}"
                 mode="default"
                 class="editor-toolbar"
               />
               <Editor
                 v-model="formData.content"
-                :defaultConfig="editorConfig"
+                :default-config="editorConfig"
                 mode="default"
                 class="editor-content"
-                @onCreated="handleCreated"
+                @on-created="handleCreated"
               />
             </div>
             <input
@@ -232,7 +476,7 @@
               type="text"
               placeholder="请输入URL地址"
               class="form-input"
-            />
+            >
           </div>
 
           <div class="form-group">
@@ -243,28 +487,66 @@
               min="1"
               class="form-input"
               placeholder="1"
-            />
+            >
           </div>
 
           <div class="form-group form-group--inline">
             <label class="checkbox-label">
-              <input v-model="formData.pinTop" type="checkbox" :true-value="1" :false-value="0" />
+              <input
+                v-model="formData.pinTop"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+              >
               <span>置顶显示</span>
             </label>
             
             <label class="checkbox-label">
-              <input v-model="formData.showFront" type="checkbox" :true-value="1" :false-value="0" />
+              <input
+                v-model="formData.showFront"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+              >
               <span>前台显示</span>
             </label>
           </div>
         </div>
 
         <div class="dialog__footer">
-          <button class="btn-cancel" @click="closeDialog" :disabled="isSaving">取消</button>
-          <button class="btn-confirm" @click="saveItem" :disabled="isSaving">
-            <svg v-if="!isSaving" width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="btn-cancel"
+            :disabled="isSaving"
+            @click="closeDialog"
+          >
+            取消
+          </button>
+          <button
+            class="btn-confirm"
+            :disabled="isSaving"
+            @click="saveItem"
+          >
+            <svg
+              v-if="!isSaving"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9.66667 13V8.33333H4.33333V13"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             <span v-if="isSaving">保存中...</span>
             <span v-else>保存</span>
@@ -274,22 +556,46 @@
     </div>
 
     <!-- 预览对话框 -->
-    <div v-if="showPreviewDialog" class="dialog-overlay" @click.self="showPreviewDialog = false">
+    <div
+      v-if="showPreviewDialog"
+      class="dialog-overlay"
+      @click.self="showPreviewDialog = false"
+    >
       <div class="dialog dialog--large">
         <div class="dialog__header">
           <h3>资源预览</h3>
-          <button class="dialog__close" @click="showPreviewDialog = false">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+          <button
+            class="dialog__close"
+            @click="showPreviewDialog = false"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="#666"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
         
         <div class="dialog__body">
-          <div v-if="previewData" class="preview-content">
+          <div
+            v-if="previewData"
+            class="preview-content"
+          >
             <h2>{{ previewData.title }}</h2>
-            <p class="preview-description">{{ previewData.description }}</p>
-            <div class="preview-time">发布时间：{{ previewData.publishTime }}</div>
+            <p class="preview-description">
+              {{ previewData.description }}
+            </p>
+            <div class="preview-time">
+              发布时间：{{ previewData.publishTime }}
+            </div>
           </div>
         </div>
       </div>

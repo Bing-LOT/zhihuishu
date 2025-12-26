@@ -4,11 +4,25 @@
     <div class="page-header">
       <div class="page-title">
         <h2>"习思想的伟大实践"融入成果</h2>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-left: 8px;">
-          <path d="M12 5.33333L6.66667 10.6667L4 8" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          style="margin-left: 8px;"
+        >
+          <path
+            d="M12 5.33333L6.66667 10.6667L4 8"
+            stroke="#999"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </div>
-      <p class="page-desc">配置核心文稿内容</p>
+      <p class="page-desc">
+        配置核心文稿内容
+      </p>
     </div>
 
     <!-- 编辑表单 -->
@@ -20,15 +34,42 @@
           rows="20"
           placeholder="请输入核心文稿内容（纯文本）"
           class="form-textarea"
-        ></textarea>
+        />
       </div>
 
       <div class="form-actions">
-        <button class="btn-cancel" @click="handleCancel" :disabled="loading">取消</button>
-        <button class="btn-save" @click="handleSave" :disabled="loading">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9.66667 13V8.33333H4.33333V13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <button
+          class="btn-cancel"
+          :disabled="loading"
+          @click="handleCancel"
+        >
+          取消
+        </button>
+        <button
+          class="btn-save"
+          :disabled="loading"
+          @click="handleSave"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+          >
+            <path
+              d="M11.6667 6.33333V11.6667C11.6667 12.0203 11.5262 12.3594 11.2762 12.6095C11.0261 12.8595 10.687 13 10.3333 13H3.66667C3.31304 13 2.97391 12.8595 2.72386 12.6095C2.47381 12.3594 2.33333 12.0203 2.33333 11.6667V2.33333C2.33333 1.97971 2.47381 1.64057 2.72386 1.39052C2.97391 1.14048 3.31304 1 3.66667 1H9L11.6667 3.66667V6.33333Z"
+              stroke="white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9.66667 13V8.33333H4.33333V13"
+              stroke="white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           {{ loading ? '保存中...' : '保存' }}
         </button>

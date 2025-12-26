@@ -2,14 +2,20 @@
   <div class="example-detail-page">
     <!-- 背景图 -->
     <div class="detail-bg">
-      <img src="/images/indexBg.png" alt="" />
+      <img
+        src="/images/indexBg.png"
+        alt=""
+      >
     </div>
 
     <div class="detail-container">
       <!-- 面包屑导航 -->
       <div class="breadcrumb">
         <span class="breadcrumb-item">您的位置：</span>
-        <span class="breadcrumb-item clickable" @click="$router.push('/topics')">习思想的伟大实践</span>
+        <span
+          class="breadcrumb-item clickable"
+          @click="$router.push('/topics')"
+        >习思想的伟大实践</span>
         <span class="breadcrumb-item">&gt;&gt;</span>
         <span class="breadcrumb-item">习思想优秀视频展播</span>
         <span class="breadcrumb-item">&gt;&gt;</span>
@@ -23,9 +29,14 @@
         <!-- 左侧：课程信息卡片 -->
         <div class="info-card">
           <div class="card-cover">
-            <img :src="exampleDetail?.coverUrl" alt="" />
+            <img
+              :src="exampleDetail?.coverUrl"
+              alt=""
+            >
           </div>
-          <h3 class="card-title">{{ exampleDetail?.name }}</h3>
+          <h3 class="card-title">
+            {{ exampleDetail?.name }}
+          </h3>
           <div class="card-info">
             <div class="info-row">
               <span class="info-label">主讲教师：</span>
@@ -37,7 +48,10 @@
                 >
                   {{ teacher.name }}
                 </span>
-                <span v-if="!exampleDetail?.teachers || exampleDetail.teachers.length === 0" class="teacher-name">-</span>
+                <span
+                  v-if="!exampleDetail?.teachers || exampleDetail.teachers.length === 0"
+                  class="teacher-name"
+                >-</span>
               </div>
             </div>
             <div class="info-row">
@@ -67,7 +81,9 @@
         <div class="video-card">
           <!-- 标题和观看次数 -->
           <div class="video-header">
-            <h2 class="video-title">{{ exampleDetail?.name }}</h2>
+            <h2 class="video-title">
+              {{ exampleDetail?.name }}
+            </h2>
             <div class="view-count">
               观看次数：<span class="count-number">{{ formatViewCount(exampleDetail?.statPv) }}</span>
             </div>
@@ -92,10 +108,18 @@
       <!-- 其他示范案例展播 -->
       <div class="recommend-section">
         <div class="recommend-header">
-          <h3 class="recommend-title">其他示范案例展播</h3>
-          <button class="more-btn" @click="$router.push('/topics/examples')">
+          <h3 class="recommend-title">
+            其他示范案例展播
+          </h3>
+          <button
+            class="more-btn"
+            @click="$router.push('/topics/examples')"
+          >
             <span>查看更多</span>
-<img src="/images/arrow-right.svg" alt="">
+            <img
+              src="/images/arrow-right.svg"
+              alt=""
+            >
           </button>
         </div>
 

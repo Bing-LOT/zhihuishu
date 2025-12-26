@@ -2,41 +2,64 @@
   <div class="footprint-detail-page">
     <!-- 背景图 -->
     <div class="detail-bg">
-      <img src="/images/indexBg.png" alt="" />
+      <img
+        src="/images/indexBg.png"
+        alt=""
+      >
     </div>
 
     <div class="detail-container">
       <!-- 面包屑导航 -->
       <div class="breadcrumb">
         <span class="breadcrumb-item">您的位置： </span>
-        <span class="breadcrumb-item clickable" @click="$router.push('/topics')">习思想的伟大实践</span>
+        <span
+          class="breadcrumb-item clickable"
+          @click="$router.push('/topics')"
+        >习思想的伟大实践</span>
         <span class="breadcrumb-item"> >> </span>
-        <span class="breadcrumb-item clickable" @click="$router.push('/topics')">总书记的福建脚步</span>
+        <span
+          class="breadcrumb-item clickable"
+          @click="$router.push('/topics')"
+        >总书记的福建脚步</span>
         <span class="breadcrumb-item"> >> </span>
-        <span class="breadcrumb-item clickable" @click="$router.push('/topics/footprints')">更多内容</span>
+        <span
+          class="breadcrumb-item clickable"
+          @click="$router.push('/topics/footprints')"
+        >更多内容</span>
         <span class="breadcrumb-item"> >> </span>
         <span class="breadcrumb-item active">内容详情</span>
       </div>
 
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
+      <div
+        v-if="loading"
+        class="loading-state"
+      >
         <p>加载中...</p>
       </div>
 
       <!-- 主内容区 -->
-      <div v-else-if="footprintDetail" class="main-content">
+      <div
+        v-else-if="footprintDetail"
+        class="main-content"
+      >
         <!-- 标题和元信息 -->
         <div class="content-header">
-          <h1 class="content-title">{{ footprintDetail.title }}</h1>
+          <h1 class="content-title">
+            {{ footprintDetail.title }}
+          </h1>
           <div class="content-meta">
             <span class="meta-item">发布时间：{{ formatDate(footprintDetail.createTime) }}</span>
-            <div class="meta-divider"></div>
+            <div class="meta-divider" />
             <span class="meta-item">浏览人数：{{ footprintDetail.statPv || 0 }}</span>
           </div>
         </div>
 
         <!-- 视频播放器（如果有视频内容） -->
-        <div v-if="hasVideo" class="video-container">
+        <div
+          v-if="hasVideo"
+          class="video-container"
+        >
           <video
             ref="videoPlayer"
             class="video-player"
@@ -50,13 +73,24 @@
         </div>
 
         <!-- 富文本内容 -->
-        <div class="content-body" v-html="footprintDetail.content"></div>
+        <div
+          class="content-body"
+          v-html="footprintDetail.content"
+        />
       </div>
 
       <!-- 错误状态 -->
-      <div v-else class="error-state">
+      <div
+        v-else
+        class="error-state"
+      >
         <p>内容加载失败</p>
-        <button class="back-btn" @click="$router.back()">返回</button>
+        <button
+          class="back-btn"
+          @click="$router.back()"
+        >
+          返回
+        </button>
       </div>
     </div>
   </div>

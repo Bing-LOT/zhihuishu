@@ -4,7 +4,11 @@
     :class="{ 'video-card--large': isLarge }"
     @click="handleClick"
   >
-    <img :src="thumbnail" :alt="title" class="video-card__thumbnail" />
+    <img
+      :src="thumbnail"
+      :alt="title"
+      class="video-card__thumbnail"
+    >
     <div class="video-card__overlay">
       <span class="video-card__title">{{ title }}</span>
     </div>

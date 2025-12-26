@@ -2,16 +2,29 @@
   <div class="course-detail">
     <!-- 背景层 -->
     <div class="course-detail__bg">
-      <img src="/images/indexBg.png" alt="" />
+      <img
+        src="/images/indexBg.png"
+        alt=""
+      >
     </div>
 
     <div class="course-detail__container">
       <!-- 面包屑 -->
       <div class="course-detail__breadcrumb">
         <span class="label">您的位置：</span>
-        <router-link to="/overview" class="link">思政概览</router-link>
+        <router-link
+          to="/overview"
+          class="link"
+        >
+          思政概览
+        </router-link>
         <span class="separator">>></span>
-        <router-link to="/study/courses" class="link">党员教师课程思政示范课展播</router-link>
+        <router-link
+          to="/study/courses"
+          class="link"
+        >
+          党员教师课程思政示范课展播
+        </router-link>
         <span class="separator">>></span>
         <span class="current">{{ course.title || '课程详情' }}</span>
       </div>
@@ -21,26 +34,39 @@
         <div class="course-info-card">
           <!-- 装饰背景 -->
           <div class="card-bg-decoration">
-            <div class="bg-gradient"></div>
-            <div class="bg-pattern"></div>
+            <div class="bg-gradient" />
+            <div class="bg-pattern" />
           </div>
 
           <!-- 封面图 -->
           <div class="course-info__cover-wrapper">
-            <img :src="course.cover" :alt="course.title" class="course-cover" />
-            <div class="course-info__badge" v-if="course.badge">
-              <div class="badge-bg"></div>
+            <img
+              :src="course.cover"
+              :alt="course.title"
+              class="course-cover"
+            >
+            <div
+              v-if="course.badge"
+              class="course-info__badge"
+            >
+              <div class="badge-bg" />
               <span>{{ course.badge }}</span>
             </div>
           </div>
 
-          <h1 class="course-info__title">{{ course.title }}</h1>
+          <h1 class="course-info__title">
+            {{ course.title }}
+          </h1>
 
           <div class="course-info__meta">
             <div class="course-info__row">
               <span class="label">主讲教师：</span>
               <div class="teachers highlight">
-                <span v-for="(teacher, index) in course.teacherList" :key="index" class="teacher-item">
+                <span
+                  v-for="(teacher, index) in course.teacherList"
+                  :key="index"
+                  class="teacher-item"
+                >
                   {{ teacher.name }}
                 </span>
               </div>
@@ -67,32 +93,58 @@
               :class="{ 'active': currentTab === tab.value }"
               @click="currentTab = tab.value"
             >
-              <div class="dot"></div>
+              <div class="dot" />
               <span>{{ tab.label }}</span>
-              <div class="dot"></div>
+              <div class="dot" />
             </button>
           </div>
 
           <!-- 标签页内容 -->
           <div class="course-tab-content">
             <!-- 课程简介 -->
-            <div v-if="currentTab === 'intro'" class="course-intro text-content">
-              <div v-if="course.brief" v-html="course.brief"></div>
-              <p v-else style="text-indent: 0; opacity: 0.5;">暂无课程简介</p>
+            <div
+              v-if="currentTab === 'intro'"
+              class="course-intro text-content"
+            >
+              <div
+                v-if="course.brief"
+                v-html="course.brief"
+              />
+              <p
+                v-else
+                style="text-indent: 0; opacity: 0.5;"
+              >
+                暂无课程简介
+              </p>
             </div>
             
             <!-- 教学设计 -->
-            <div v-else-if="currentTab === 'design'" class="course-design">
-              <div v-if="pdfLoading" class="pdf-loading">
-                <div class="loading-spinner"></div>
+            <div
+              v-else-if="currentTab === 'design'"
+              class="course-design"
+            >
+              <div
+                v-if="pdfLoading"
+                class="pdf-loading"
+              >
+                <div class="loading-spinner" />
                 <p>正在加载PDF文档...</p>
               </div>
-              <div v-else-if="pdfPages.length > 0" class="pdf-viewer">
+              <div
+                v-else-if="pdfPages.length > 0"
+                class="pdf-viewer"
+              >
                 <!-- 第一页独占一行 -->
                 <div class="pdf-page-row first-page">
                   <div class="pdf-page-wrapper first">
-                    <img :src="pdfPages[0]" alt="第1页" class="pdf-page-image" />
-                    <div class="pdf-page-number">第 1 页</div>
+                    <img
+                      :src="pdfPages[0]"
+                      alt="第1页"
+                      class="pdf-page-image"
+                    >
+                    <div class="pdf-page-number">
+                      第 1 页
+                    </div>
                   </div>
                 </div>
                 
@@ -103,35 +155,74 @@
                     :key="index + 1"
                     class="pdf-page-wrapper"
                   >
-                    <img :src="page" :alt="`第${index + 2}页`" class="pdf-page-image" />
-                    <div class="pdf-page-number">第 {{ index + 2 }} 页</div>
+                    <img
+                      :src="page"
+                      :alt="`第${index + 2}页`"
+                      class="pdf-page-image"
+                    >
+                    <div class="pdf-page-number">
+                      第 {{ index + 2 }} 页
+                    </div>
                   </div>
                 </template>
               </div>
-              <div v-else-if="course.docUrl" class="doc-download">
+              <div
+                v-else-if="course.docUrl"
+                class="doc-download"
+              >
                 <h3>教学设计文档</h3>
-                <a :href="course.docUrl" target="_blank" class="download-btn">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 13L6 9H8.5V4H11.5V9H14L10 13Z" fill="currentColor"/>
-                    <path d="M4 14H16V16H4V14Z" fill="currentColor"/>
+                <a
+                  :href="course.docUrl"
+                  target="_blank"
+                  class="download-btn"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                  >
+                    <path
+                      d="M10 13L6 9H8.5V4H11.5V9H14L10 13Z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M4 14H16V16H4V14Z"
+                      fill="currentColor"
+                    />
                   </svg>
                   <span>下载教学设计文档</span>
                 </a>
               </div>
-              <p v-else style="text-indent: 0; opacity: 0.5; text-align: center;">暂无教学设计文档</p>
+              <p
+                v-else
+                style="text-indent: 0; opacity: 0.5; text-align: center;"
+              >
+                暂无教学设计文档
+              </p>
             </div>
             
             <!-- 教学视频 -->
-            <div v-else-if="currentTab === 'video'" class="course-video">
-              <div v-if="course.videoUrl" class="video-player">
+            <div
+              v-else-if="currentTab === 'video'"
+              class="course-video"
+            >
+              <div
+                v-if="course.videoUrl"
+                class="video-player"
+              >
                 <video 
                   :src="course.videoUrl"
                   controls
                   class="video-content"
-                >
-                </video>
+                />
               </div>
-              <p v-else style="text-indent: 0; opacity: 0.5; text-align: center; padding: 40px 0;">暂无教学视频</p>
+              <p
+                v-else
+                style="text-indent: 0; opacity: 0.5; text-align: center; padding: 40px 0;"
+              >
+                暂无教学视频
+              </p>
             </div>
           </div>
         </div>

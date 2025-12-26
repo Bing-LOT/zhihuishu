@@ -946,7 +946,7 @@
                   仅支持上传 1 个视频文件
                 </p>
                 <p class="upload-hint">
-                  支持 MP4 格式，最大 500MB
+                  支持 MP4 格式
                 </p>
                 <button
                   class="btn-select-file"
@@ -1241,10 +1241,10 @@ const handleVideoChange = (event: Event) => {
       alert('仅支持 MP4 格式')
       return
     }
-    if (file.size > 500 * 1024 * 1024) {
-      alert('视频文件不能超过 500MB')
-      return
-    }
+    // if (file.size > 500 * 1024 * 1024) {
+    //   alert('视频文件不能超过 500MB')
+    //   return
+    // }
     actualVideoFile.value = file
     formData.value.videoFile = {
       name: file.name,

@@ -1200,10 +1200,10 @@ const handleVideoChange = (event: Event) => {
       alert('仅支持 MP4 格式')
       return
     }
-    if (file.size > 500 * 1024 * 1024) {
-      alert('视频文件不能超过 500MB')
-      return
-    }
+    // if (file.size > 500 * 1024 * 1024) {
+    //   alert('视频文件不能超过 500MB')
+    //   return
+    // }
     // 保存原始文件对象
     formData.value.videoRawFile = file
     // 生成预览信息

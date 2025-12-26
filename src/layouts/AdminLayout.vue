@@ -72,11 +72,19 @@
 
       <!-- 主内容区 -->
       <main class="admin-main" :class="{ 'admin-main--full': !showSidebar }">
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component, route: routeSlot }">
           <keep-alive>
-            <component :is="Component" v-if="route.meta.keepAlive" />
+            <component 
+              :is="Component" 
+              :key="routeSlot.path" 
+              v-if="routeSlot.meta.keepAlive" 
+            />
           </keep-alive>
-          <component :is="Component" v-if="!route.meta.keepAlive" />
+          <component 
+            :is="Component" 
+            :key="routeSlot.path" 
+            v-if="!routeSlot.meta.keepAlive" 
+          />
         </router-view>
       </main>
     </div>
@@ -191,6 +199,50 @@ watch(
     // 根据路由更新当前选中的标签页
     if (newPath.startsWith('/admin/resources')) {
       currentTab.value = 'resources'
+      
+      // 根据路由更新左侧菜单选中状态
+      if (newPath === '/admin/resources/home') {
+        currentMenu.value = 'home'
+      } else if (newPath === '/admin/resources/party-course') {
+        currentMenu.value = 'party-course'
+        // 展开父菜单
+        const overviewMenu = sideMenus.value.find(m => m.key === 'overview')
+        if (overviewMenu) overviewMenu.expanded = true
+      } else if (newPath === '/admin/resources/model-display') {
+        currentMenu.value = 'model-display'
+        const overviewMenu = sideMenus.value.find(m => m.key === 'overview')
+        if (overviewMenu) overviewMenu.expanded = true
+      } else if (newPath === '/admin/resources/practice-achievement') {
+        currentMenu.value = 'practice-achievement'
+        const practiceMenu = sideMenus.value.find(m => m.key === 'great-practice')
+        if (practiceMenu) practiceMenu.expanded = true
+      } else if (newPath === '/admin/resources/practice-video') {
+        currentMenu.value = 'practice-video'
+        const practiceMenu = sideMenus.value.find(m => m.key === 'great-practice')
+        if (practiceMenu) practiceMenu.expanded = true
+      } else if (newPath === '/admin/resources/practice-case') {
+        currentMenu.value = 'practice-case'
+        const practiceMenu = sideMenus.value.find(m => m.key === 'great-practice')
+        if (practiceMenu) practiceMenu.expanded = true
+      } else if (newPath === '/admin/resources/practice-footprint') {
+        currentMenu.value = 'practice-footprint'
+        const practiceMenu = sideMenus.value.find(m => m.key === 'great-practice')
+        if (practiceMenu) practiceMenu.expanded = true
+      } else if (newPath === '/admin/resources/list') {
+        currentMenu.value = 'resources'
+      } else if (newPath === '/admin/resources/excellent-class') {
+        currentMenu.value = 'excellent-class'
+        const specialMenu = sideMenus.value.find(m => m.key === 'special')
+        if (specialMenu) specialMenu.expanded = true
+      } else if (newPath === '/admin/resources/college-special') {
+        currentMenu.value = 'college-special'
+        const specialMenu = sideMenus.value.find(m => m.key === 'special')
+        if (specialMenu) specialMenu.expanded = true
+      } else if (newPath === '/admin/resources/culture-map') {
+        currentMenu.value = 'culture-map'
+        const specialMenu = sideMenus.value.find(m => m.key === 'special')
+        if (specialMenu) specialMenu.expanded = true
+      }
     } else if (newPath.startsWith('/admin/questions')) {
       currentTab.value = 'questions'
     } else if (newPath.startsWith('/admin/analysis')) {

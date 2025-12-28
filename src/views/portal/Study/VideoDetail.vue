@@ -317,7 +317,7 @@ const fetchCourseDetail = async () => {
       college: data.college,
       teacherList: data.teachers.map(t => ({
         name: t.name,
-        title: t.department || '教师'
+        title: t.title || '教师'
       })),
       brief: data.brief,
       docUrl: data.docUrl,

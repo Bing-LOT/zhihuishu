@@ -265,7 +265,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getExampleExpoDetail, getExampleExpoList, type ExampleExpoListItem } from '@/api/banner'
+import { getExampleExpoDetail, type ExampleExpoListItem } from '@/api/banner'
+import { getCourseExpoPageList, type CourseExpoItem } from '@/api/course'
 
 /**
  * 学院案例视频详情页
@@ -299,22 +300,18 @@ const getInitialData = () => {
 // 视频详情数据（默认值）
 const videoDetail = ref<ExampleExpoListItem>({
   id: 0,
-  name: '概率论与数理统计',
-  coverUrl: '/images/home/video-1.jpg',
-  college: '数学与统计学院',
-  teachers: [{ name: '薛美玉', title: '教授' }],
-  content: `
-    <p style="text-indent: 32px;">课程是人才培养的最后一公里。随着大数据时代的来临，"概率论与数理统计"作为大数据的主要基础理论之一，受到专家学者的广泛关注，这一课程已成为高等院校理工科、经管类各专业重要的基础课程之一，大量应用于社会、经济、科学等领域。</p>
-    <p style="text-indent: 32px;">其中概率论以现代数学框架为基础研究随机现象的统计规律性，数理统计则以概率论为理论基础，研究怎样用有效的方法去收集、整理、分析受随机性影响的数据，并对所研究的问题作出统计推断和预测，同时为决策和行动提供依据和建议。</p>
-    <p style="text-indent: 32px;">通过本课程的学习，学生能掌握概率论与数理统计的基本概念、基本理论和方法，从而理解随机现象的基本思想、训练数理逻辑思维，培养运用概率统计方法分析和解决实际问题的能力，为后续学习乃至工作奠定必备的数理基础。</p>
-  `,
-  videoUrl: '/videos/hero-video.mp4',
+  name: '',
+  coverUrl: '',
+  college: '',
+  teachers: [{ name: '', title: '' }],
+  content: ``,
+  videoUrl: '',
   showFront: 1,
   statPv: 100000
 })
 
 // 推荐视频列表
-const recommendVideos = ref<ExampleExpoListItem[]>([])
+const recommendVideos = ref<CourseExpoItem[]>([])
 
 // 视频播放器相关状态
 const videoPlayer = ref<HTMLVideoElement>()
@@ -385,10 +382,9 @@ const loadVideoDetail = async () => {
 // 加载推荐视频列表
 const loadRecommendVideos = async () => {
   try {
-    const data = await getExampleExpoList({
+    const data = await getCourseExpoPageList({
       pageIndex: 1,
-      pageSize: 4,
-      showFront: 1
+      pageSize: 4
     })
     recommendVideos.value = data.records
     console.log('✅ 推荐视频加载成功:', recommendVideos.value)
@@ -398,47 +394,63 @@ const loadRecommendVideos = async () => {
     recommendVideos.value = [
       {
         id: 1,
+        createTime: '',
         name: '概率论与数理统计',
         coverUrl: '/images/home/video-2.jpg',
         college: '数学与统计学院',
-        teachers: [{ name: '薛美玉', title: '教授' }],
-        content: '',
-        showFront: 1,
+        teachers: [{ name: '薛美玉' }],
         levelName: '国家示范',
-        showStatPv: 3456
+        property: '',
+        brief: '',
+        docUrl: '',
+        videoUrl: '',
+        showStatPv: 3456,
+        statPv: 3456
       },
       {
         id: 2,
+        createTime: '',
         name: '概率论与数理统计',
         coverUrl: '/images/home/video-3.jpg',
         college: '数学与统计学院',
-        teachers: [{ name: '薛美玉', title: '教授' }],
-        content: '',
-        showFront: 1,
+        teachers: [{ name: '薛美玉' }],
         levelName: '国家示范',
-        showStatPv: 3456
+        property: '',
+        brief: '',
+        docUrl: '',
+        videoUrl: '',
+        showStatPv: 3456,
+        statPv: 3456
       },
       {
         id: 3,
+        createTime: '',
         name: '概率论与数理统计',
         coverUrl: '/images/home/video-4.jpg',
         college: '数学与统计学院',
-        teachers: [{ name: '薛美玉', title: '教授' }],
-        content: '',
-        showFront: 1,
+        teachers: [{ name: '薛美玉' }],
         levelName: '国家示范',
-        showStatPv: 3456
+        property: '',
+        brief: '',
+        docUrl: '',
+        videoUrl: '',
+        showStatPv: 3456,
+        statPv: 3456
       },
       {
         id: 4,
+        createTime: '',
         name: '概率论与数理统计',
         coverUrl: '/images/home/video-1.jpg',
         college: '数学与统计学院',
-        teachers: [{ name: '薛美玉', title: '教授' }],
-        content: '',
-        showFront: 1,
+        teachers: [{ name: '薛美玉' }],
         levelName: '国家示范',
-        showStatPv: 3456
+        property: '',
+        brief: '',
+        docUrl: '',
+        videoUrl: '',
+        showStatPv: 3456,
+        statPv: 3456
       }
     ]
   }

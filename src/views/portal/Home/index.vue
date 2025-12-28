@@ -721,7 +721,7 @@ const loadCourses = async () => {
         title: teacher.title,
         department: college.college
       })),
-      video: '/videos/hero-video.mp4', // 添加默认视频
+      video: college.videoUrl || '/videos/hero-video.mp4', // 使用API返回的视频URL，如果没有则使用默认视频
       sort: index + 1,
       status: 'published' as const,
       studentCount: college.statPv || 0,

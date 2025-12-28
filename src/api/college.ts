@@ -23,6 +23,7 @@ export interface CollegeItem {
   teachers: Teacher[] // 主讲教师多个
   types: string[] // 建设课程类型，多个
   content: string // 课程详细内容
+  videoUrl?: string // 视频地址
   statPv: number // 浏览量
   showFront: number // 是否前台显示：1=显示；0=隐藏
   createTime: string // 发布时间
@@ -67,6 +68,7 @@ export interface AddCollegeParams {
   teachers: Teacher[] // 主讲教师，多个（必需）
   types: string[] // 建设课程类型，多个（必需）
   content: string // 课程详情内容（必需）
+  videoUrl?: string // 视频地址（可选）
   showFront: number // 前台显示：1=显示；0=隐藏（必需）
 }
 
@@ -88,6 +90,7 @@ export interface EditCollegeParams {
   teachers: Teacher[] // 主讲教师，多个（必需）
   types: string[] // 建设课程类型，多个（必需）
   content: string // 课程详情内容（必需）
+  videoUrl?: string // 视频地址（可选）
   showFront: number // 前台显示：1=显示；0=隐藏（必需）
 }
 

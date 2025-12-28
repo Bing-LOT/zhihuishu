@@ -247,9 +247,9 @@
                   <div class="course-card-horizontal__meta">
                     <span>推荐督导员：{{ course.supervisor }}</span>
                   </div>
-                  <div class="course-card-horizontal__meta">
+                  <!-- <div class="course-card-horizontal__meta">
                     <span>发布时间：{{ course.publishTime }}</span>
-                  </div>
+                  </div> -->
                   <button
                     class="course-card-horizontal__watch-btn"
                     @click="watchCourse(course)"
@@ -1763,7 +1763,6 @@ const handleResourceClick = () => {
 }
 
 .course-card-horizontal__description {
-  flex: 1;
   margin: 0;
   font-size: 14px;
   color: #333;
@@ -1772,9 +1771,10 @@ const handleResourceClick = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
+  max-height: calc(1.5em * 3);
 }
 
 .course-card-horizontal__meta {

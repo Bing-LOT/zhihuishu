@@ -35,12 +35,12 @@
         >
           后台管理系统
         </router-link>
-        <router-link
+        <!-- <router-link
           to="/admin/analysis"
           class="header__btn"
         >
           教学数据看板
-        </router-link>
+        </router-link> -->
         <button
           class="header__search"
           @click="handleSearch"

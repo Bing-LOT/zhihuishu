@@ -315,9 +315,9 @@
                   <div class="course-card-horizontal__meta">
                     <span>推荐督导员：{{ course.supervisor }}</span>
                   </div>
-                  <div class="course-card-horizontal__meta">
+                  <!-- <div class="course-card-horizontal__meta">
                     <span>发布时间：{{ course.publishTime }}</span>
-                  </div>
+                  </div> -->
                   <button
                     class="course-card-horizontal__watch-btn"
                     @click="watchCourse(course)"

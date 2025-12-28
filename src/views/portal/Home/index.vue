@@ -715,10 +715,10 @@ const loadCourses = async () => {
       cover: college.coverUrl,
       description: college.content,
       level: 'university' as const,
-      teacherList: college.teachers.map((teacher: string, idx: number) => ({
+      teacherList: college.teachers.map((teacher: { name: string; title: string }, idx: number) => ({
         id: String(idx + 1),
-        name: teacher,
-        title: '教师',
+        name: teacher.name,
+        title: teacher.title,
         department: college.college
       })),
       video: '/videos/hero-video.mp4', // 添加默认视频

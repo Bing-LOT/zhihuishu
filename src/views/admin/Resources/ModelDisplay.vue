@@ -576,11 +576,11 @@
               <option value="">
                 请选择示范等级
               </option>
-              <option value="国家级">
-                国家级
+              <option value="国家示范">
+                国家示范
               </option>
-              <option value="省级">
-                省级
+              <option value="省级示范">
+                省级示范
               </option>
               <option value="校级">
                 校级

@@ -360,7 +360,7 @@ const fetchCourses = async () => {
       semester: item.teachingTime,
       supervisor: item.director,
       publishTime: item.createTime,
-      views: 3456, // API 返回中没有观看人数，使用默认值
+      views: 0, // API 返回中没有观看人数，使用默认值
       description: item.brief || '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。本期教学督导表扬的优秀课堂授课教师，在课堂教学中大胆改革与创新，将AI技术融入教学实践，实现课堂"赋能"。她通过动态问题链激发学生探索兴趣，',
       playUrl: item.playUrl
     }))

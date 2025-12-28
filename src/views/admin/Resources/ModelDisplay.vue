@@ -477,7 +477,7 @@
         <div class="dialog__body">
           <!-- 封面图片上传 -->
           <div class="form-group">
-            <label>课程封面 <span class="required">*</span></label>
+            <label>课程封面</label>
             <div class="cover-upload-area">
               <input
                 ref="coverInput"
@@ -694,6 +694,44 @@
           </div>
 
           <div class="form-group">
+            <label>案例名称 <span class="required">*</span></label>
+            <input
+              v-model="formData.exampleName"
+              type="text"
+              placeholder="请输入案例名称"
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>入选方向 <span class="required">*</span></label>
+            <select
+              v-model="formData.direction"
+              class="form-input"
+            >
+              <option value="无">
+                无
+              </option>
+              <option value="面向产出">
+                面向产出
+              </option>
+              <option value="教学有道">
+                教学有道
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>思政元素</label>
+            <textarea
+              v-model="formData.content"
+              rows="4"
+              placeholder="请输入思政元素"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
             <label>教师信息 <span class="required">*</span></label>
             <div class="teacher-list">
               <div
@@ -768,7 +806,7 @@
           </div>
 
           <div class="form-group">
-            <label>教学设计 <span class="required">*</span></label>
+            <label>教学设计</label>
             <div class="file-upload-area">
               <input
                 ref="pdfInput"
@@ -866,7 +904,7 @@
           </div>
 
           <div class="form-group">
-            <label>教学视频 <span class="required">*</span></label>
+            <label>教学视频</label>
             <div class="file-upload-area">
               <input
                 ref="videoInput"
@@ -1096,6 +1134,9 @@ interface DisplayItem {
   teachers?: Array<{ name: string; title: string }>  // 完整教师信息
   college: string
   category: string
+  exampleName?: string // 案例名称
+  direction?: string   // 入选方向
+  content?: string     // 思政元素
   description: string
   status: 'active' | 'inactive'
   publishTime: string
@@ -1134,6 +1175,9 @@ const formData = ref({
   level: '',
   college: '',
   category: '',
+  exampleName: '',  // 案例名称
+  direction: '无',  // 入选方向：面向产出、教学有道，默认：无
+  content: '',      // 思政元素
   teachers: [
     { name: '', title: '' }
   ],
@@ -1310,6 +1354,9 @@ const convertToDisplayItem = (item: CourseExpoItem, index: number): DisplayItem 
     teachers: item.teachers,           // 保存完整教师信息
     college: item.college,
     category: item.property,
+    exampleName: item.exampleName,     // 案例名称
+    direction: item.direction,         // 入选方向
+    content: item.content,             // 思政元素
     description: item.brief,
     status: item.showFront === 1 ? 'active' : 'inactive',
     publishTime: item.createTime || item.updateTime || new Date().toISOString().split('T')[0],
@@ -1444,6 +1491,9 @@ const editItem = (item: DisplayItem) => {
     level: item.levelName || '',          // 回显示范等级
     college: item.college,
     category: item.category,
+    exampleName: item.exampleName || '',  // 回显案例名称
+    direction: item.direction || '无',    // 回显入选方向
+    content: item.content || '',          // 回显思政元素
     teachers: teachersArray.length > 0 ? teachersArray : [{ name: '', title: '' }],
     description: item.description,
     cover: item.cover || '',
@@ -1486,6 +1536,9 @@ const toggleVisibility = async (item: DisplayItem) => {
       levelName: item.levelName || '',
       property: item.category,
       college: item.college,
+      exampleName: item.exampleName || '',
+      direction: item.direction || '无',
+      content: item.content || '',
       brief: item.description,
       docUrl: item.docUrl || '',
       videoUrl: item.videoUrl || '',
@@ -1545,6 +1598,14 @@ const saveItem = async () => {
     alert('请选择所在学院')
     return
   }
+  if (!formData.value.exampleName) {
+    alert('请输入案例名称')
+    return
+  }
+  if (!formData.value.direction) {
+    alert('请选择入选方向')
+    return
+  }
   
   const validTeachers = formData.value.teachers.filter(t => t.name && t.title)
   if (validTeachers.length === 0) {
@@ -1555,32 +1616,6 @@ const saveItem = async () => {
   if (!formData.value.description) {
     alert('请输入课程简介')
     return
-  }
-  
-  if (!showEditDialog.value) {
-    // 新增时的验证
-    if (!actualCoverFile.value) {
-      alert('请上传课程封面')
-      return
-    }
-    if (!actualPdfFile.value) {
-      alert('请上传教学设计文档')
-      return
-    }
-    if (!actualVideoFile.value) {
-      alert('请上传教学视频')
-      return
-    }
-  } else {
-    // 编辑时的验证：如果移除了原文件，必须重新上传
-    if (!actualPdfFile.value && !formData.value.docUrl) {
-      alert('请上传教学设计文档')
-      return
-    }
-    if (!actualVideoFile.value && !formData.value.videoUrl) {
-      alert('请上传教学视频')
-      return
-    }
   }
 
   try {
@@ -1628,6 +1663,9 @@ const saveItem = async () => {
         levelName: formData.value.level,
         property: formData.value.category,
         college: formData.value.college,
+        exampleName: formData.value.exampleName,
+        direction: formData.value.direction,
+        content: formData.value.content,
         brief: formData.value.description,
         docUrl: finalDocUrl,
         videoUrl: finalVideoUrl,
@@ -1653,6 +1691,9 @@ const saveItem = async () => {
         levelName: formData.value.level,
         property: formData.value.category,
         college: formData.value.college,
+        exampleName: formData.value.exampleName,
+        direction: formData.value.direction,
+        content: formData.value.content,
         brief: formData.value.description,
         docUrl: docUrl,
         videoUrl: videoUrl,
@@ -1690,6 +1731,9 @@ const closeDialog = () => {
     level: '',
     college: '',
     category: '',
+    exampleName: '',
+    direction: '无',
+    content: '',
     teachers: [{ name: '', title: '' }],
     description: '',
     cover: '',

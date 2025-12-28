@@ -222,13 +222,16 @@ export function editPoliticalResourcePageTitle(content: string): Promise<any> {
  */
 export interface CourseExpoAddParams {
   name: string                    // 课程名称
-  coverUrl: string                // 课程封面
+  coverUrl?: string               // 课程封面（可选）
   levelName: string               // 示范等级
   property: string                // 课程性质
   college: string                 // 所在学院
+  exampleName: string             // 案例名称
+  direction: string               // 入选方向：面向产出、教学有道，默认：无
+  content?: string                // 思政元素（可选）
   brief: string                   // 课程简介
-  docUrl: string                  // 教学设计文档
-  videoUrl: string                // 教学视频
+  docUrl?: string                 // 教学设计文档（可选）
+  videoUrl?: string               // 教学视频（可选）
   showStatPv: number              // 显示学习统计：1=显示；0=不显示
   showFront: number               // 是否前台显示：1=显示；0=不显示
   teachers: Array<{               // 教师信息
@@ -275,13 +278,16 @@ export interface CourseExpoPageParams {
 export interface CourseExpoItem {
   id: string | number
   name: string                    // 课程名称
-  coverUrl: string                // 课程封面
+  coverUrl?: string               // 课程封面（可选）
   levelName: string               // 示范等级
   property: string                // 课程性质
   college: string                 // 所在学院
+  exampleName?: string            // 案例名称
+  direction?: string              // 入选方向
+  content?: string                // 思政元素（可选）
   brief: string                   // 课程简介
-  docUrl: string                  // 教学设计文档
-  videoUrl: string                // 教学视频
+  docUrl?: string                 // 教学设计文档（可选）
+  videoUrl?: string               // 教学视频（可选）
   showStatPv: number              // 显示学习统计
   showFront: number               // 是否前台显示
   teachers: Array<{               // 教师信息

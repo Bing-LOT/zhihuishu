@@ -288,30 +288,42 @@
     </div>
 
     <!-- 分页 -->
-    <!-- <div v-if="!loading && courses.length > 0" class="pagination">
-      <button
-        class="pagination__btn"
+    <div
+      v-if="!loading && courses.length > 0 && totalPages > 1"
+      class="pagination"
+    >
+      <button 
+        class="pagination-btn" 
         :disabled="currentPage === 1"
-        @click="prevPage"
+        @click="handlePageChange(currentPage - 1)"
       >
         上一页
       </button>
-      <div class="pagination__info">
-        第 {{ currentPage }} / {{ totalPages }} 页（共 {{ total }} 条）
+      <div class="pagination-pages">
+        <button
+          v-for="page in visiblePages"
+          :key="page"
+          class="pagination-page"
+          :class="{ active: page === currentPage }"
+          :disabled="page === -1"
+          @click="handlePageChange(page)"
+        >
+          {{ page === -1 ? '...' : page }}
+        </button>
       </div>
-      <button
-        class="pagination__btn"
-        :disabled="currentPage >= totalPages"
-        @click="nextPage"
+      <button 
+        class="pagination-btn" 
+        :disabled="currentPage === totalPages"
+        @click="handlePageChange(currentPage + 1)"
       >
         下一页
       </button>
-    </div> -->
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getNiceCoursePageList, type NiceCourseItem } from '@/api/resource'
 
 // 课程数据
@@ -392,20 +404,50 @@ const watchCourse = (course: CourseItem) => {
   }
 }
 
-// 分页
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-    fetchCourses()
-  }
+// 处理分页变化
+const handlePageChange = (page: number) => {
+  if (page < 1 || page > totalPages.value || page === -1) return
+  currentPage.value = page
+  fetchCourses()
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-    fetchCourses()
+// 可见的分页按钮
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const maxVisible = 7
+  
+  if (totalPages.value <= maxVisible) {
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    if (currentPage.value <= 4) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push(-1) // 省略号占位符
+      pages.push(totalPages.value)
+    } else if (currentPage.value >= totalPages.value - 3) {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
+        pages.push(i)
+      }
+      pages.push(-1)
+      pages.push(totalPages.value)
+    }
   }
-}
+  
+  return pages
+})
 
 // 挂载时获取数据
 onMounted(() => {
@@ -779,35 +821,68 @@ onMounted(() => {
 /* 分页 */
 .pagination {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 24px;
+  justify-content: center;
+  gap: 8px;
   margin-top: 48px;
 }
 
-.pagination__btn {
-  padding: 12px 24px;
-  background: #bc2220;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+.pagination-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: 'Source Han Sans CN', sans-serif;
+  color: #333;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.pagination__btn:hover:not(:disabled) {
-  opacity: 0.8;
+.pagination-btn:hover:not(:disabled) {
+  color: #bc2220;
+  border-color: #bc2220;
 }
 
-.pagination__btn:disabled {
+.pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination__info {
-  font-size: 16px;
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-page {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+  font-family: 'Source Han Sans CN', sans-serif;
   color: #333;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-page:hover:not(:disabled) {
+  color: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-page.active {
+  color: white;
+  background: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
 

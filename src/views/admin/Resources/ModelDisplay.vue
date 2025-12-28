@@ -603,17 +603,26 @@
               <option value="公共基础课">
                 公共基础课
               </option>
-              <option value="专业必修课程">
-                专业必修课程
+              <option value="学科基础课">
+                学科基础课
               </option>
-              <option value="通识教育课程">
-                通识教育课程
+              <option value="科学必修课">
+                科学必修课
               </option>
-              <option value="专业选修课程">
-                专业选修课程
+              <option value="专业必修课">
+                专业必修课
               </option>
-              <option value="实践课程">
-                实践课程
+              <option value="专业选修课">
+                专业选修课
+              </option>
+              <option value="专业基础课">
+                专业基础课
+              </option>
+              <option value="实践课">
+                实践课
+              </option>
+              <option value="通识选修课">
+                通识选修课
               </option>
             </select>
           </div>

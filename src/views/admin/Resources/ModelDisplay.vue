@@ -742,13 +742,13 @@
                 <input
                   v-model="teacher.name"
                   type="text"
-                  placeholder="教师姓名"
+                  placeholder="教师姓名（必填）"
                   class="form-input teacher-input"
                 >
                 <input
                   v-model="teacher.title"
                   type="text"
-                  placeholder="职称"
+                  placeholder="职称（可选）"
                   class="form-input teacher-input"
                 >
                 <button
@@ -1607,9 +1607,9 @@ const saveItem = async () => {
     return
   }
   
-  const validTeachers = formData.value.teachers.filter(t => t.name && t.title)
+  const validTeachers = formData.value.teachers.filter(t => t.name)
   if (validTeachers.length === 0) {
-    alert('请至少添加一位教师信息')
+    alert('请至少添加一位教师姓名')
     return
   }
   

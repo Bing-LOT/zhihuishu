@@ -600,6 +600,9 @@
               <option value="">
                 请选择课程性质
               </option>
+              <option value="公共基础课">
+                公共基础课
+              </option>
               <option value="专业必修课程">
                 专业必修课程
               </option>

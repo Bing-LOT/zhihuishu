@@ -5,6 +5,14 @@
 import request from './request'
 
 /**
+ * 教师信息结构
+ */
+export interface Teacher {
+  name: string // 教师姓名
+  title: string // 教师职称
+}
+
+/**
  * 一院一品数据结构
  */
 export interface CollegeItem {
@@ -12,7 +20,7 @@ export interface CollegeItem {
   name: string // 课程名称
   coverUrl: string // 封面图片
   college: string // 所在学院
-  teachers: string[] // 主讲教师多个
+  teachers: Teacher[] // 主讲教师多个
   types: string[] // 建设课程类型，多个
   content: string // 课程详细内容
   statPv: number // 浏览量
@@ -46,7 +54,7 @@ export interface PageResponse<T> {
  * 分页查询一院一品列表
  */
 export function getCollegePageList(params: CollegePageParams) {
-  return request.post<PageResponse<CollegeItem>>('/college/page/list', params)
+  return request.post<PageResponse<CollegeItem>>('/api/special/college/page/list', params)
 }
 
 /**
@@ -56,7 +64,7 @@ export interface AddCollegeParams {
   coverUrl: string // 封面图片（必需）
   name: string // 课程名称（必需）
   college: string // 所在学院（必需）
-  teachers: string[] // 主讲教师，多个（必需）
+  teachers: Teacher[] // 主讲教师，多个（必需）
   types: string[] // 建设课程类型，多个（必需）
   content: string // 课程详情内容（必需）
   showFront: number // 前台显示：1=显示；0=隐藏（必需）
@@ -77,7 +85,7 @@ export interface EditCollegeParams {
   coverUrl: string // 封面图片（必需）
   name: string // 课程名称（必需）
   college: string // 所在学院（必需）
-  teachers: string[] // 主讲教师，多个（必需）
+  teachers: Teacher[] // 主讲教师，多个（必需）
   types: string[] // 建设课程类型，多个（必需）
   content: string // 课程详情内容（必需）
   showFront: number // 前台显示：1=显示；0=隐藏（必需）

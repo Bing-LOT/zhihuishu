@@ -273,6 +273,39 @@
           @click="handleCourseClick"
         />
       </div>
+
+      <!-- 分页 -->
+      <div
+        v-if="!loading && filteredCourseList.length > 0 && totalPages > 1"
+        class="pagination"
+      >
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+        >
+          上一页
+        </button>
+        <div class="pagination-pages">
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            class="pagination-page"
+            :class="{ active: page === currentPage }"
+            :disabled="page === -1"
+            @click="page !== -1 && handlePageChange(page)"
+          >
+            {{ page === -1 ? '...' : page }}
+          </button>
+        </div>
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+        >
+          下一页
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -300,6 +333,11 @@ const courseList = ref<CourseExpoItem[]>([])
 const totalCount = ref(0)
 const loading = ref(false)
 
+// 分页数据
+const currentPage = ref(1)
+const pageSize = ref(16)
+const totalPages = ref(0)
+
 // 筛选选项
 const typeOptions = ['全部', '示范课程', '建设发展', '一院一品', '思政微视频']
 const levelOptions = ['全部', '国家示范', '省级示范']
@@ -319,8 +357,8 @@ const fetchCourseList = async () => {
   loading.value = true
   try {
     const params: any = {
-      pageIndex: 1,
-      pageSize: 16
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value
     }
 
     // 添加筛选条件
@@ -341,10 +379,12 @@ const fetchCourseList = async () => {
     const response = await getCourseExpoPageList(params)
     courseList.value = response.records
     totalCount.value = response.total
+    totalPages.value = response.pages
   } catch (error) {
     console.error('获取课程列表失败:', error)
     courseList.value = []
     totalCount.value = 0
+    totalPages.value = 0
   } finally {
     loading.value = false
   }
@@ -352,6 +392,7 @@ const fetchCourseList = async () => {
 
 // 监听筛选条件变化
 watch([activeType, activeLevel, activeDepartment], () => {
+  currentPage.value = 1 // 重置到第一页
   fetchCourseList()
 })
 
@@ -379,8 +420,58 @@ const filteredCourseList = computed(() => {
  * 处理搜索
  */
 const handleSearch = () => {
+  currentPage.value = 1 // 重置到第一页
   fetchCourseList()
 }
+
+/**
+ * 处理分页变化
+ */
+const handlePageChange = (page: number) => {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  fetchCourseList()
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+/**
+ * 可见的分页按钮
+ */
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const maxVisible = 7
+  
+  if (totalPages.value <= maxVisible) {
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    if (currentPage.value <= 4) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push(-1) // 省略号占位符
+      pages.push(totalPages.value)
+    } else if (currentPage.value >= totalPages.value - 3) {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
+        pages.push(i)
+      }
+      pages.push(-1)
+      pages.push(totalPages.value)
+    }
+  }
+  
+  return pages
+})
 
 const handleCourseClick = (course: any) => {
   router.push(`/study/video/${course.id}`)
@@ -670,6 +761,73 @@ const handleCourseClick = (course: any) => {
 .empty-text {
   font-size: 18px;
   color: #999;
+}
+
+/* 分页 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 48px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: 'Source Han Sans CN', sans-serif;
+  color: #333;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-page {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+  font-family: 'Source Han Sans CN', sans-serif;
+  color: #333;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-page:hover:not(:disabled) {
+  color: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-page.active {
+  color: white;
+  background: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
 

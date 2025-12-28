@@ -296,7 +296,7 @@
               {{ course.name }}
             </h3>
             <div class="course-card__footer">
-              <span class="course-card__teacher">教师：{{ course.teachers.join('、') || '未知' }}</span>
+              <span class="course-card__teacher">教师：{{ course.teachers?.map(t => t.name).join('、') || '未知' }}</span>
               <div class="course-card__views">
                 <svg
                   width="20"
@@ -315,7 +315,7 @@
                     fill-opacity="0.5"
                   />
                 </svg>
-                <span>{{ course.statPv || 3456 }}人</span>
+                <span>{{ course.statPv }}人</span>
               </div>
             </div>
           </div>

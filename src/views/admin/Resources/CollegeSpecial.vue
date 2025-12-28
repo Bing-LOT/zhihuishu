@@ -206,7 +206,7 @@
                   fill="#666"
                 />
               </svg>
-              <span>{{ item.teachers.join('、') }}</span>
+              <span>{{ item.teachers?.map(t => t.name).join('、') || '未知' }}</span>
             </div>
 
             <div class="meta-item">
@@ -742,7 +742,7 @@
             </div>
             <h2>{{ previewData.name }}</h2>
             <div class="preview-meta">
-              <span>教师：{{ previewData.teachers.join('、') }}</span>
+              <span>教师：{{ previewData.teachers?.map(t => t.name).join('、') || '未知' }}</span>
               <span>学院：{{ previewData.college }}</span>
               <span>类别：{{ previewData.types.join('、') }}</span>
               <span>浏览量：{{ previewData.statPv }}</span>
@@ -1018,7 +1018,7 @@ const editItem = (item: CollegeItem) => {
     id: item.id.toString(),
     name: item.name,
     coverUrl: item.coverUrl || '',
-    teachers: item.teachers.join('、'),
+    teachers: item.teachers?.map(t => t.name).join('、') || '',
     college: item.college,
     types: item.types[0] || '', // 取数组第一个元素
     content: item.content,
@@ -1140,7 +1140,10 @@ const saveItem = async () => {
     }
     
     // 将字符串转换为数组
-    const teachersArray = formData.value.teachers.split('、').filter(t => t.trim())
+    const teachersArray = formData.value.teachers
+      .split('、')
+      .filter(t => t.trim())
+      .map(name => ({ name: name.trim(), title: '' }))
     const typesArray = [formData.value.types] // 单选值转为数组
     
     if (showEditDialog.value) {

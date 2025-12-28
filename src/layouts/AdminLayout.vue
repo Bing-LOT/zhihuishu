@@ -168,7 +168,7 @@ const sideMenus = ref([
     children: [
       { key: 'practice-achievement', label: '习思想融入成果', path: '/admin/resources/practice-achievement' },
       { key: 'practice-video', label: '习思想优秀视频展播', path: '/admin/resources/practice-video' },
-      { key: 'practice-case', label: '习思想融入学科教学实践示范案例展播', path: '/admin/resources/practice-case' },
+      // { key: 'practice-case', label: '习思想融入学科教学实践示范案例展播', path: '/admin/resources/practice-case' },
       { key: 'practice-footprint', label: '总书记的福建足迹', path: '/admin/resources/practice-footprint' }
     ]
   },
@@ -184,7 +184,7 @@ const sideMenus = ref([
     expanded: false,
     children: [
       { key: 'excellent-class', label: '优秀思政课堂', path: '/admin/resources/excellent-class' },
-      { key: 'college-special', label: '一院一品', path: '/admin/resources/college-special' },
+      // { key: 'college-special', label: '一院一品', path: '/admin/resources/college-special' },
       { key: 'culture-map', label: '红色文化资源地图（福州地区）', path: '/admin/resources/culture-map' }
     ]
   }

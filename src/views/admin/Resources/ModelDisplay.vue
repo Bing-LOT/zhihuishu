@@ -627,6 +627,9 @@
               <option value="">
                 请选择学院
               </option>
+              <option value="厦门工艺美术学院">
+                厦门工艺美术学院
+              </option>
               <option value="发规处">
                 发规处
               </option>

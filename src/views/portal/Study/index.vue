@@ -1139,7 +1139,7 @@ const fetchCollegeCourses = async () => {
       title: item.name,
       cover: item.coverUrl || '/images/home/video-1.jpg',
       college: item.所在学院 || '',
-      teacher: item.teachers && item.teachers.length > 0 ? item.teachers.join('、') : '',
+      teacher: item.teachers && item.teachers.length > 0 ? item.teachers.map((t: any) => t.name).join('、') : '',
       views: item.statPv || 0,
       teachers: item.teachers,
       types: item.types,

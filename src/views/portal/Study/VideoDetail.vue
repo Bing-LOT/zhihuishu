@@ -134,37 +134,21 @@
                 v-else-if="pdfPages.length > 0"
                 class="pdf-viewer"
               >
-                <!-- 第一页独占一行 -->
-                <div class="pdf-page-row first-page">
-                  <div class="pdf-page-wrapper first">
-                    <img
-                      :src="pdfPages[0]"
-                      alt="第1页"
-                      class="pdf-page-image"
-                    >
-                    <div class="pdf-page-number">
-                      第 1 页
-                    </div>
+                <!-- 所有页面都独占一行 -->
+                <div 
+                  v-for="(page, index) in pdfPages" 
+                  :key="index"
+                  class="pdf-page-wrapper"
+                >
+                  <img
+                    :src="page"
+                    :alt="`第${index + 1}页`"
+                    class="pdf-page-image"
+                  >
+                  <div class="pdf-page-number">
+                    第 {{ index + 1 }} 页
                   </div>
                 </div>
-                
-                <!-- 其他页面两页一行 -->
-                <template v-if="pdfPages.length > 1">
-                  <div 
-                    v-for="(page, index) in pdfPages.slice(1)" 
-                    :key="index + 1"
-                    class="pdf-page-wrapper"
-                  >
-                    <img
-                      :src="page"
-                      :alt="`第${index + 2}页`"
-                      class="pdf-page-image"
-                    >
-                    <div class="pdf-page-number">
-                      第 {{ index + 2 }} 页
-                    </div>
-                  </div>
-                </template>
               </div>
               <div
                 v-else-if="course.docUrl"
@@ -719,34 +703,22 @@ onMounted(() => {
 /* PDF 查看器容器 */
 .pdf-viewer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   padding: 0 0 20px 0; /* 底部 20px 间距 */
 }
 
-/* 第一页独占一行 */
-.pdf-page-row.first-page {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0;
-}
-
-/* PDF 页面包装器 */
+/* PDF 页面包装器 - 每页独占一行 */
 .pdf-page-wrapper {
   position: relative;
-  width: calc(50% - 5px); /* 两页一行，减去间隔的一半 */
+  width: 100%;
+  max-width: 800px;
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* 第一页特殊样式 */
-.pdf-page-row.first-page .pdf-page-wrapper.first {
-  width: 100%;
-  max-width: 800px;
 }
 
 .pdf-page-wrapper:hover {

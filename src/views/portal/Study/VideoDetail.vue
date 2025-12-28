@@ -62,13 +62,13 @@
             <div class="course-info__row">
               <span class="label">主讲教师：</span>
               <div class="teachers highlight">
-                <span
+                <div
                   v-for="(teacher, index) in course.teacherList"
                   :key="index"
                   class="teacher-item"
                 >
-                  {{ teacher.name }}
-                </span>
+                  {{ teacher.name }} - {{ teacher.title }}
+                </div>
               </div>
             </div>
             <div class="course-info__row">
@@ -521,13 +521,15 @@ onMounted(() => {
 .course-info__row .teachers {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px 8px;
   color: #bc2220;
+  flex: 1;
 }
 
-.teacher-item:not(:last-child)::after {
-  content: '';
-  margin-left: 8px;
+.teacher-item {
+  width: calc(50% - 4px);
+  font-size: 16px;
+  color: #bc2220;
 }
 
 /* 右侧内容栏 */

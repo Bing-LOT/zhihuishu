@@ -1910,6 +1910,9 @@ onMounted(() => {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .item-footer {

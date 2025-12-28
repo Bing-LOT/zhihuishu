@@ -256,9 +256,9 @@
             <div class="course-card__info-item">
               <span>推荐督导员：{{ course.supervisor }}</span>
             </div>
-            <div class="course-card__info-item">
+            <!-- <div class="course-card__info-item">
               <span>发布时间：{{ course.publishTime }}</span>
-            </div>
+            </div> -->
           </div>
           <button
             class="course-card__watch-btn"
@@ -690,12 +690,14 @@ onMounted(() => {
   color: #333;
   opacity: 0.5;
   line-height: 1.5;
+  max-height: 4.5em; /* 1.5 line-height × 3 lines */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
+  word-break: break-word;
 }
 
 .course-card__info {

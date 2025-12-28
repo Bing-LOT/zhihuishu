@@ -137,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCard from '@/components/common/CourseCard/index.vue'
 import { getXiThoughtExampleDetail, getXiThoughtExampleTopList } from '@/api/redCulture'
@@ -228,10 +228,27 @@ const handleExampleClick = (example: Course) => {
   router.push(`/topics/example/${example.id}`)
 }
 
-onMounted(() => {
+// 初始化加载
+const loadData = () => {
   fetchExampleDetail()
   fetchRecommendList()
+  // 滚动到页面顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  loadData()
 })
+
+// 监听路由参数变化
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      loadData()
+    }
+  }
+)
 </script>
 
 <style scoped>

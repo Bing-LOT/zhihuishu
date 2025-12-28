@@ -337,7 +337,7 @@ const router = useRouter()
 // 筛选选项
 const expoTypes = [
   { label: '全部', value: '' },
-  { label: '教学岗', value: '教学岗' },
+  { label: '教师岗', value: '教师岗' },
   { label: '管理岗', value: '管理岗' }
 ]
 

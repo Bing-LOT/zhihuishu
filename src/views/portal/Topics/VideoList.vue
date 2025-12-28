@@ -291,9 +291,12 @@
       </div>
 
       <!-- 分页 -->
-      <!-- <div v-if="videoList.length > 0" class="pagination">
-        <button
-          class="pagination-btn"
+      <div
+        v-if="!loading && videoList.length > 0 && totalPages > 1"
+        class="pagination"
+      >
+        <button 
+          class="pagination-btn" 
           :disabled="currentPage === 1"
           @click="handlePageChange(currentPage - 1)"
         >
@@ -301,22 +304,24 @@
         </button>
         <div class="pagination-pages">
           <button
-            v-for="page in displayPages"
+            v-for="page in visiblePages"
             :key="page"
-            :class="['pagination-page', { active: page === currentPage }]"
-            @click="handlePageChange(page)"
+            class="pagination-page"
+            :class="{ active: page === currentPage, ellipsis: page === -1 }"
+            :disabled="page === -1"
+            @click="page !== -1 && handlePageChange(page)"
           >
-            {{ page }}
+            {{ page === -1 ? '...' : page }}
           </button>
         </div>
-        <button
-          class="pagination-btn"
+        <button 
+          class="pagination-btn" 
           :disabled="currentPage === totalPages"
           @click="handlePageChange(currentPage + 1)"
         >
           下一页
         </button>
-      </div> -->
+      </div>
     </div>
   </div>
 </template>
@@ -369,32 +374,40 @@ const selectedCollege = ref('全部')
 const searchKeyword = ref('')
 const totalCount = ref(0)
 const currentPage = ref(1)
-const pageSize = ref(16)
+const pageSize = ref(12)
 const totalPages = ref(1)
 
 // 计算显示的页码
-const displayPages = computed(() => {
+const visiblePages = computed(() => {
   const pages: number[] = []
-  const maxDisplay = 7
+  const maxVisible = 7
   
-  if (totalPages.value <= maxDisplay) {
+  if (totalPages.value <= maxVisible) {
     for (let i = 1; i <= totalPages.value; i++) {
       pages.push(i)
     }
   } else {
-    pages.push(1)
-    
-    let start = Math.max(2, currentPage.value - 2)
-    let end = Math.min(totalPages.value - 1, currentPage.value + 2)
-    
-    if (start > 2) pages.push(-1) // 用 -1 表示 ...
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i)
+    if (currentPage.value <= 4) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push(-1) // 省略号占位符
+      pages.push(totalPages.value)
+    } else if (currentPage.value >= totalPages.value - 3) {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
+        pages.push(i)
+      }
+      pages.push(-1)
+      pages.push(totalPages.value)
     }
-    
-    if (end < totalPages.value - 1) pages.push(-1)
-    pages.push(totalPages.value)
   }
   
   return pages
@@ -841,7 +854,18 @@ onMounted(() => {
   color: #fff;
 }
 
-.pagination-page:hover:not(.active) {
+.pagination-page.ellipsis {
+  border: none;
+  cursor: default;
+  background: transparent;
+}
+
+.pagination-page.ellipsis:hover {
+  background: transparent;
+  border: none;
+}
+
+.pagination-page:hover:not(.active):not(.ellipsis) {
   background: #f5f5f5;
   border-color: #bc2220;
   color: #bc2220;

@@ -306,12 +306,45 @@
           </div>
         </div>
       </div>
+
+      <!-- 分页 -->
+      <div
+        v-if="!loading && exampleList.length > 0 && totalPages > 1"
+        class="pagination"
+      >
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+        >
+          上一页
+        </button>
+        <div class="pagination-pages">
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            class="pagination-page"
+            :class="{ active: page === currentPage }"
+            :disabled="page === -1"
+            @click="handlePageChange(page)"
+          >
+            {{ page === -1 ? '...' : page }}
+          </button>
+        </div>
+        <button 
+          class="pagination-btn" 
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+        >
+          下一页
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getXiThoughtExamplePageList } from '@/api/redCulture'
 import type { XiThoughtExampleVideo } from '@/api/redCulture'
@@ -370,6 +403,11 @@ const filters = ref({
 const searchKeyword = ref('')
 const totalCount = ref(0)
 
+// 分页
+const currentPage = ref(1)
+const pageSize = ref(12) // 每页12个视频（4列 x 3行）
+const totalPages = ref(1)
+
 // 获取教师名字
 const getTeacherNames = (teachers?: Array<{ name: string }>) => {
   if (!teachers || teachers.length === 0) return '未知'
@@ -379,6 +417,7 @@ const getTeacherNames = (teachers?: Array<{ name: string }>) => {
 // 处理筛选变化
 const handleFilterChange = (filterType: string, value: string) => {
   filters.value[filterType as keyof typeof filters.value] = value
+  currentPage.value = 1 // 重置到第一页
   fetchExampleList()
 }
 
@@ -388,8 +427,8 @@ const fetchExampleList = async () => {
   try {
     // 构建请求参数
     const params: any = {
-      pageIndex: 1,
-      pageSize: 16
+      pageIndex: currentPage.value,
+      pageSize: pageSize.value
     }
     
     // 添加筛选条件（"全部"对应空字符串或不传）
@@ -413,10 +452,12 @@ const fetchExampleList = async () => {
     
     exampleList.value = response.records
     totalCount.value = response.total
+    totalPages.value = response.pages
   } catch (error) {
     console.error('获取案例列表失败：', error)
     exampleList.value = []
     totalCount.value = 0
+    totalPages.value = 1
   } finally {
     loading.value = false
   }
@@ -424,6 +465,7 @@ const fetchExampleList = async () => {
 
 // 搜索
 const handleSearch = () => {
+  currentPage.value = 1 // 重置到第一页
   fetchExampleList()
 }
 
@@ -431,6 +473,51 @@ const handleSearch = () => {
 const handleExampleClick = (example: XiThoughtExampleVideo) => {
   router.push(`/topics/example/${example.id}`)
 }
+
+// 处理分页变化
+const handlePageChange = (page: number) => {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  fetchExampleList()
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// 可见的分页按钮
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const maxVisible = 7
+  
+  if (totalPages.value <= maxVisible) {
+    for (let i = 1; i <= totalPages.value; i++) {
+      pages.push(i)
+    }
+  } else {
+    if (currentPage.value <= 4) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push(-1) // 省略号占位符
+      pages.push(totalPages.value)
+    } else if (currentPage.value >= totalPages.value - 3) {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = totalPages.value - 4; i <= totalPages.value; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+      pages.push(-1)
+      for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
+        pages.push(i)
+      }
+      pages.push(-1)
+      pages.push(totalPages.value)
+    }
+  }
+  
+  return pages
+})
 
 onMounted(() => {
   fetchExampleList()
@@ -766,6 +853,71 @@ onMounted(() => {
   gap: 4px;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* 分页 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 48px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-page {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-page:hover:not(:disabled):not(.active) {
+  color: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-page.active {
+  color: white;
+  background: #bc2220;
+  border-color: #bc2220;
+}
+
+.pagination-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
 

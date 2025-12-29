@@ -283,6 +283,39 @@ export function getNiceCourseTopList(): Promise<NiceCourseItem[]> {
 }
 
 /**
+ * 优秀思政课堂分页查询参数
+ */
+export interface NiceCoursePageParams {
+  pageIndex: number     // 页码，默认1
+  pageSize: number      // 每页大小，默认10条
+  keyword?: string      // 搜索关键词
+  showFront?: number    // 显示状态：1=显示；0=隐藏；不传显示所有
+}
+
+/**
+ * 优秀思政课堂分页响应
+ */
+export interface NiceCoursePageResponse {
+  records: NiceCourseItem[]
+  total: number
+  size: number
+  current: number
+  pages: number
+}
+
+/**
+ * 获取优秀思政课堂分页列表
+ * @param params 查询参数
+ */
+export function getNiceCoursePageList(params: NiceCoursePageParams): Promise<NiceCoursePageResponse> {
+  return request({
+    url: '/niceCourse/page/list',
+    method: 'POST',
+    data: params
+  })
+}
+
+/**
  * 一院一品专题项
  */
 export interface CollegeSpecialItem {

@@ -1010,7 +1010,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import AMapLoader from '@amap/amap-jsapi-loader'
-import { getNiceCourseTopList, getCollegeSpecialTopList } from '@/api/course'
+import { getNiceCoursePageList, getCollegeSpecialTopList } from '@/api/course'
 import type { NiceCourseItem, CollegeSpecialItem } from '@/api/course'
 import { getRedCultureList, type RedCultureItem } from '@/api/redCulture'
 
@@ -1056,36 +1056,58 @@ const loading = ref(false)
 const fetchNiceCourses = async () => {
   try {
     loading.value = true
-    const data = await getNiceCourseTopList()
+    const allCourses: CourseItem[] = []
     
-    // 数据映射：将API返回的数据转换为组件使用的格式
-    excellentCourses.value = data.map((item: NiceCourseItem) => ({
-      id: String(item.id),
-      title: item.title,
-      cover: item.picUrls && item.picUrls.length > 0 ? item.picUrls[0] : '/images/home/video-1.jpg',
-      courseName: item.name,
-      teacher: item.teacher,
-      semester: item.teachingTime,
-      supervisor: item.director,
-      publishTime: item.createTime,
-      views: 0, // API 返回中没有观看人数，设置默认值
-      description: item.brief || '',
-      playUrl: item.playUrl
-    }))
+    // 每页4条数据，最多获取3页
+    const pageSize = 4
+    const maxPages = 3
+    
+    // 循环获取最多3页数据
+    for (let page = 1; page <= maxPages; page++) {
+      const response = await getNiceCoursePageList({
+        pageIndex: page,
+        pageSize: pageSize,
+        showFront: 1  // 只获取前台显示的数据
+      })
+      
+      // 数据映射：将API返回的数据转换为组件使用的格式
+      const mappedData = response.records.map((item: NiceCourseItem) => ({
+        id: String(item.id),
+        title: item.title,
+        cover: item.picUrls && item.picUrls.length > 0 ? item.picUrls[0] : '/images/home/video-1.jpg',
+        courseName: item.name,
+        teacher: item.teacher,
+        semester: item.teachingTime,
+        supervisor: item.director,
+        publishTime: item.createTime,
+        views: 0, // API 返回中没有观看人数，设置默认值
+        description: item.brief || '',
+        playUrl: item.playUrl
+      }))
+      
+      allCourses.push(...mappedData)
+      
+      // 如果当前页已经是最后一页，则停止获取
+      if (page >= response.pages) {
+        break
+      }
+    }
+    
+    excellentCourses.value = allCourses
   } catch (error) {
     console.error('获取优秀思政课堂数据失败:', error)
     // 如果接口失败，使用默认数据
     excellentCourses.value = [
-  {
-    id: '1',
-    title: '教学督导表扬的优秀本科课堂第二十四期',
-    cover: '/images/home/video-1.jpg',
-    courseName: '马克思主义基本原理',
-    teacher: '董海峰-副教授',
-    semester: '2025年春季学期',
-    supervisor: '戴力芬',
-    publishTime: '2025-12-11',
-    views: 3456,
+      {
+        id: '1',
+        title: '教学督导表扬的优秀本科课堂第二十四期',
+        cover: '/images/home/video-1.jpg',
+        courseName: '马克思主义基本原理',
+        teacher: '董海峰-副教授',
+        semester: '2025年春季学期',
+        supervisor: '戴力芬',
+        publishTime: '2025-12-11',
+        views: 3456,
         description: '高校军事理论课肩负着传承军事智慧，培育国防素养的重要使命，是提升当代大学生国防观念，增强民族自豪感的重要途径。'
       }
     ]

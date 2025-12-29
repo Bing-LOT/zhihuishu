@@ -1700,7 +1700,7 @@ const handleResourceClick = () => {
 }
 
 .course-card-horizontal__image {
-  width: 240px;
+  width: 180px;
   flex-shrink: 0;
   position: relative;
   background: #d9d9d9;

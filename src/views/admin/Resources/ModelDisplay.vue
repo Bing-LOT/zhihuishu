@@ -576,6 +576,9 @@
               <option value="">
                 请选择示范等级
               </option>
+              <option value="无">
+                无
+              </option>
               <option value="国家示范">
                 国家示范
               </option>
@@ -600,29 +603,29 @@
               <option value="">
                 请选择课程性质
               </option>
-              <option value="公共基础课">
-                公共基础课
+              <option value="公共基础课程">
+                公共基础课程
               </option>
-              <option value="学科基础课">
-                学科基础课
+              <option value="学科基础课程">
+                学科基础课程
               </option>
-              <option value="科学必修课">
-                科学必修课
+              <option value="科学必修课程">
+                科学必修课程
               </option>
-              <option value="专业必修课">
-                专业必修课
+              <option value="专业必修课程">
+                专业必修课程
               </option>
-              <option value="专业选修课">
-                专业选修课
+              <option value="专业选修课程">
+                专业选修课程
               </option>
-              <option value="专业基础课">
-                专业基础课
+              <option value="专业基础课程">
+                专业基础课程
               </option>
-              <option value="实践课">
-                实践课
+              <option value="实践课程">
+                实践课程
               </option>
-              <option value="通识选修课">
-                通识选修课
+              <option value="通识选修课程">
+                通识选修课程
               </option>
             </select>
           </div>
@@ -1181,7 +1184,7 @@ const videoInput = ref<HTMLInputElement | null>(null)
 const formData = ref({
   id: '',
   title: '',
-  level: '',
+  level: '无',
   college: '',
   category: '',
   exampleName: '',  // 案例名称
@@ -1737,7 +1740,7 @@ const closeDialog = () => {
   formData.value = {
     id: '',
     title: '',
-    level: '',
+    level: '无',
     college: '',
     category: '',
     exampleName: '',

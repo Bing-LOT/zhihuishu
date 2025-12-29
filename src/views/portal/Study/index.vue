@@ -1698,6 +1698,7 @@ const handleResourceClick = () => {
   display: flex;
   flex-direction: column;
   gap: 48px;
+  min-height: 608px; /* 固定最小高度，防止切换时抖动 (280px * 2 + 48px gap) */
 }
 
 .courses-row {
@@ -1714,6 +1715,7 @@ const handleResourceClick = () => {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 280px; /* 固定高度，防止内容不一致时抖动 */
 }
 
 .course-card-horizontal:hover {
@@ -1769,6 +1771,9 @@ const handleResourceClick = () => {
   font-weight: 500;
   color: #333;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* 只显示一行 */
 }
 
 .course-card-horizontal__views {
@@ -1796,7 +1801,7 @@ const handleResourceClick = () => {
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
-  max-height: calc(1.5em * 3);
+  height: calc(1.5em * 3); /* 固定高度为3行，保持一致性 */
 }
 
 .course-card-horizontal__meta {

@@ -592,7 +592,7 @@ const convertVideoToCourse = (video: XiThoughtVideo): Course => {
     teacherList: [{
       id: String(video.id),
       name: video.presenter || '未知',
-      title: '主讲人',
+      title: '主持人',
       avatar: '',
       bio: '',
       department: video.college
@@ -620,7 +620,7 @@ const convertExampleVideoToCourse = (video: XiThoughtExampleVideo): Course => {
     teacherList: video.teachers?.map((teacher, index) => ({
       id: String(video.id) + '-' + index,
       name: teacher.name,
-      title: teacher.title || '教师',
+      title: teacher.title || '主持人',
       avatar: '',
       bio: '',
       department: video.college || ''

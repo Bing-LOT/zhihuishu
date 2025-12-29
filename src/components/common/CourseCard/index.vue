@@ -28,7 +28,7 @@
       </h3>
       <div class="course-card__meta">
         <span class="course-card__teacher">
-          教师：{{ course.teacherList[0]?.name || '刘丽军' }}
+          主持人：{{ course.teacherList[0]?.name || '刘丽军' }}
         </span>
         <div class="course-card__views">
           <svg

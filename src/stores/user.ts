@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', () => {
   
   // API 文档要求的 AuthToken - 从本地存储中读取，如果不存在则使用默认值
   const authToken = ref<string>(
-    getStorageItem<string>(AUTH_TOKEN_KEY) || 'e801656e474d45dda9036df21c0be90b'
+    getStorageItem<string>(AUTH_TOKEN_KEY) || '4b2bce7935cd41dcbcd7be39c3e615db'
   )
   
   const userStats = ref<UserStats | null>(null)

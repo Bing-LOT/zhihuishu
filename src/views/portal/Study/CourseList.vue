@@ -407,7 +407,10 @@ const filteredCourseList = computed(() => {
     id: course.id.toString(),
     title: course.name,
     cover: course.coverUrl,
-    teacherList: course.teachers.map(t => ({ name: t.name, title: t.department || '' })),
+    teacherList: course.teachers.map(t => ({ 
+      name: t.name, 
+      department: course.college  // 使用课程的学院字段
+    })),
     studentCount: course.showStatPv || course.statPv || 0,
     badge: course.levelName,
     department: course.college,

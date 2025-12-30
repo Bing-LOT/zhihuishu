@@ -84,9 +84,37 @@ request.interceptors.response.use(
     console.log('=============================')
     
     // 处理响应数据
-    const { code, data, msg } = response.data as any
+    const { code, data, msg, ssoLoginUrl } = response.data as any
     
     console.log('解析后 - code:', code, 'msg:', msg)
+    
+    // 处理登录状态失效
+    if (code === 501) {
+      console.warn('⚠️ 登录状态已过期 (code 501):', msg)
+      
+      // 清除过期的用户信息
+      const userStore = useUserStore()
+      userStore.token = ''
+      userStore.refreshToken = ''
+      userStore.user = null
+      
+      // 只在生产环境才跳转到 SSO 登录页面
+      if (!import.meta.env.DEV) {
+        if (ssoLoginUrl) {
+          console.log('🔄 生产环境 - 跳转到 SSO 登录:', ssoLoginUrl)
+          window.location.href = ssoLoginUrl
+        } else {
+          console.error('❌ 未提供 ssoLoginUrl，无法跳转')
+        }
+      } else {
+        console.log('🔧 开发环境 - 跳过 SSO 登录跳转')
+        if (ssoLoginUrl) {
+          console.log('SSO 登录地址:', ssoLoginUrl)
+        }
+      }
+      
+      return Promise.reject(new Error(msg || '登录状态已过期'))
+    }
     
     if (code === 200 || code === 0) {
       console.log('✅ API响应成功:', msg || '操作成功')
@@ -115,16 +143,28 @@ request.interceptors.response.use(
       
       // 处理业务错误码 501 (Token过期)
       if (code === 501) {
-        console.warn('⚠️ Token已过期 (code 501)')
-        // 清除过期的 token（但不清除固定的 authToken）
+        console.warn('⚠️ 登录状态已过期 (code 501):', msg)
+        
+        // 清除过期的用户信息
         const userStore = useUserStore()
         userStore.token = ''
         userStore.refreshToken = ''
         userStore.user = null
         
-        // 如果有 SSO 登录地址，可以考虑重定向
-        // 但为了不影响不需要认证的页面，这里只打印警告
-        console.warn('如需重新登录，请访问:', data.ssoLoginUrl)
+        // 只在生产环境才跳转到 SSO 登录页面
+        if (!import.meta.env.DEV) {
+          if (data?.ssoLoginUrl) {
+            console.log('🔄 生产环境 - 跳转到 SSO 登录:', data.ssoLoginUrl)
+            window.location.href = data.ssoLoginUrl
+          } else {
+            console.error('❌ 未提供 ssoLoginUrl，无法跳转')
+          }
+        } else {
+          console.log('🔧 开发环境 - 跳过 SSO 登录跳转')
+          if (data?.ssoLoginUrl) {
+            console.log('SSO 登录地址:', data.ssoLoginUrl)
+          }
+        }
       }
       
       switch (status) {

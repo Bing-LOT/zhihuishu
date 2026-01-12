@@ -4,8 +4,8 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import portalRoutes from './modules/portal'
 import adminRoutes from './modules/admin'
+import publicRoutes from './modules/public'
 import { authGuard } from './guards/authGuard'
 import { roleGuard } from './guards/roleGuard'
 
@@ -70,7 +70,7 @@ const errorRoutes: RouteRecordRaw[] = [
 
 // 合并所有路由
 const routes: RouteRecordRaw[] = [
-  ...portalRoutes,
+  ...publicRoutes,
   ...adminRoutes,
   ...authRoutes,
   ...errorRoutes

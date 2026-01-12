@@ -10,6 +10,7 @@ import request from './request'
 export interface HotspotItem {
   id: number
   title: string
+  source?: string  // 来源（如：新华网、人民日报等）
   content: string
   contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
   pinTop: number  // 1=置顶；0=不置顶
@@ -68,6 +69,7 @@ export function getHotspotDetail(id: string | number): Promise<HotspotItem> {
  */
 export interface HotspotAddItem {
   title: string
+  source?: string  // 来源（如：新华网、人民日报等）
   content: string
   contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
   pinTop: number  // 1=置顶；0=不置顶

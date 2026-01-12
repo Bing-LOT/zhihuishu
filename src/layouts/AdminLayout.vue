@@ -179,6 +179,12 @@ const sideMenus = ref([
     expanded: false
   },
   {
+    key: 'hotspot',
+    label: '思政热点',
+    path: '/admin/resources/hotspot',
+    expanded: false
+  },
+  {
     key: 'special',
     label: '特色专题',
     expanded: false,
@@ -263,6 +269,8 @@ watch(
         if (practiceMenu) practiceMenu.expanded = true
       } else if (newPath === '/admin/resources/list') {
         currentMenu.value = 'resources'
+      } else if (newPath === '/admin/resources/hotspot') {
+        currentMenu.value = 'hotspot'
       } else if (newPath === '/admin/resources/excellent-class') {
         currentMenu.value = 'excellent-class'
         const specialMenu = sideMenus.value.find(m => m.key === 'special')

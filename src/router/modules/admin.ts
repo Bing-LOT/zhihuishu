@@ -118,6 +118,15 @@ const adminRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'resources/hotspot',
+        name: 'AdminResourcesHotspot',
+        component: () => import('@/views/admin/Resources/HotspotManage.vue'),
+        meta: {
+          title: '思政热点',
+          keepAlive: true
+        }
+      },
+      {
         path: 'questions',
         name: 'AdminQuestions',
         component: () => import('@/views/admin/Questions/index.vue'),

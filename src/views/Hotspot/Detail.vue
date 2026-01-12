@@ -1,49 +1,284 @@
 <template>
   <div class="detail-page">
-    <div class="detail-container">
-      <!-- Back Button -->
-      <button class="back-btn" @click="goBack">
-        ← 返回列表
-      </button>
-
-      <!-- Loading -->
-      <div v-if="isLoading" class="loading">
-        <div class="loading-spinner" />
-        <p>加载中...</p>
-      </div>
-
-      <!-- Content -->
-      <div v-else-if="detail" class="detail-content">
-        <h1 class="detail-title">{{ detail.title }}</h1>
-        <div class="detail-meta">
-          <span class="meta-item">发布时间：{{ formatDate(detail.createTime) }}</span>
-          <span class="meta-item">浏览量：{{ detail.statPv || 0 }}</span>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-section">
+          <img 
+            src="/images/00dcb4e82f32dad380c689b6a020ef7171d0aa8f.png" 
+            alt="Logo" 
+            class="logo-img"
+          >
+          <span class="logo-text">福州大学大思政教育未来学习中心</span>
         </div>
-        <div class="detail-body" v-html="detail.content" />
+        <div class="action-section">
+          <div class="search-bar">
+            <input 
+              type="text" 
+              placeholder="课程 名师 新闻 资源搜索"
+              class="search-input"
+            >
+            <button class="search-btn">
+              资源搜索
+            </button>
+          </div>
+          <button class="admin-btn">
+            后台管理系统
+          </button>
+          <button class="login-btn">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 10C12.7614 10 15 7.76142 15 5C15 2.23858 12.7614 0 10 0C7.23858 0 5 2.23858 5 5C5 7.76142 7.23858 10 10 10Z" fill="#c30d23"/>
+              <path d="M10 12.5C4.47715 12.5 0 14.4772 0 17V20H20V17C20 14.4772 15.5228 12.5 10 12.5Z" fill="#c30d23"/>
+            </svg>
+            登录
+          </button>
+        </div>
       </div>
+    </header>
 
-      <!-- Error -->
-      <div v-else class="error-state">
-        <p>内容加载失败</p>
-        <button class="retry-btn" @click="loadDetail">
-          重新加载
-        </button>
+    <!-- Navigation -->
+    <nav class="nav-bar">
+      <a href="/" class="nav-item">首页</a>
+      <a href="/hotspot" class="nav-item active">思政热点</a>
+      <a href="/teaching" class="nav-item">教学有道</a>
+      <a href="/classroom" class="nav-item">精彩课堂</a>
+      <a href="/college" class="nav-item">一院一品</a>
+      <a href="/special" class="nav-item">特色专题</a>
+      <a href="/resource" class="nav-item">育人资源</a>
+      <a href="/exam" class="nav-item">学习题库</a>
+      <a href="/reference" class="nav-item">他山之石</a>
+    </nav>
+
+    <!-- Page Title Banner -->
+    <div class="page-banner">
+      <h1 class="banner-title">思政热点</h1>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item">您的位置： </span>
+        <a href="/" class="breadcrumb-item">首页</a>
+        <span class="breadcrumb-separator">&gt;&gt;</span>
+        <a href="/hotspot" class="breadcrumb-item">思政热点</a>
+        <span class="breadcrumb-separator">&gt;&gt;</span>
+        <span class="breadcrumb-item active">新闻详情</span>
       </div>
     </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Loading -->
+        <div v-if="isLoading" class="loading">
+          <div class="loading-spinner" />
+          <p>加载中...</p>
+        </div>
+
+        <!-- Content -->
+        <template v-else-if="detail">
+          <!-- Left: Article Content -->
+          <div class="article-section">
+            <h1 class="article-title">{{ detail.title }}</h1>
+            
+            <div class="article-meta">
+              <span class="meta-item">来源：新华网</span>
+              <span class="meta-item">发布时间：{{ formatDate(detail.createTime) }}</span>
+              <span class="meta-divider" />
+              <span class="meta-item">浏览人数：{{ detail.statPv || 0 }}</span>
+            </div>
+
+            <div class="article-body" v-html="detail.content" />
+
+            <!-- Related Links -->
+            <div class="related-links">
+              <div class="links-header">
+                <h3>新闻链接</h3>
+                <div class="header-divider">
+                  <div class="divider-active" />
+                  <div class="divider-inactive" />
+                </div>
+              </div>
+              
+              <div class="link-list">
+                <a 
+                  v-for="link in relatedLinks" 
+                  :key="link.id"
+                  :href="link.url"
+                  class="link-item"
+                >
+                  <span class="link-dot" />
+                  <div class="link-text">
+                    <p class="link-title">{{ link.title }}</p>
+                    <p class="link-source">({{ link.source }})</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Special Topics -->
+          <div class="topics-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="title-highlight">特别</span>专题
+              </h2>
+            </div>
+            <div class="section-divider">
+              <div class="divider-line active" />
+              <div class="divider-line" />
+            </div>
+
+            <div v-if="isLoadingTopics" class="loading">
+              <div class="loading-spinner" />
+            </div>
+
+            <div v-else class="topics-list">
+              <a
+                v-for="topic in specialTopics"
+                :key="topic.id"
+                :href="getTopicLink(topic)"
+                :target="topic.contentType === 1 ? '_blank' : '_self'"
+                class="topic-card"
+              >
+                <img 
+                  :src="topic.coverUrl" 
+                  :alt="topic.title"
+                  class="topic-image"
+                >
+                <div class="topic-overlay">
+                  <span class="topic-title">{{ topic.title }}</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </template>
+
+        <!-- Error -->
+        <div v-else class="error-state">
+          <p>内容加载失败</p>
+          <button class="retry-btn" @click="loadDetail">
+            重新加载
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-logos">
+          <img 
+            src="/images/8a264f96ca2ef2ae41fc9455a3252271c5f03a12.png" 
+            alt="福州大学" 
+            class="footer-logo"
+          >
+          <img 
+            src="/images/95fe256e7055215419581e0b2171ddf24fbd0e16.png" 
+            alt="Logo" 
+            class="footer-logo-small"
+          >
+        </div>
+        <div class="footer-divider" />
+        <div class="footer-info">
+          <p>地址：福建省福州市福州大学城乌龙江北大道2号</p>
+          <p>邮编：350108</p>
+          <p>中文域名：福州大学.公益</p>
+          <div class="footer-bottom">
+            <p>© 2021 福州大学     <a href="https://beian.miit.gov.cn/" target="_blank">闽ICP备05005463号</a></p>
+            <p class="beian">
+              <img src="/images/b7ed956a421650d887b7c14004ee575109d9f658.png" alt="公安备案">
+              闽公网安备35018302000122
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { getHotspotDetail } from '@/api/hotspot'
-import type { HotspotItem } from '@/types/hotspot'
+import { useRoute } from 'vue-router'
+import { getHotspotDetail, getSpecialTopicList } from '@/api/hotspot'
+import type { HotspotItem, SpecialTopicItem } from '@/types/hotspot'
 
 const route = useRoute()
-const router = useRouter()
 
 const detail = ref<HotspotItem | null>(null)
 const isLoading = ref(false)
+const specialTopics = ref<SpecialTopicItem[]>([])
+const isLoadingTopics = ref(false)
+
+// Related links
+const relatedLinks = ref([
+  {
+    id: 1,
+    title: '2025年中国国际形象全球调查报告：习近平新时代中国特色社会主义思想获国际社会高度认同 国际社会对华好感度持续提升',
+    source: '新华网',
+    url: '#'
+  },
+  {
+    id: 2,
+    title: '2025年中国国际形象全球调查报告：习近平新时代中国特色社会主义思想获国际社会高度认同 国际社会对华好感度持续提升',
+    source: '新华网',
+    url: '#'
+  }
+])
+
+// Mock special topics (extended)
+const mockSpecialTopics: SpecialTopicItem[] = [
+  {
+    id: 1,
+    title: '结合专业特色领会习近平总书记关于教育...',
+    coverUrl: '/images/Frame_1000015326.png',
+    content: '<p>结合专业特色领会习近平总书记关于教育的重要论述</p>',
+    contentType: 0,
+    sort: 1,
+    showFront: 1,
+    createTime: '2025-01-10'
+  },
+  {
+    id: 2,
+    title: '民无信不立 楼无廉不坚',
+    coverUrl: '/images/Frame_1000015327.png',
+    content: '<p>加强廉政文化建设</p>',
+    contentType: 0,
+    sort: 2,
+    showFront: 1,
+    createTime: '2025-01-09'
+  },
+  {
+    id: 3,
+    title: '弘扬五四精神 谱写奋斗青春',
+    coverUrl: '/images/Frame_1000015361.png',
+    content: '<p>传承五四精神</p>',
+    contentType: 0,
+    sort: 3,
+    showFront: 1,
+    createTime: '2025-01-08'
+  },
+  {
+    id: 4,
+    title: '数字经济成为福建经济发展的重要引擎',
+    coverUrl: '/images/guanhuaiBG.png',
+    content: '<p>数字经济发展</p>',
+    contentType: 0,
+    sort: 4,
+    showFront: 1,
+    createTime: '2025-01-07'
+  },
+  {
+    id: 5,
+    title: '解析校园火山地质讲好福州大学故事',
+    coverUrl: '/images/indexBg.png',
+    content: '<p>校园地质文化</p>',
+    contentType: 0,
+    sort: 5,
+    showFront: 1,
+    createTime: '2025-01-06'
+  }
+]
 
 const loadDetail = async () => {
   const id = route.params.id as string
@@ -51,12 +286,66 @@ const loadDetail = async () => {
 
   try {
     isLoading.value = true
+    
+    // Mock data for demonstration
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    detail.value = {
+      id: parseInt(id),
+      title: '2025年中国国际形象全球调查报告：习近平新时代中国特色社会主义思想获国际社会高度认同 国际社会对华好感度持续提升',
+      content: `
+        <p style="text-indent: 32px;">新华社北京12月29日电　2025年中国国际形象全球调查报告29日发布。报告显示，习近平新时代中国特色社会主义思想获国际社会高度认同，深入贯彻中央八项规定精神、制定五年规划等执政理念与经验获国际好评，国际社会对华好感度持续提升、期待中国发挥更大作用。</p>
+        <p style="text-indent: 32px;">&nbsp;</p>
+        <p style="text-indent: 32px;">本次全球调查由环球时报研究院具体执行。调查样本为46个国家、约5.17万民众，其中包括15个发达国家和31个发展中国家，涵盖各大洲代表性国家及二十国集团国家、9个金砖国家、10个东盟国家。</p>
+        <p style="text-indent: 32px;">&nbsp;</p>
+        <p style="text-indent: 32px;">本次调查选取了习近平新时代中国特色社会主义思想中的部分重要理念，询问外国受访民众的意见。"构建人类命运共同体""绿水青山就是金山银山"获近八成国际民意认同，"全面从严治党""全面深化改革""以人民为中心"获超过七成认同。</p>
+        <p style="text-indent: 32px;">&nbsp;</p>
+        <p style="text-indent: 32px;">调查显示，近七成国外受访民众对中国共产党深入贯彻中央八项规定精神等全面从严治党理念和实践持肯定态度。本次调查介绍了中国编制并实施五年规划的发展经验，超过四分之三的国外受访民众对此具有客观积极的认知与评价。</p>
+        <p style="text-indent: 32px;">&nbsp;</p>
+        <p style="text-indent: 32px;">调查显示，超过八成国外受访民众对2025年中国经济增长给予积极评价，近九成受访者表示对未来10年中国经济增长有信心。近八成国外受访民众认可中国综合国力在增强，近七成国外受访民众对中国抱有好感，对中国人的奋斗精神、创新精神的认同比例超过四分之三。九成多国外受访民众对中国感兴趣，其中四成多兴趣程度很高。</p>
+        <p style="text-indent: 32px;">&nbsp;</p>
+        <p style="text-indent: 32px;">在推动国际秩序朝着公正合理方向发展、改革完善全球治理、开展国际和地区热点问题斡旋与协调，以及经贸合作、教科文合作等方面，八成左右国外受访民众期待中国未来开展更多行动或发挥更大作用。</p>
+        <p style="text-indent: 32px;">&nbsp;</p>
+        <p style="text-indent: 32px;">超过八成国外受访民众认为本国与中国是正常、友好或战略合作的关系，超过三分之二的国外受访民众希望未来本国与中国的关系变得更好，超过四分之三的国外受访民众对中国的周边外交政策给出积极客观评价。</p>
+      `,
+      contentType: 0,
+      pinTop: 1,
+      statPv: 1093158,
+      showFront: 1,
+      createTime: '2025-12-29'
+    }
+    
+    /* 实际API调用（已注释）：
     detail.value = await getHotspotDetail(id)
+    */
   } catch (error) {
     console.error('加载详情失败:', error)
     detail.value = null
   } finally {
     isLoading.value = false
+  }
+}
+
+const loadSpecialTopics = async () => {
+  try {
+    isLoadingTopics.value = true
+    
+    // Mock data
+    await new Promise(resolve => setTimeout(resolve, 300))
+    specialTopics.value = mockSpecialTopics
+    
+    /* 实际API调用（已注释）：
+    const response = await getSpecialTopicList()
+    specialTopics.value = (response || [])
+      .filter(item => item.showFront === 1)
+      .sort((a, b) => a.sort - b.sort)
+      .slice(0, 5)
+    */
+  } catch (error) {
+    console.error('加载特别专题失败:', error)
+    specialTopics.value = []
+  } finally {
+    isLoadingTopics.value = false
   }
 }
 
@@ -73,86 +362,460 @@ const formatDate = (dateStr: string) => {
   }
 }
 
-const goBack = () => {
-  router.back()
+const getTopicLink = (topic: SpecialTopicItem) => {
+  if (topic.contentType === 1) {
+    return topic.content
+  } else {
+    return `/topic/detail/${topic.id}`
+  }
 }
 
 onMounted(() => {
   loadDetail()
+  loadSpecialTopics()
 })
 </script>
 
 <style scoped>
 .detail-page {
   min-height: 100vh;
-  background: #f5f5f5;
-  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
 }
 
-.detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
+/* Header - Same as list page */
+.header {
   background: white;
-  border-radius: 8px;
-  padding: 40px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.back-btn {
-  background: none;
-  border: 1px solid #d9d9d9;
-  padding: 8px 16px;
-  border-radius: 4px;
+.header-content {
+  max-width: 1920px;
+  margin: 0 auto;
+  height: 110px;
+  padding: 0 360px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-img {
+  height: 52px;
+  width: 195px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-family: 'Source Han Sans CN', sans-serif;
+  font-size: 24px;
+  color: #515151;
+  white-space: nowrap;
+}
+
+.action-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  border: 1px solid #c30d23;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.search-input {
+  width: 216px;
+  padding: 6px 16px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #757575;
+}
+
+.search-btn {
+  background: #c30d23;
+  color: white;
+  border: none;
+  padding: 6px 19px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  background: #a00a1c;
+}
+
+.admin-btn {
+  border: 1px solid #c30d23;
+  background: white;
+  color: #c30d23;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 18px;
   cursor: pointer;
   transition: all 0.3s;
-  margin-bottom: 24px;
+  white-space: nowrap;
 }
 
-.back-btn:hover {
-  border-color: #c30d23;
-  color: #c30d23;
+.admin-btn:hover {
+  background: #c30d23;
+  color: white;
 }
 
-.detail-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 16px;
-  line-height: 1.4;
-}
-
-.detail-meta {
+.login-btn {
   display: flex;
-  gap: 24px;
-  padding: 16px 0;
-  border-bottom: 1px solid #e8e8e8;
-  margin-bottom: 32px;
-  color: #999;
-  font-size: 14px;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #c30d23;
+  font-size: 18px;
+  cursor: pointer;
+  transition: opacity 0.3s;
 }
 
-.detail-body {
+.login-btn:hover {
+  opacity: 0.8;
+}
+
+/* Navigation */
+.nav-bar {
+  background: #c30d23;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 76px;
+  padding: 0 360px;
+}
+
+.nav-item {
+  color: white;
+  font-size: 18px;
+  text-decoration: none;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+/* Page Banner */
+.page-banner {
+  height: 150px;
+  background: linear-gradient(to bottom, #c30d23, #e84a5f);
+  background-image: url('/images/4c8331d220c0e081675aafdc11c39282e1eb9cb9.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-title {
+  font-size: 55.9px;
+  font-weight: bold;
+  background: linear-gradient(to bottom, white, #f7eea4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 2px 8px 2px rgba(0, 0, 0, 0.15);
+  margin: 0;
+}
+
+/* Breadcrumb */
+.breadcrumb-container {
+  padding: 0 360px;
+}
+
+.breadcrumb {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 0;
+  border-bottom: 1px solid #ebebeb;
   font-size: 16px;
-  line-height: 1.8;
-  color: #333;
+  line-height: 1.75;
+  justify-content: flex-start;
 }
 
-.detail-body :deep(img) {
+.breadcrumb-item {
+  color: #333;
+  opacity: 0.5;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+
+.breadcrumb-item:hover {
+  opacity: 0.8;
+}
+
+.breadcrumb-item.active {
+  color: #c30d23;
+  opacity: 1;
+}
+
+.breadcrumb-separator {
+  color: #333;
+  opacity: 0.5;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 40px 360px;
+  max-width: 1920px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 40px;
+}
+
+/* Article Section */
+.article-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.article-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #000;
+  line-height: 45px;
+  text-align: center;
+  margin: 0;
+  padding: 0 24px;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #999;
+}
+
+.meta-item {
+  white-space: nowrap;
+}
+
+.meta-divider {
+  width: 1px;
+  height: 14px;
+  background: #eee;
+}
+
+.article-body {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #666;
+}
+
+.article-body :deep(p) {
+  margin: 0 0 16px;
+}
+
+.article-body :deep(img) {
   max-width: 100%;
   height: auto;
   margin: 16px 0;
 }
 
-.detail-body :deep(p) {
-  margin: 16px 0;
+/* Related Links */
+.related-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.detail-body :deep(h1),
-.detail-body :deep(h2),
-.detail-body :deep(h3) {
-  margin: 24px 0 16px;
+.links-header h3 {
+  font-size: 16px;
+  color: #333;
+  margin: 0 0 12px;
 }
 
+.header-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.divider-active {
+  width: 64px;
+  height: 2px;
+  background: #c30d23;
+}
+
+.divider-inactive {
+  flex: 1;
+  height: 2px;
+  background: #eee;
+}
+
+.link-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.link-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.link-item:hover {
+  transform: translateX(4px);
+}
+
+.link-dot {
+  width: 4px;
+  height: 4px;
+  background: #c30d23;
+  border-radius: 2px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.link-text {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  line-height: normal;
+}
+
+.link-title {
+  margin: 0;
+}
+
+.link-source {
+  margin: 0;
+  color: #666;
+}
+
+/* Topics Section */
+.topics-section {
+  width: 305px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 30px;
+  font-weight: bold;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.title-highlight {
+  color: #c30d23;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.divider-line {
+  height: 2px;
+  background: #e0e0e0;
+  flex: 1;
+}
+
+.divider-line.active {
+  background: #c30d23;
+  width: 86px;
+  flex: none;
+}
+
+.topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.topic-card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.3s;
+  text-decoration: none;
+  display: block;
+}
+
+.topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.topic-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 380 / 213;
+  object-fit: cover;
+  display: block;
+}
+
+.topic-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 0 0 4px 4px;
+}
+
+.topic-title {
+  color: white;
+  font-size: 14px;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Loading */
 .loading {
   display: flex;
   flex-direction: column;
@@ -177,6 +840,7 @@ onMounted(() => {
   100% { transform: rotate(360deg); }
 }
 
+/* Error State */
 .error-state {
   display: flex;
   flex-direction: column;
@@ -199,6 +863,154 @@ onMounted(() => {
 
 .retry-btn:hover {
   background: #a00a1c;
+}
+
+/* Footer */
+.footer {
+  background: #222;
+  color: white;
+  padding: 24px 360px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1920px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+
+.footer-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-logo {
+  height: 60px;
+  width: 180px;
+  object-fit: contain;
+}
+
+.footer-logo-small {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.footer-divider {
+  width: 1px;
+  height: 128px;
+  background: white;
+  opacity: 0.3;
+}
+
+.footer-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.footer-info p {
+  margin: 0;
+}
+
+.footer-info a {
+  color: white;
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  display: flex;
+  gap: 48px;
+  align-items: center;
+}
+
+.beian {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.beian img {
+  width: 18px;
+  height: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1600px) {
+  .header-content,
+  .nav-bar,
+  .main-content,
+  .footer,
+  .breadcrumb-container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+  
+  .topics-section {
+    width: 100%;
+  }
+  
+  .topics-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    height: auto;
+    padding: 20px;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .logo-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .logo-text {
+    font-size: 18px;
+  }
+  
+  .action-section {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-bar {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 16px;
+  }
+  
+  .page-banner {
+    height: 100px;
+  }
+  
+  .banner-title {
+    font-size: 36px;
+  }
+  
+  .article-title {
+    font-size: 22px;
+    line-height: 1.4;
+  }
 }
 </style>
 

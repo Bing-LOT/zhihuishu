@@ -244,6 +244,323 @@ const total = ref(0)
 const specialTopics = ref<SpecialTopicItem[]>([])
 const isLoadingTopics = ref(false)
 
+// Mock Data - 模拟数据
+const mockHotspotData: HotspotItem[] = [
+  {
+    id: 1,
+    title: '党建引领成渝地区双城经济圈职业院校"大思政课"建设高质量发展研讨会暨2025年共同体年会举办',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 1,
+    statPv: 1250,
+    showFront: 1,
+    createTime: '2025-01-10'
+  },
+  {
+    id: 2,
+    title: '党建领航 融创赋能——福建信息职业技术学院物联网与人工智能学院探索"1354"党建工作机制纪实',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 980,
+    showFront: 1,
+    createTime: '2025-01-09'
+  },
+  {
+    id: 3,
+    title: '党建引领·体系赋能 河南经贸职业学院人工智能技术应用专业群打造人才培养新范式',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 856,
+    showFront: 1,
+    createTime: '2025-01-08'
+  },
+  {
+    id: 4,
+    title: '深耕区域发展 江西洪州职业学院以产教融合书写育人新篇',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 742,
+    showFront: 1,
+    createTime: '2025-01-07'
+  },
+  {
+    id: 5,
+    title: '总书记关心的重大文化工程｜存史启智润民心',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1580,
+    showFront: 1,
+    createTime: '2025-01-06'
+  },
+  {
+    id: 6,
+    title: '有人用AI"拍"了一部《芭本海默》，堪比好莱坞原片',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2100,
+    showFront: 1,
+    createTime: '2025-01-05'
+  },
+  {
+    id: 7,
+    title: '马斯克：如果没有外星人，那么我们就只是黑暗深渊中一根小蜡烛',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1890,
+    showFront: 1,
+    createTime: '2025-01-04'
+  },
+  {
+    id: 8,
+    title: '一家三口吃瓜中毒！凌晨3点进医院…',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 3200,
+    showFront: 1,
+    createTime: '2025-01-03'
+  },
+  {
+    id: 9,
+    title: '上市三年，突然"易主"？',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1450,
+    showFront: 1,
+    createTime: '2025-01-02'
+  },
+  {
+    id: 10,
+    title: '智慧农业风起，中科原动力带机器人走进田间地头',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 920,
+    showFront: 1,
+    createTime: '2025-01-01'
+  },
+  {
+    id: 11,
+    title: '曾比恒大冲更猛，他比许家印更可惜',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2500,
+    showFront: 1,
+    createTime: '2024-12-31'
+  },
+  {
+    id: 12,
+    title: '买彩票的年轻人：用确定的不确定性对抗焦虑',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1680,
+    showFront: 1,
+    createTime: '2024-12-30'
+  },
+  {
+    id: 13,
+    title: '暑期游火爆，文旅企业收入却"令人意外"在下降？',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1120,
+    showFront: 1,
+    createTime: '2024-12-29'
+  },
+  {
+    id: 14,
+    title: '中国电影行业的王座，正在悄悄易主？',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1340,
+    showFront: 1,
+    createTime: '2024-12-28'
+  },
+  {
+    id: 15,
+    title: '弘扬践行教育家精神 书写教育强国篇章——习近平总书记给全国特岗教师代表的回信激励广大教师',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2800,
+    showFront: 1,
+    createTime: '2024-12-27'
+  },
+  {
+    id: 16,
+    title: '纪念中国人民抗日战争暨世界反法西斯战争胜利80周年',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 3500,
+    showFront: 1,
+    createTime: '2024-12-26'
+  },
+  {
+    id: 17,
+    title: '文化是灵魂——习近平文化思想在浙江的溯源与实践（上）',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2200,
+    showFront: 1,
+    createTime: '2024-12-25'
+  },
+  {
+    id: 18,
+    title: '江西省高校课程思政教学示范研究中心暨课程思政建设工作推进会在江西中医药大学举办',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1560,
+    showFront: 1,
+    createTime: '2024-12-24'
+  },
+  {
+    id: 19,
+    title: '习近平总书记关切事丨流金淌银！北国冰雪资源释放新红利——冰雪经济高质量发展新实践之一',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1890,
+    showFront: 1,
+    createTime: '2024-12-23'
+  },
+  {
+    id: 20,
+    title: '女子去银行取15万现金，工作人员细查后报警，民警顺线抓洗钱团伙',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 4200,
+    showFront: 1,
+    createTime: '2024-12-22'
+  },
+  {
+    id: 21,
+    title: '同甘不共苦， "消失"的房企合伙人',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1750,
+    showFront: 1,
+    createTime: '2024-12-21'
+  },
+  {
+    id: 22,
+    title: '银行业危机风波未完：仍有一颗定时炸弹滴滴作响！',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2600,
+    showFront: 1,
+    createTime: '2024-12-20'
+  },
+  {
+    id: 23,
+    title: '信息量非常大！房地产，一个转向要来了？',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 3100,
+    showFront: 1,
+    createTime: '2024-12-19'
+  },
+  {
+    id: 24,
+    title: '一文看懂，居民的钱都投资去了哪里？',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1980,
+    showFront: 1,
+    createTime: '2024-12-18'
+  },
+  {
+    id: 25,
+    title: '七、八十年代风靡全国的"的确良"是什么面料，为何突然消失了？',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2300,
+    showFront: 1,
+    createTime: '2024-12-17'
+  },
+  {
+    id: 26,
+    title: '国产电车的遮羞布，被高温撕掉了',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 2750,
+    showFront: 1,
+    createTime: '2024-12-16'
+  },
+  {
+    id: 27,
+    title: '深化新时代教育评价改革 推动高等教育高质量发展',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1450,
+    showFront: 1,
+    createTime: '2024-12-15'
+  },
+  {
+    id: 28,
+    title: '加强思政课建设 培养时代新人——各地高校深入学习贯彻习近平总书记重要讲话精神',
+    content: '<p>详细内容...</p>',
+    contentType: 0,
+    pinTop: 0,
+    statPv: 1820,
+    showFront: 1,
+    createTime: '2024-12-14'
+  }
+]
+
+const mockSpecialTopics: SpecialTopicItem[] = [
+  {
+    id: 1,
+    title: '结合专业特色领会习近平总书记关于教育...',
+    coverUrl: '/images/Frame_1000015326.png',
+    content: '<p>结合专业特色领会习近平总书记关于教育的重要论述，推动思政课程与课程思政同向同行。</p>',
+    contentType: 0,
+    sort: 1,
+    showFront: 1,
+    createTime: '2025-01-10'
+  },
+  {
+    id: 2,
+    title: '民无信不立 楼无廉不坚',
+    coverUrl: '/images/Frame_1000015327.png',
+    content: '<p>加强廉政文化建设，培养新时代廉洁自律的社会主义建设者和接班人。</p>',
+    contentType: 0,
+    sort: 2,
+    showFront: 1,
+    createTime: '2025-01-09'
+  },
+  {
+    id: 3,
+    title: '弘扬五四精神 谱写奋斗青春',
+    coverUrl: '/images/Frame_1000015361.png',
+    content: '<p>传承五四精神，激励广大青年学生在新时代建功立业，谱写壮丽的青春篇章。</p>',
+    contentType: 0,
+    sort: 3,
+    showFront: 1,
+    createTime: '2025-01-08'
+  }
+]
+
 // Computed
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
@@ -300,6 +617,25 @@ const loadNewsList = async () => {
   try {
     isLoading.value = true
     
+    // 使用模拟数据
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Filter by search keyword if provided
+    let filteredData = mockHotspotData
+    if (searchKeyword.value) {
+      filteredData = mockHotspotData.filter(item => 
+        item.title.toLowerCase().includes(searchKeyword.value.toLowerCase())
+      )
+    }
+    
+    // Paginate
+    const start = (currentPage.value - 1) * pageSize.value
+    const end = start + pageSize.value
+    newsList.value = filteredData.slice(start, end)
+    total.value = filteredData.length
+    
+    /* 实际API调用代码（已注释）：
     const response = await getHotspotList({
       pageIndex: currentPage.value,
       pageSize: pageSize.value,
@@ -309,6 +645,7 @@ const loadNewsList = async () => {
     
     newsList.value = response.records || []
     total.value = response.total || 0
+    */
   } catch (error) {
     console.error('加载新闻列表失败:', error)
     newsList.value = []
@@ -322,12 +659,20 @@ const loadSpecialTopics = async () => {
   try {
     isLoadingTopics.value = true
     
+    // 使用模拟数据
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
+    specialTopics.value = mockSpecialTopics
+    
+    /* 实际API调用代码（已注释）：
     const response = await getSpecialTopicList()
     // Filter to show only active items and limit to 3
     specialTopics.value = (response || [])
       .filter(item => item.showFront === 1)
       .sort((a, b) => a.sort - b.sort)
       .slice(0, 3)
+    */
   } catch (error) {
     console.error('加载特别专题失败:', error)
     specialTopics.value = []

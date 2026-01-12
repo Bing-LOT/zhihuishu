@@ -751,12 +751,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
 }
 
 .logo-section {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-shrink: 0;
 }
 
 .logo-img {
@@ -776,6 +778,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .search-bar {

@@ -58,6 +58,24 @@ const publicRoutes: RouteRecordRaw[] = [
       title: '教学案例详情',
       requiresAuth: false
     }
+  },
+  {
+    path: '/classroom',
+    name: 'Classroom',
+    component: () => import('@/views/Classroom/index.vue'),
+    meta: {
+      title: '精彩课堂',
+      requiresAuth: false
+    }
+  },
+  {
+    path: '/classroom/detail/:id',
+    name: 'ClassroomDetail',
+    component: () => import('@/views/Classroom/Detail.vue'),
+    meta: {
+      title: '课程详情',
+      requiresAuth: false
+    }
   }
 ]
 

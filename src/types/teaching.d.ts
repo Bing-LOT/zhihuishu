@@ -3,6 +3,16 @@
  */
 
 /**
+ * 教师信息
+ */
+export interface Teacher {
+  /** 教师姓名 */
+  name: string
+  /** 职称 */
+  title?: string
+}
+
+/**
  * 教学案例
  */
 export interface TeachingCase {
@@ -24,6 +34,20 @@ export interface TeachingCase {
   isNational?: boolean
   /** 创建时间 */
   createTime?: string
+  /** 学校名称 */
+  schoolName?: string
+  /** 学科门类 */
+  categoryName?: string
+  /** 教学类别名称 */
+  caseTypeName?: string
+  /** 授课教师列表 */
+  teachers?: Teacher[]
+  /** 课程简介 */
+  introduction?: string
+  /** 教学设计 */
+  designContent?: string
+  /** 教学视频URL */
+  videoUrl?: string
 }
 
 /**

@@ -51,3 +51,14 @@ export function increaseViewCount(id: number | string) {
   })
 }
 
+/**
+ * 获取相关推荐教学案例
+ */
+export function getRelatedCases(id: number | string, limit: number = 4) {
+  return request<TeachingCase[]>({
+    url: `/api/teaching/cases/${id}/related`,
+    method: 'get',
+    params: { limit }
+  })
+}
+

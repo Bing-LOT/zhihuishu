@@ -1,73 +1,13 @@
 <template>
   <div class="hotspot-page">
     <!-- Header -->
-    <header class="header">
-      <div class="header-content">
-        <div class="logo-section">
-          <img 
-            src="/images/00dcb4e82f32dad380c689b6a020ef7171d0aa8f.png" 
-            alt="Logo" 
-            class="logo-img"
-          >
-          <span class="logo-text">福州大学大思政教育未来学习中心</span>
-        </div>
-        <div class="action-section">
-          <div class="search-bar">
-            <input 
-              v-model="searchKeyword"
-              type="text" 
-              placeholder="课程 名师 新闻 资源搜索"
-              class="search-input"
-              @keyup.enter="handleSearch"
-            >
-            <button class="search-btn" @click="handleSearch">
-              资源搜索
-            </button>
-          </div>
-          <button class="admin-btn">
-            后台管理系统
-          </button>
-          <button class="login-btn">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 10C12.7614 10 15 7.76142 15 5C15 2.23858 12.7614 0 10 0C7.23858 0 5 2.23858 5 5C5 7.76142 7.23858 10 10 10Z" fill="#c30d23"/>
-              <path d="M10 12.5C4.47715 12.5 0 14.4772 0 17V20H20V17C20 14.4772 15.5228 12.5 10 12.5Z" fill="#c30d23"/>
-            </svg>
-            登录
-          </button>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <!-- Banner -->
-    <div class="banner">
-      <img 
-        src="/images/e1abaefd40f9ac8751d3843a47b777c872cdb435.png" 
-        alt="Banner" 
-        class="banner-img"
-      >
-      <div class="banner-indicators">
-        <span 
-          v-for="(item, index) in bannerCount" 
-          :key="index" 
-          class="indicator"
-          :class="{ active: index === currentBanner }"
-          @click="currentBanner = index"
-        />
-      </div>
-    </div>
+    <AppBanner />
 
     <!-- Navigation -->
-    <nav class="nav-bar">
-      <a href="/" class="nav-item">首页</a>
-      <a href="/hotspot" class="nav-item active">思政热点</a>
-      <a href="/teaching" class="nav-item">教学有道</a>
-      <a href="/classroom" class="nav-item">精彩课堂</a>
-      <a href="/college" class="nav-item">一院一品</a>
-      <a href="/special" class="nav-item">特色专题</a>
-      <a href="/resource" class="nav-item">育人资源</a>
-      <a href="/exam" class="nav-item">学习题库</a>
-      <a href="/reference" class="nav-item">他山之石</a>
-    </nav>
+    <AppNavigation />
 
     <!-- Main Content -->
     <main class="main-content">
@@ -189,35 +129,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-logos">
-          <img 
-            src="/images/8a264f96ca2ef2ae41fc9455a3252271c5f03a12.png" 
-            alt="福州大学" 
-            class="footer-logo"
-          >
-          <img 
-            src="/images/95fe256e7055215419581e0b2171ddf24fbd0e16.png" 
-            alt="Logo" 
-            class="footer-logo-small"
-          >
-        </div>
-        <div class="footer-divider" />
-        <div class="footer-info">
-          <p>地址：福建省福州市福州大学城乌龙江北大道2号</p>
-          <p>邮编：350108</p>
-          <p>中文域名：福州大学.公益</p>
-          <div class="footer-bottom">
-            <p>© 2021 福州大学     <a href="https://beian.miit.gov.cn/" target="_blank">闽ICP备05005463号</a></p>
-            <p class="beian">
-              <img src="/images/b7ed956a421650d887b7c14004ee575109d9f658.png" alt="公安备案">
-              闽公网安备35018302000122
-            </p>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
 </template>
 
@@ -225,10 +137,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { getHotspotList, getSpecialTopicList } from '@/api/hotspot'
 import type { HotspotItem, SpecialTopicItem } from '@/types/hotspot'
-
-// Banner
-const bannerCount = 3
-const currentBanner = ref(0)
+import AppHeader from '@/components/common/AppHeader/index.vue'
+import AppBanner from '@/components/common/AppBanner/index.vue'
+import AppNavigation from '@/components/common/AppNavigation/index.vue'
+import AppFooter from '@/components/common/AppFooter/index.vue'
 
 // Search
 const searchKeyword = ref('')
@@ -718,11 +630,6 @@ const getTopicLink = (topic: SpecialTopicItem) => {
 onMounted(() => {
   loadNewsList()
   loadSpecialTopics()
-  
-  // Auto-rotate banner
-  setInterval(() => {
-    currentBanner.value = (currentBanner.value + 1) % bannerCount
-  }, 5000)
 })
 </script>
 
@@ -732,181 +639,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: #fff;
-}
-
-/* Header */
-.header {
-  background: white;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.header-content {
-  max-width: 1920px;
-  margin: 0 auto;
-  height: 110px;
-  padding: 0 360px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-shrink: 0;
-}
-
-.logo-img {
-  height: 52px;
-  width: 195px;
-  object-fit: contain;
-}
-
-.logo-text {
-  font-family: 'Source Han Sans CN', sans-serif;
-  font-size: 24px;
-  color: #515151;
-  white-space: nowrap;
-}
-
-.action-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: nowrap;
-  flex-shrink: 0;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  border: 1px solid #c30d23;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.search-input {
-  width: 216px;
-  padding: 6px 16px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  color: #757575;
-}
-
-.search-btn {
-  background: #c30d23;
-  color: white;
-  border: none;
-  padding: 6px 19px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background 0.3s;
-  white-space: nowrap;
-}
-
-.search-btn:hover {
-  background: #a00a1c;
-}
-
-.admin-btn {
-  border: 1px solid #c30d23;
-  background: white;
-  color: #c30d23;
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.3s;
-  white-space: nowrap;
-}
-
-.admin-btn:hover {
-  background: #c30d23;
-  color: white;
-}
-
-.login-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: #c30d23;
-  font-size: 18px;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.login-btn:hover {
-  opacity: 0.8;
-}
-
-/* Banner */
-.banner {
-  position: relative;
-  height: 500px;
-  background: #f0f0f0;
-  overflow: hidden;
-}
-
-.banner-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.banner-indicators {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 18px;
-}
-
-.indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.indicator.active {
-  background: #c30d23;
-}
-
-/* Navigation */
-.nav-bar {
-  background: #c30d23;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 76px;
-  padding: 0 360px;
-}
-
-.nav-item {
-  color: white;
-  font-size: 18px;
-  text-decoration: none;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-}
-
-.nav-item:hover,
-.nav-item.active {
-  opacity: 0.8;
-  font-weight: 500;
 }
 
 /* Main Content */
@@ -1164,89 +896,9 @@ onMounted(() => {
   100% { transform: rotate(360deg); }
 }
 
-/* Footer */
-.footer {
-  background: #222;
-  color: white;
-  padding: 24px 360px;
-  margin-top: auto;
-}
-
-.footer-content {
-  max-width: 1920px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 48px;
-}
-
-.footer-logos {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.footer-logo {
-  height: 60px;
-  width: 180px;
-  object-fit: contain;
-}
-
-.footer-logo-small {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-}
-
-.footer-divider {
-  width: 1px;
-  height: 128px;
-  background: white;
-  opacity: 0.3;
-}
-
-.footer-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 16px;
-  line-height: 1.75;
-}
-
-.footer-info p {
-  margin: 0;
-}
-
-.footer-info a {
-  color: white;
-  text-decoration: underline;
-}
-
-.footer-bottom {
-  display: flex;
-  gap: 48px;
-  align-items: center;
-}
-
-.beian {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.beian img {
-  width: 18px;
-  height: 20px;
-}
-
 /* Responsive */
 @media (max-width: 1600px) {
-  .header-content,
-  .nav-bar,
-  .main-content,
-  .footer {
+  .main-content {
     padding-left: 40px;
     padding-right: 40px;
   }
@@ -1272,40 +924,8 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .header-content {
-    height: auto;
-    padding: 20px;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .logo-section {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .logo-text {
-    font-size: 18px;
-  }
-  
-  .action-section {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .nav-bar {
-    height: auto;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 16px;
-  }
-  
   .news-columns {
     grid-template-columns: 1fr;
-  }
-  
-  .banner {
-    height: 300px;
   }
 }
 </style>

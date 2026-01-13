@@ -8,7 +8,7 @@ const publicRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    redirect: '/hotspot',
+    component: () => import('@/views/Home/index.vue'),
     meta: {
       title: '首页',
       requiresAuth: false

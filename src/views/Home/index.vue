@@ -559,43 +559,59 @@
         </div>
       </section>
 
-      <!-- 优秀思政课堂 Section -->
+      <!-- 督导点赞课 Section -->
       <section class="excellent-course-section">
         <div class="section-header">
-          <h2 class="section-title">
-            <span class="title-highlight">优秀</span>思政课堂
-          </h2>
-          <a href="/excellent-course" class="more-link">
-            <span>更多</span>
-            <img src="/images/arrow-right.svg" alt="更多" class="arrow-icon">
+          <div class="section-title-wrapper">
+            <h2 class="section-title">
+              <span class="title-highlight">督导</span><span class="title-normal">点赞课</span>
+            </h2>
+            <div class="title-divider" />
+          </div>
+          <a href="/excellent-course" class="more-link-bracket">
+            【查看更多】
           </a>
         </div>
         
-        <div class="excellent-course-grid">
-          <div 
-            v-for="item in excellentCourseList" 
-            :key="item.id"
-            class="excellent-course-card"
-            @click="playExcellentCourse(item)"
-          >
-            <img 
-              :src="item.picUrls && item.picUrls.length > 0 ? item.picUrls[0] : '/images/placeholder.png'" 
-              :alt="item.title" 
-              class="excellent-course-img"
-            >
-            <div class="excellent-course-info">
-              <h3 class="excellent-course-title">{{ item.title }}</h3>
-              <p class="excellent-course-meta">
-                <span>{{ item.name }}</span>
-                <span v-if="item.teacher"> · {{ item.teacher }}</span>
-              </p>
+        <div class="excellent-course-content">
+          <div class="excellent-course-rows">
+            <div class="excellent-course-grid">
+              <div 
+                v-for="item in excellentCourseList" 
+                :key="item.id"
+                class="excellent-course-card"
+                @click="playExcellentCourse(item)"
+              >
+                <div class="excellent-course-image">
+                  <img 
+                    :src="item.picUrls && item.picUrls.length > 0 ? item.picUrls[0] : '/images/placeholder.png'" 
+                    :alt="item.title" 
+                    class="course-img"
+                  >
+                  <div class="image-bottom-overlay">
+                    <p class="course-period">{{ item.period || '督导课堂第24期' }}</p>
+                  </div>
+                  <div class="view-count-badge">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M1 8C1 8 3.5 3 8 3C12.5 3 15 8 15 8C15 8 12.5 13 8 13C3.5 13 1 8 1 8Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="8" cy="8" r="2" stroke="white" stroke-width="1.5"/>
+                    </svg>
+                    <span>{{ item.viewCountText || '345.6w人次' }}</span>
+                  </div>
+                </div>
+                <div class="excellent-course-info">
+                  <h3 class="excellent-course-title">{{ item.title }}</h3>
+                  <p class="course-teacher">授课教师：{{ item.teacher || '董海峰' }}</p>
+                  <p class="course-time">授课时间：{{ item.courseTime || '2025年春季学期' }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- 智慧教学依托优质教育资源 Section -->
-      <section class="smart-teaching-section">
+      <!-- <section class="smart-teaching-section">
         <div class="section-header">
           <h2 class="section-title">
             <span class="title-highlight">智慧教学</span>依托优质教育资源
@@ -615,10 +631,10 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
 
       <!-- 学院特色 Section -->
-      <section class="college-section">
+      <!-- <section class="college-section">
         <div class="section-header">
           <h2 class="section-title">
             <span class="title-highlight">学院</span>特色
@@ -646,7 +662,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
     </main>
 
     <!-- Footer -->
@@ -893,9 +909,15 @@ const loadCourses = async () => {
 const loadExcellentCourses = async () => {
   try {
     const data = await getNiceCourseTopList()
-    excellentCourseList.value = data.slice(0, 4)
+    excellentCourseList.value = data.slice(0, 8).map((item, index) => ({
+      ...item,
+      period: item.period || `督导课堂第${24 + index}期`,
+      viewCountText: item.viewCountText || '345.6w人次',
+      teacher: item.teacher || '董海峰',
+      courseTime: item.courseTime || '2025年春季学期'
+    }))
   } catch (error) {
-    console.error('加载优秀思政课堂失败:', error)
+    console.error('加载督导点赞课失败:', error)
   }
 }
 
@@ -2026,51 +2048,123 @@ section {
   border-radius: 3px;
 }
 
-/* 优秀思政课堂 */
+/* 督导点赞课 */
+.excellent-course-section .section-header {
+  border-bottom: none;
+}
+
+.excellent-course-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.excellent-course-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .excellent-course-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 16px;
 }
 
 .excellent-course-card {
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 272px;
 }
 
 .excellent-course-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.excellent-course-img {
+.excellent-course-image {
+  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 158.242px;
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
+}
+
+.course-img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
+.image-bottom-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.course-period {
+  color: white;
+  font-size: 14px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-count-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-count-badge span {
+  color: white;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .excellent-course-info {
-  padding: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: white;
+  flex: 1;
 }
 
 .excellent-course-title {
   font-size: 16px;
-  font-weight: bold;
   color: #333;
-  margin: 0 0 8px 0;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.excellent-course-meta {
+.course-teacher,
+.course-time {
   font-size: 14px;
-  color: #666;
+  color: #333;
+  opacity: 0.5;
   margin: 0;
+  white-space: nowrap;
 }
 
 /* 智慧教学 */
@@ -2256,8 +2350,11 @@ section {
   .college-special-grid,
   .classroom-grid,
   .resource-grid,
-  .excellent-course-grid,
   .college-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .excellent-course-grid {
     grid-template-columns: repeat(3, 1fr);
   }
   
@@ -2331,10 +2428,14 @@ section {
   .college-special-grid,
   .classroom-grid,
   .resource-grid,
-  .excellent-course-grid,
   .college-grid,
-  .smart-teaching-grid {
+  .smart-teaching-grid,
+  .excellent-course-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .excellent-course-card {
+    height: auto;
   }
   
   .recommend-banners {

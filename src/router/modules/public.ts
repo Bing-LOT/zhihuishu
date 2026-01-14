@@ -76,6 +76,15 @@ const publicRoutes: RouteRecordRaw[] = [
       title: '课程详情',
       requiresAuth: false
     }
+  },
+  {
+    path: '/special',
+    name: 'SpecialTopic',
+    component: () => import('@/views/SpecialTopic/index.vue'),
+    meta: {
+      title: '特色专题',
+      requiresAuth: false
+    }
   }
 ]
 

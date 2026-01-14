@@ -68,3 +68,5 @@ app.use(ElementPlus, {
 
 现在刷新页面，所有 Element Plus 组件的文本都会显示为中文了！✅
 
+
+

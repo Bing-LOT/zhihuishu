@@ -163,6 +163,7 @@ import {
   addHotspot,
   editHotspot,
   removeHotspot,
+  toggleHotspotShowFront,
   type HotspotItem,
   type HotspotAddItem,
   type HotspotEditItem
@@ -262,8 +263,6 @@ const formData = reactive<HotspotAddItem & { id?: number }>({
   title: '',
   source: '',
   content: '',
-  contentType: 0,
-  pinTop: 0,
   showFront: 1
 })
 
@@ -332,10 +331,8 @@ const handleEdit = (row: HotspotItem) => {
   dialogTitle.value = '编辑'
   formData.id = row.id
   formData.title = row.title
-  formData.source = row.source || ''
+  formData.source = (row.source || '') as string
   formData.content = row.content
-  formData.contentType = row.contentType
-  formData.pinTop = row.pinTop
   formData.showFront = row.showFront
   dialogVisible.value = true
 }
@@ -344,13 +341,8 @@ const handleEdit = (row: HotspotItem) => {
 const handleToggleShow = async (row: HotspotItem) => {
   try {
     const newShowFront = row.showFront === 1 ? 0 : 1
-    await editHotspot({
+    await toggleHotspotShowFront({
       id: row.id,
-      title: row.title,
-      source: row.source,
-      content: row.content,
-      contentType: row.contentType,
-      pinTop: row.pinTop,
       showFront: newShowFront
     })
     ElMessage.success('操作成功')
@@ -399,8 +391,6 @@ const handleSave = async () => {
         title: formData.title,
         source: formData.source,
         content: formData.content,
-        contentType: formData.contentType,
-        pinTop: formData.pinTop,
         showFront: formData.showFront
       }
       await editHotspot(editData)
@@ -411,8 +401,6 @@ const handleSave = async () => {
         title: formData.title,
         source: formData.source,
         content: formData.content,
-        contentType: formData.contentType,
-        pinTop: formData.pinTop,
         showFront: formData.showFront
       }
       await addHotspot(addData)
@@ -438,8 +426,6 @@ const handleDialogClose = () => {
   formData.title = ''
   formData.source = ''
   formData.content = ''
-  formData.contentType = 0
-  formData.pinTop = 0
   formData.showFront = 1
   
   // 清空编辑器内容

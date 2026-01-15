@@ -10,9 +10,9 @@ import request from './request'
 export interface HotspotItem {
   id: number
   title: string
-  source?: number | string  // 来源（可能是数字ID或字符串，如：新华网、人民日报等）
+  source?: string  // 来源（如：新华网、人民日报等）
   content: string
-  contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
+  contentType?: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
   pinTop?: number  // 1=置顶；0=不置顶
   statPv?: number  // 浏览量
   showFront: number  // 1=显示；0=不显示
@@ -47,7 +47,7 @@ export interface HotspotListResponse {
  */
 export function getHotspotList(params: HotspotListParams): Promise<HotspotListResponse> {
   return request({
-    url: '/api/news/page/list',
+    url: '/news/page/list',
     method: 'POST',
     data: params
   })
@@ -68,12 +68,10 @@ export function getHotspotDetail(id: string | number): Promise<HotspotItem> {
  * 新增思政热点数据结构
  */
 export interface HotspotAddItem {
-  title: string
-  source?: number | string  // 来源（可能是数字ID或字符串，如：新华网、人民日报等）
-  content: string
-  contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
-  pinTop: number  // 1=置顶；0=不置顶
-  showFront: number  // 1=显示；0=不显示
+  title: string  // 标题（必需）
+  source?: string  // 来源（可选）
+  content: string  // 内容（必需）
+  showFront: number  // 前台显示：1=显示；0=隐藏（必需）
 }
 
 /**
@@ -82,7 +80,7 @@ export interface HotspotAddItem {
  */
 export function addHotspot(data: HotspotAddItem): Promise<{ id: number }> {
   return request({
-    url: '/hotspot/add',
+    url: '/news/add',
     method: 'POST',
     data
   })
@@ -92,7 +90,7 @@ export function addHotspot(data: HotspotAddItem): Promise<{ id: number }> {
  * 编辑思政热点数据结构
  */
 export interface HotspotEditItem extends HotspotAddItem {
-  id: number
+  id: number  // id（必需）
 }
 
 /**
@@ -101,7 +99,7 @@ export interface HotspotEditItem extends HotspotAddItem {
  */
 export function editHotspot(data: HotspotEditItem): Promise<void> {
   return request({
-    url: '/hotspot/edit',
+    url: '/news/edit',
     method: 'PUT',
     data
   })
@@ -113,8 +111,28 @@ export function editHotspot(data: HotspotEditItem): Promise<void> {
  */
 export function removeHotspot(id: number): Promise<void> {
   return request({
-    url: `/hotspot/remove/${id}`,
+    url: `/news/remove/${id}`,
     method: 'DELETE'
+  })
+}
+
+/**
+ * 切换思政热点显示/隐藏状态参数
+ */
+export interface ToggleShowFrontParams {
+  id: number  // 热点ID（必需）
+  showFront: number  // 前台显示：1=显示；0=隐藏（必需）
+}
+
+/**
+ * 切换思政热点显示/隐藏状态
+ * @param params 包含id和showFront的参数
+ */
+export function toggleHotspotShowFront(params: ToggleShowFrontParams): Promise<void> {
+  return request({
+    url: '/news/showFront/edit',
+    method: 'PUT',
+    data: params
   })
 }
 

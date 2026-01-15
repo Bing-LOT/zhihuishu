@@ -10,11 +10,11 @@ import request from './request'
 export interface HotspotItem {
   id: number
   title: string
-  source?: string  // 来源（如：新华网、人民日报等）
+  source?: number | string  // 来源（可能是数字ID或字符串，如：新华网、人民日报等）
   content: string
   contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
-  pinTop: number  // 1=置顶；0=不置顶
-  statPv: number  // 浏览量
+  pinTop?: number  // 1=置顶；0=不置顶
+  statPv?: number  // 浏览量
   showFront: number  // 1=显示；0=不显示
   createTime: string
   updateTime?: string
@@ -47,7 +47,7 @@ export interface HotspotListResponse {
  */
 export function getHotspotList(params: HotspotListParams): Promise<HotspotListResponse> {
   return request({
-    url: '/hotspot/page/list',
+    url: '/api/news/page/list',
     method: 'POST',
     data: params
   })
@@ -59,7 +59,7 @@ export function getHotspotList(params: HotspotListParams): Promise<HotspotListRe
  */
 export function getHotspotDetail(id: string | number): Promise<HotspotItem> {
   return request({
-    url: `/hotspot/detail/${id}`,
+    url: `/api/news/get/${id}`,
     method: 'GET'
   })
 }
@@ -69,7 +69,7 @@ export function getHotspotDetail(id: string | number): Promise<HotspotItem> {
  */
 export interface HotspotAddItem {
   title: string
-  source?: string  // 来源（如：新华网、人民日报等）
+  source?: number | string  // 来源（可能是数字ID或字符串，如：新华网、人民日报等）
   content: string
   contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
   pinTop: number  // 1=置顶；0=不置顶

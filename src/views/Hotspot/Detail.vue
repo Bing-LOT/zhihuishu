@@ -82,7 +82,7 @@
             <h1 class="article-title">{{ detail.title }}</h1>
             
             <div class="article-meta">
-              <span class="meta-item">来源：新华网</span>
+              <span v-if="detail.source" class="meta-item">来源：{{ detail.source }}</span>
               <span class="meta-item">发布时间：{{ formatDate(detail.createTime) }}</span>
               <span class="meta-divider" />
               <span class="meta-item">浏览人数：{{ detail.statPv || 0 }}</span>
@@ -287,37 +287,14 @@ const loadDetail = async () => {
   try {
     isLoading.value = true
     
-    // Mock data for demonstration
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    detail.value = {
-      id: parseInt(id),
-      title: '2025年中国国际形象全球调查报告：习近平新时代中国特色社会主义思想获国际社会高度认同 国际社会对华好感度持续提升',
-      content: `
-        <p style="text-indent: 32px;">新华社北京12月29日电　2025年中国国际形象全球调查报告29日发布。报告显示，习近平新时代中国特色社会主义思想获国际社会高度认同，深入贯彻中央八项规定精神、制定五年规划等执政理念与经验获国际好评，国际社会对华好感度持续提升、期待中国发挥更大作用。</p>
-        <p style="text-indent: 32px;">&nbsp;</p>
-        <p style="text-indent: 32px;">本次全球调查由环球时报研究院具体执行。调查样本为46个国家、约5.17万民众，其中包括15个发达国家和31个发展中国家，涵盖各大洲代表性国家及二十国集团国家、9个金砖国家、10个东盟国家。</p>
-        <p style="text-indent: 32px;">&nbsp;</p>
-        <p style="text-indent: 32px;">本次调查选取了习近平新时代中国特色社会主义思想中的部分重要理念，询问外国受访民众的意见。"构建人类命运共同体""绿水青山就是金山银山"获近八成国际民意认同，"全面从严治党""全面深化改革""以人民为中心"获超过七成认同。</p>
-        <p style="text-indent: 32px;">&nbsp;</p>
-        <p style="text-indent: 32px;">调查显示，近七成国外受访民众对中国共产党深入贯彻中央八项规定精神等全面从严治党理念和实践持肯定态度。本次调查介绍了中国编制并实施五年规划的发展经验，超过四分之三的国外受访民众对此具有客观积极的认知与评价。</p>
-        <p style="text-indent: 32px;">&nbsp;</p>
-        <p style="text-indent: 32px;">调查显示，超过八成国外受访民众对2025年中国经济增长给予积极评价，近九成受访者表示对未来10年中国经济增长有信心。近八成国外受访民众认可中国综合国力在增强，近七成国外受访民众对中国抱有好感，对中国人的奋斗精神、创新精神的认同比例超过四分之三。九成多国外受访民众对中国感兴趣，其中四成多兴趣程度很高。</p>
-        <p style="text-indent: 32px;">&nbsp;</p>
-        <p style="text-indent: 32px;">在推动国际秩序朝着公正合理方向发展、改革完善全球治理、开展国际和地区热点问题斡旋与协调，以及经贸合作、教科文合作等方面，八成左右国外受访民众期待中国未来开展更多行动或发挥更大作用。</p>
-        <p style="text-indent: 32px;">&nbsp;</p>
-        <p style="text-indent: 32px;">超过八成国外受访民众认为本国与中国是正常、友好或战略合作的关系，超过三分之二的国外受访民众希望未来本国与中国的关系变得更好，超过四分之三的国外受访民众对中国的周边外交政策给出积极客观评价。</p>
-      `,
-      contentType: 0,
-      pinTop: 1,
-      statPv: 1093158,
-      showFront: 1,
-      createTime: '2025-12-29'
-    }
-    
-    /* 实际API调用（已注释）：
+    // 调用真实API
     detail.value = await getHotspotDetail(id)
-    */
+    
+    console.log('思政热点详情加载成功:', {
+      id: detail.value.id,
+      标题: detail.value.title,
+      浏览量: detail.value.statPv
+    })
   } catch (error) {
     console.error('加载详情失败:', error)
     detail.value = null

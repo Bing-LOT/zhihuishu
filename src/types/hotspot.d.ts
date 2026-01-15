@@ -6,10 +6,11 @@
 export interface HotspotItem {
   id: number
   title: string
+  source?: number | string  // 来源（可能是数字ID或字符串）
   content: string
   contentType: number  // 0=富文本内容（内部详情）；1=URL地址（外部跳转）
-  pinTop: number  // 1=置顶；0=不置顶
-  statPv: number  // 浏览量
+  pinTop?: number  // 1=置顶；0=不置顶
+  statPv?: number  // 浏览量
   showFront: number  // 1=显示；0=不显示
   createTime: string
   updateTime?: string

@@ -149,7 +149,7 @@ const searchKeyword = ref('')
 const newsList = ref<HotspotItem[]>([])
 const isLoading = ref(false)
 const currentPage = ref(1)
-const pageSize = ref(28) // 14 items per column * 2 columns
+const pageSize = ref(30) // 14 items per column * 2 columns
 const total = ref(0)
 
 // Special Topics
@@ -529,25 +529,7 @@ const loadNewsList = async () => {
   try {
     isLoading.value = true
     
-    // 使用模拟数据
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // Filter by search keyword if provided
-    let filteredData = mockHotspotData
-    if (searchKeyword.value) {
-      filteredData = mockHotspotData.filter(item => 
-        item.title.toLowerCase().includes(searchKeyword.value.toLowerCase())
-      )
-    }
-    
-    // Paginate
-    const start = (currentPage.value - 1) * pageSize.value
-    const end = start + pageSize.value
-    newsList.value = filteredData.slice(start, end)
-    total.value = filteredData.length
-    
-    /* 实际API调用代码（已注释）：
+    // 调用真实API
     const response = await getHotspotList({
       pageIndex: currentPage.value,
       pageSize: pageSize.value,
@@ -557,7 +539,13 @@ const loadNewsList = async () => {
     
     newsList.value = response.records || []
     total.value = response.total || 0
-    */
+    
+    console.log('思政热点列表加载成功:', {
+      总数: total.value,
+      当前页: currentPage.value,
+      每页条数: pageSize.value,
+      记录数: newsList.value.length
+    })
   } catch (error) {
     console.error('加载新闻列表失败:', error)
     newsList.value = []

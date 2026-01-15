@@ -4,10 +4,18 @@
     <AppHeader />
 
     <!-- Banner -->
-    <AppBanner />
+    <!-- <AppBanner /> -->
 
     <!-- Navigation -->
     <AppNavigation />
+
+    <!-- 教学有道横幅 -->
+    <section class="teaching-banner">
+      <img src="/images/teaching-banner.png" alt="教学有道" class="banner-image">
+      <div class="banner-content">
+        <h1 class="banner-title">教学有道</h1>
+      </div>
+    </section>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -39,7 +47,7 @@
             </div>
             <div class="meta-item">
               <span class="meta-label">教学类别：</span>
-              <span class="meta-value">{{ caseInfo.caseTypeName || (caseInfo.caseType === 1 ? '教学案例' : '一流本科') }}</span>
+              <span class="meta-value">{{ caseInfo.caseTypeName || (caseInfo.caseType === 1 ? '教育案例' : '一流本科') }}</span>
             </div>
           </div>
           <div class="teachers-box">
@@ -59,9 +67,9 @@
             </div>
           </div>
           <div class="view-count">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 7.5C11.3807 7.5 12.5 8.61929 12.5 10C12.5 11.3807 11.3807 12.5 10 12.5C8.61929 12.5 7.5 11.3807 7.5 10C7.5 8.61929 8.61929 7.5 10 7.5Z" stroke="#333" opacity="0.5" stroke-width="1"/>
-              <path d="M2.5 10C2.5 10 5 5 10 5C15 5 17.5 10 17.5 10C17.5 10 15 15 10 15C5 15 2.5 10 2.5 10Z" stroke="#333" opacity="0.5" stroke-width="1"/>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 7.5C11.3807 7.5 12.5 8.61929 12.5 10C12.5 11.3807 11.3807 12.5 10 12.5C8.61929 12.5 7.5 11.3807 7.5 10C7.5 8.61929 8.61929 7.5 10 7.5Z" stroke="#333" stroke-width="1"/>
+              <path d="M2.5 10C2.5 10 5 5 10 5C15 5 17.5 10 17.5 10C17.5 10 15 15 10 15C5 15 2.5 10 2.5 10Z" stroke="#333" stroke-width="1"/>
             </svg>
             <span class="count-label">累计观看人数</span>
             <span class="count-value">{{ caseInfo.viewCount }}</span>
@@ -112,13 +120,13 @@
           <div class="content-divider" />
           <div class="content-body">
             <!-- 课程简介 -->
-            <div v-if="activeTab === 'introduction'" class="content-text" v-html="formatContent(caseInfo?.introduction)" />
+            <div v-show="activeTab === 'introduction'" class="content-text" v-html="formatContent(caseInfo?.introduction)" />
             
             <!-- 教学设计 -->
-            <div v-else-if="activeTab === 'design'" class="content-text" v-html="formatContent(caseInfo?.designContent)" />
+            <div v-show="activeTab === 'design'" class="content-text" v-html="formatContent(caseInfo?.designContent)" />
             
             <!-- 教学视频 -->
-            <div v-else-if="activeTab === 'video'" class="video-wrapper">
+            <div v-show="activeTab === 'video'" class="video-wrapper">
               <video 
                 v-if="caseInfo?.videoUrl" 
                 :src="caseInfo.videoUrl" 
@@ -151,7 +159,7 @@
             <div class="card-cover">
               <img :src="item.coverUrl" alt="" class="cover-img">
               <div class="cover-overlay">
-                <span class="case-label">案例名称：{{ item.title }}</span>
+                <span class="case-label">案例名称：xxxx</span>
               </div>
               <div v-if="item.isNational" class="national-badge-small">
                 国家示范
@@ -162,9 +170,9 @@
               <div class="card-footer">
                 <span class="teacher-name">教师：{{ item.teacherName }}</span>
                 <div class="view-count-small">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 5C9.65685 5 11 6.34315 11 8C11 9.65685 9.65685 11 8 11C6.34315 11 5 9.65685 5 8C5 6.34315 6.34315 5 8 5Z" stroke="#333" opacity="0.5" stroke-width="1"/>
-                    <path d="M1 8C1 8 3 3 8 3C13 3 15 8 15 8C15 8 13 13 8 13C3 13 1 8 1 8Z" stroke="#333" opacity="0.5" stroke-width="1"/>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5C9.65685 5 11 6.34315 11 8C11 9.65685 9.65685 11 8 11C6.34315 11 5 9.65685 5 8C5 6.34315 6.34315 5 8 5Z" stroke="#333" stroke-width="1"/>
+                    <path d="M1 8C1 8 3 3 8 3C13 3 15 8 15 8C15 8 13 13 8 13C3 13 1 8 1 8Z" stroke="#333" stroke-width="1"/>
                   </svg>
                   <span>{{ formatViewCount(item.viewCount) }}</span>
                 </div>
@@ -274,7 +282,7 @@ function generateMockDetail(): TeachingCase {
     schoolName: '长安大学',
     categoryName: '信息学院',
     caseType: 1,
-    caseTypeName: '教学案例',
+    caseTypeName: '教育案例',
     isNational: true,
     teachers: [
       { name: '张三', title: '教师' },
@@ -378,6 +386,52 @@ onMounted(() => {
   background: #fff;
 }
 
+/* ===== 教学有道横幅 ===== */
+.teaching-banner {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: #c30d23;
+}
+
+.banner-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-title {
+  font-family: 'Source Han Sans CN', sans-serif;
+  font-size: 56px;
+  font-weight: bold;
+  line-height: normal;
+  margin: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f7eea4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 2px 8px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
 /* ===== Main Content ===== */
 .main-content {
   flex: 1;
@@ -388,6 +442,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  background: #fff;
 }
 
 /* ===== 面包屑导航 ===== */
@@ -403,8 +458,8 @@ onMounted(() => {
 }
 
 .breadcrumb-item {
-  cursor: pointer;
-  transition: color 0.3s;
+  cursor: default;
+  transition: color 0.3s, opacity 0.3s;
 }
 
 .breadcrumb-item.inactive {
@@ -412,7 +467,11 @@ onMounted(() => {
   opacity: 0.5;
 }
 
-.breadcrumb-item.inactive:hover {
+.breadcrumb-item.inactive:not(:first-child) {
+  cursor: pointer;
+}
+
+.breadcrumb-item.inactive:not(:first-child):hover {
   opacity: 0.7;
 }
 
@@ -429,6 +488,7 @@ onMounted(() => {
   display: flex;
   gap: 32px;
   position: relative;
+  align-items: stretch;
 }
 
 .info-cover {
@@ -450,6 +510,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  justify-content: space-between;
 }
 
 .info-title {
@@ -469,6 +531,7 @@ onMounted(() => {
   font-size: 14px;
   color: #333;
   line-height: normal;
+  flex-shrink: 0;
 }
 
 .meta-item {
@@ -493,6 +556,8 @@ onMounted(() => {
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  padding: 12px 0;
+  justify-content: center;
 }
 
 .teachers-header {
@@ -500,6 +565,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   width: 100%;
+  padding: 0 0 0 0;
 }
 
 .header-bar {
@@ -523,23 +589,27 @@ onMounted(() => {
   padding: 0 12px;
   font-family: 'Source Han Sans CN', sans-serif;
   line-height: normal;
+  align-items: flex-start;
 }
 
 .teacher-item {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: flex-start;
 }
 
 .teacher-name {
   font-size: 16px;
   color: #333;
+  white-space: nowrap;
 }
 
 .teacher-title {
   font-size: 14px;
   color: #333;
   opacity: 0.5;
+  white-space: nowrap;
 }
 
 .view-count {
@@ -547,11 +617,10 @@ onMounted(() => {
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  opacity: 0.5;
 }
 
 .view-count svg {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .count-label {
@@ -559,6 +628,7 @@ onMounted(() => {
   font-size: 14px;
   line-height: normal;
   color: #333;
+  opacity: 0.5;
 }
 
 .count-value {
@@ -566,13 +636,12 @@ onMounted(() => {
   font-size: 14px;
   line-height: normal;
   color: #c30d23;
-  opacity: 1;
 }
 
 .national-badge {
   position: absolute;
   top: 16px;
-  left: 500px;
+  left: 524px;
   padding: 4px 8px;
   background: linear-gradient(to left, #bc7120, #bc2220);
   color: white;
@@ -580,6 +649,7 @@ onMounted(() => {
   font-family: 'Source Han Sans CN', sans-serif;
   border-radius: 0 4px 0 4px;
   line-height: normal;
+  white-space: nowrap;
 }
 
 /* ===== Tab切换区域 ===== */
@@ -590,6 +660,7 @@ onMounted(() => {
   height: 720px;
   position: relative;
   isolation: isolate;
+  border-radius: 0;
 }
 
 .tab-sidebar {
@@ -598,7 +669,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 32px;
-  padding: 24px;
+  padding: 24px 0 24px 24px;
   position: relative;
   z-index: 2;
 }
@@ -607,7 +678,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 8px 24px;
+  padding: 8px 24px 8px 24px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
@@ -616,6 +687,8 @@ onMounted(() => {
   line-height: normal;
   color: #333;
   white-space: nowrap;
+  width: auto;
+  min-width: 166px;
 }
 
 .tab-item:hover {
@@ -649,12 +722,14 @@ onMounted(() => {
   position: relative;
   z-index: 1;
   overflow: hidden;
+  min-width: 0;
 }
 
 .content-header {
   display: flex;
   align-items: center;
   gap: 10px;
+  height: 28px;
 }
 
 .content-bar {
@@ -676,14 +751,35 @@ onMounted(() => {
 
 .content-divider {
   width: 100%;
-  height: 1px;
-  background: #e5e5e5;
+  height: 0;
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 0;
 }
 
 .content-body {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  padding-right: 8px;
+}
+
+.content-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.content-body::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 3px;
+}
+
+.content-body::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
 }
 
 .content-text {
@@ -696,6 +792,7 @@ onMounted(() => {
 
 .content-text :deep(p) {
   margin: 0 0 16px 0;
+  text-align: justify;
 }
 
 .content-text :deep(p:last-child) {
@@ -704,7 +801,7 @@ onMounted(() => {
 
 .video-wrapper {
   width: 100%;
-  height: 100%;
+  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -712,13 +809,15 @@ onMounted(() => {
 
 .video-player {
   width: 100%;
-  max-height: 100%;
+  max-width: 100%;
   border-radius: 4px;
+  background: #000;
 }
 
 .no-video {
   font-size: 16px;
   color: #999;
+  font-family: 'Source Han Sans CN', sans-serif;
 }
 
 /* ===== 相关推荐 ===== */
@@ -727,6 +826,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 24px;
   width: 100%;
+  padding-bottom: 0;
 }
 
 .section-header {
@@ -734,12 +834,14 @@ onMounted(() => {
   align-items: center;
   gap: 20px;
   width: 100%;
+  height: 44px;
 }
 
 .section-title-wrapper {
   display: flex;
   align-items: center;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -749,14 +851,17 @@ onMounted(() => {
   display: flex;
   align-items: center;
   margin: 0;
+  line-height: normal;
 }
 
 .title-highlight {
   color: #c30d23;
+  letter-spacing: 0;
 }
 
 .title-normal {
   color: #000;
+  letter-spacing: 0;
 }
 
 .title-divider {
@@ -765,6 +870,8 @@ onMounted(() => {
   background-image: url('/images/0284b4e501c92c66c4350a706aae467b7ebb06a3.png');
   background-repeat: repeat-x;
   background-size: 5px 15px;
+  background-position: left center;
+  min-width: 0;
 }
 
 .related-grid {
@@ -772,11 +879,12 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   width: 100%;
+  align-items: stretch;
 }
 
 .case-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   cursor: pointer;
@@ -795,12 +903,14 @@ onMounted(() => {
   aspect-ratio: 364 / 200;
   position: relative;
   overflow: hidden;
+  border-radius: 4px 4px 0 0;
 }
 
 .card-cover .cover-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .cover-overlay {
@@ -817,6 +927,8 @@ onMounted(() => {
   font-size: 14px;
   font-family: 'Source Han Sans CN', sans-serif;
   line-height: normal;
+  display: block;
+  width: 100%;
 }
 
 .national-badge-small {
@@ -830,6 +942,7 @@ onMounted(() => {
   font-family: 'Source Han Sans CN', sans-serif;
   border-radius: 0 4px 0 4px;
   line-height: normal;
+  z-index: 1;
 }
 
 .card-content {
@@ -838,6 +951,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 12px;
   background: white;
+  border-radius: 0 0 4px 4px;
 }
 
 .card-title {
@@ -846,12 +960,20 @@ onMounted(() => {
   font-family: 'Source Han Sans CN', sans-serif;
   margin: 0;
   line-height: normal;
+  min-height: 22px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .teacher-name {
@@ -860,6 +982,10 @@ onMounted(() => {
   opacity: 0.5;
   font-family: 'Source Han Sans CN', sans-serif;
   line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 .view-count-small {
@@ -867,6 +993,7 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   opacity: 0.5;
+  flex-shrink: 0;
 }
 
 .view-count-small span {
@@ -874,6 +1001,7 @@ onMounted(() => {
   color: #333;
   font-family: 'Source Han Sans CN', sans-serif;
   line-height: normal;
+  white-space: nowrap;
 }
 </style>
 

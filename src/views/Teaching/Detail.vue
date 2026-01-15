@@ -123,7 +123,15 @@
             <div v-show="activeTab === 'introduction'" class="content-text" v-html="formatContent(caseInfo?.introduction)" />
             
             <!-- 教学设计 -->
-            <div v-show="activeTab === 'design'" class="content-text" v-html="formatContent(caseInfo?.designContent)" />
+            <div v-show="activeTab === 'design'" class="pdf-wrapper">
+              <div v-if="caseInfo?.designPdfUrl" class="pdf-container">
+                <VuePdfEmbed 
+                  :source="caseInfo.designPdfUrl"
+                  class="pdf-viewer"
+                />
+              </div>
+              <div v-else class="no-pdf">暂无教学设计文档</div>
+            </div>
             
             <!-- 教学视频 -->
             <div v-show="activeTab === 'video'" class="video-wrapper">
@@ -197,6 +205,7 @@ import AppHeader from '@/components/common/AppHeader/index.vue'
 import AppBanner from '@/components/common/AppBanner/index.vue'
 import AppNavigation from '@/components/common/AppNavigation/index.vue'
 import AppFooter from '@/components/common/AppFooter/index.vue'
+import VuePdfEmbed from 'vue-pdf-embed'
 
 const route = useRoute()
 const router = useRouter()
@@ -292,6 +301,7 @@ function generateMockDetail(): TeachingCase {
 <p>&nbsp;</p>
 <p style="text-indent: 32px;">通过本课程的学习，学生能掌握概率论与数理统计的基本概念、基本理论和方法，从而理解随机现象的基本思想、训练数理逻辑思维，培养运用概率统计方法分析和解决实际问题的能力，为后续学习乃至工作奠定必备的数理基础。</p>`,
     designContent: '<p>教学设计内容待补充...</p>',
+    designPdfUrl: '', // 教学设计PDF URL，实际使用时从后端获取
     videoUrl: ''
   }
 }
@@ -815,6 +825,52 @@ onMounted(() => {
 }
 
 .no-video {
+  font-size: 16px;
+  color: #999;
+  font-family: 'Source Han Sans CN', sans-serif;
+}
+
+/* ===== PDF预览样式 ===== */
+.pdf-wrapper {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.pdf-container {
+  width: 100%;
+  max-width: 914px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.pdf-viewer {
+  width: 100%;
+}
+
+.pdf-viewer :deep(.vue-pdf-embed) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.pdf-viewer :deep(.vue-pdf-embed > div) {
+  width: 100% !important;
+  margin-bottom: 0;
+}
+
+.pdf-viewer :deep(canvas) {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+.no-pdf {
   font-size: 16px;
   color: #999;
   font-family: 'Source Han Sans CN', sans-serif;

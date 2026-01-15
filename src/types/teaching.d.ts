@@ -46,6 +46,8 @@ export interface TeachingCase {
   introduction?: string
   /** 教学设计 */
   designContent?: string
+  /** 教学设计PDF URL */
+  designPdfUrl?: string
   /** 教学视频URL */
   videoUrl?: string
 }

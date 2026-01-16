@@ -47,7 +47,7 @@ export interface HotspotListResponse {
  */
 export function getHotspotList(params: HotspotListParams): Promise<HotspotListResponse> {
   return request({
-    url: '/news/page/list',
+    url: '/api/news/page/list',
     method: 'POST',
     data: params
   })

@@ -18,15 +18,22 @@ export interface Teacher {
 export interface CollegeItem {
   id: number // 业务id
   name: string // 课程名称
-  coverUrl: string // 封面图片
+  coverUrl: string // 封面图片（课程封面）
   college: string // 所在学院
-  teachers: Teacher[] // 主讲教师多个
-  types: string[] // 建设课程类型，多个
-  content: string // 课程详细内容
-  videoUrl?: string // 视频地址
+  teachers: Teacher[] // 主讲教师多个（教师信息）
+  levelName?: string // 示范等级
+  property?: string // 课程性质
+  brief?: string // 课程简介
+  docUrl?: string // 教学设计文档
+  videoUrl?: string // 教学视频
+  showStatPv?: number // 显示学习统计：1=显示；0=不显示
   statPv: number // 浏览量
-  showFront: number // 是否前台显示：1=显示；0=隐藏
-  createTime: string // 发布时间
+  showFront: number // 是否前台显示：1=显示；0=不显示
+  exampleName?: string // 案例名称
+  direction?: string // 入选方向：面向产出、教学有道、默认：无
+  content?: string // 思政元素
+  createTime?: string // 发布时间
+  types?: string[] // 建设课程类型，多个（用于列表和管理）
 }
 
 /**
@@ -122,5 +129,12 @@ export function updateCollegeSort(data: { id: number; sort: number }[]) {
  */
 export function getTopCollegeList() {
   return request.get<CollegeItem[]>('/api/special/college/top/list')
+}
+
+/**
+ * 获取一院一品详情
+ */
+export function getCollegeDetail(id: number) {
+  return request.get<CollegeItem>(`/api/special/college/get/${id}`)
 }
 

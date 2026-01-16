@@ -3,149 +3,211 @@
     <!-- Header -->
     <AppHeader />
 
-    <!-- Navigation -->
+    <!-- 导航栏 -->
     <AppNavigation />
 
-    <!-- 一院一品横幅 -->
-    <section class="college-banner">
-      <div class="banner-content">
-        <h1 class="banner-title">
-          <span class="title-highlight">一院</span>
-          <span class="title-normal">一品</span>
-        </h1>
-      </div>
-    </section>
+    <!-- Banner -->
+    <div class="banner-section">
+      <div class="banner-overlay"></div>
+      <h1 class="banner-title">一院一品</h1>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- 面包屑导航 -->
+    <!-- 主内容 -->
+    <div class="main-content">
+      <!-- 面包屑 -->
       <div class="breadcrumb">
-        <span class="breadcrumb-item inactive">您的位置： </span>
-        <span class="breadcrumb-item inactive" @click="goToHome">首页</span>
-        <span class="breadcrumb-item inactive">>> </span>
-        <span class="breadcrumb-item inactive" @click="goToCollege">一院一品</span>
-        <span class="breadcrumb-item inactive">>> </span>
-        <span class="breadcrumb-item active">案例详情</span>
+        <span class="breadcrumb-text">您的位置： </span>
+        <router-link to="/" class="breadcrumb-link">首页</router-link>
+        <span class="breadcrumb-text"> >> </span>
+        <router-link to="/college" class="breadcrumb-link">一院一品</router-link>
+        <span class="breadcrumb-text"> >> </span>
+        <span class="breadcrumb-current">作品详情</span>
       </div>
 
-      <!-- 案例信息卡片 -->
-      <div v-if="collegeInfo" class="info-card">
-        <div class="info-cover">
-          <img :src="collegeInfo.coverUrl" alt="" class="cover-img">
+      <!-- 作品信息卡片 -->
+      <div v-if="!loading && detail" class="detail-card">
+        <div class="detail-cover">
+          <img :src="detail.coverUrl" :alt="detail.name" />
+          <!-- 示范等级标签 -->
+          <div v-if="detail.levelName" class="level-badge">
+            {{ detail.levelName }}
+          </div>
         </div>
-        <div class="info-content">
-          <h1 class="info-title">{{ collegeInfo.name }}</h1>
-          <div class="info-meta">
-            <div class="meta-item">
-              <span class="meta-label">所在学院：</span>
-              <span class="meta-value">{{ collegeInfo.college }}</span>
+        <div class="detail-info">
+          <h2 class="detail-title">{{ detail.name }}</h2>
+          <div class="detail-college">
+            <span class="label">所属学院：</span>
+            <span class="value">{{ detail.college }}</span>
+          </div>
+          <div class="detail-intro">
+            <div class="intro-header">
+              <div class="intro-indicator"></div>
+              <span class="intro-title">课程简介</span>
             </div>
-            <div class="meta-item">
-              <span class="meta-label">课程类型：</span>
-              <span class="meta-value">{{ formatTypes(collegeInfo.types) }}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">发布时间：</span>
-              <span class="meta-value">{{ formatDate(collegeInfo.createTime) }}</span>
+            <div class="intro-content">
+              <p>{{ detail.brief || '暂无简介' }}</p>
             </div>
           </div>
-          <div class="teachers-box">
-            <div class="teachers-header">
-              <div class="header-bar" />
-              <span class="header-title">主讲教师</span>
-            </div>
-            <div class="teachers-list">
-              <div 
-                v-for="(teacher, index) in collegeInfo.teachers" 
-                :key="index" 
-                class="teacher-item"
-              >
-                <div class="teacher-name">{{ teacher.name }}</div>
-                <div class="teacher-title">{{ teacher.title || '教师' }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="view-count">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 7.5C11.3807 7.5 12.5 8.61929 12.5 10C12.5 11.3807 11.3807 12.5 10 12.5C8.61929 12.5 7.5 11.3807 7.5 10C7.5 8.61929 8.61929 7.5 10 7.5Z" stroke="#333" stroke-width="1"/>
-              <path d="M2.5 10C2.5 10 5 5 10 5C15 5 17.5 10 17.5 10C17.5 10 15 15 10 15C5 15 2.5 10 2.5 10Z" stroke="#333" stroke-width="1"/>
-            </svg>
-            <span class="count-label">累计观看人数</span>
-            <span class="count-value">{{ collegeInfo.statPv }}</span>
-            <span class="count-label">人</span>
+          <div class="detail-stats">
+            <el-icon class="stats-icon"><View /></el-icon>
+            <span class="stats-label">累计观看人数</span>
+            <span class="stats-count">{{ detail.statPv }}</span>
+            <span class="stats-unit">人</span>
           </div>
         </div>
       </div>
 
-      <!-- Tab切换区域 -->
-      <div class="tab-section">
-        <!-- 左侧菜单 -->
-        <aside class="tab-sidebar">
-          <div 
-            class="tab-item"
-            :class="{ active: activeTab === 'introduction' }"
-            @click="activeTab = 'introduction'"
-          >
-            <div class="tab-dot" />
-            <span>课程简介</span>
-          </div>
-          <div 
-            v-if="collegeInfo?.videoUrl"
-            class="tab-item"
+      <!-- 加载状态 -->
+      <div v-if="loading" class="loading-wrapper">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
+      </div>
+
+      <!-- 内容区域 -->
+      <div v-if="!loading && detail" class="content-section">
+        <!-- 左侧导航 -->
+        <div class="side-nav">
+          <div
+            class="nav-item"
             :class="{ active: activeTab === 'video' }"
             @click="activeTab = 'video'"
           >
-            <div class="tab-dot" />
-            <span>课程视频</span>
+            <div class="nav-indicator"></div>
+            <span>作品视频</span>
           </div>
-        </aside>
+          <div
+            class="nav-item"
+            :class="{ active: activeTab === 'intro' }"
+            @click="activeTab = 'intro'"
+          >
+            <div class="nav-indicator"></div>
+            <span>图文介绍（待定）</span>
+          </div>
+        </div>
 
-        <!-- 右侧内容区 -->
-        <div class="tab-content">
-          <!-- 课程简介 -->
-          <div v-if="activeTab === 'introduction'" class="content-section">
-            <div class="section-header">
-              <h2 class="section-title">课程简介</h2>
+        <!-- 右侧内容 -->
+        <div class="content-main">
+          <!-- 标题栏 -->
+          <div class="content-header">
+            <div class="header-indicator"></div>
+            <h3 class="header-title">作品视频</h3>
+          </div>
+          <div class="header-divider"></div>
+
+          <!-- 视频播放器 -->
+          <div v-if="activeTab === 'video'" class="video-section">
+            <div class="video-player-wrapper">
+              <VideoPlayer
+                v-if="currentVideoUrl"
+                :src="currentVideoUrl"
+                :poster="detail.coverUrl"
+              />
+              <div v-else class="no-video">
+                <p>暂无视频</p>
+              </div>
             </div>
-            <div class="section-body">
-              <div v-if="collegeInfo?.content" class="rich-content" v-html="collegeInfo.content"></div>
-              <div v-else class="empty-tip">暂无课程简介</div>
+
+            <!-- 视频列表 -->
+            <div v-if="videoList.length > 0" class="video-list">
+              <div
+                v-for="(video, index) in videoList"
+                :key="index"
+                class="video-item"
+                @click="playVideo(video)"
+              >
+                <div class="video-thumbnail">
+                  <img :src="video.thumbnail || detail.coverUrl" :alt="video.name" />
+                  <div class="video-overlay">
+                    <div class="play-icon">
+                      <el-icon :size="24"><VideoPlay /></el-icon>
+                    </div>
+                  </div>
+                </div>
+                <div class="video-name">{{ video.name }}</div>
+              </div>
             </div>
           </div>
 
-          <!-- 课程视频 -->
-          <div v-if="activeTab === 'video' && collegeInfo?.videoUrl" class="content-section">
-            <div class="section-header">
-              <h2 class="section-title">课程视频</h2>
-            </div>
-            <div class="section-body">
-              <VideoPlayer :url="collegeInfo.videoUrl" />
+          <!-- 图文介绍 -->
+          <div v-if="activeTab === 'intro'" class="intro-section">
+            <div class="intro-placeholder">
+              <p>图文介绍功能开发中...</p>
             </div>
           </div>
         </div>
       </div>
-    </main>
 
-    <!-- Footer -->
+      <!-- 相关推荐 -->
+      <div v-if="!loading" class="recommend-section">
+        <div class="recommend-header">
+          <div class="section-title">
+            <span class="title-highlight">相关</span>
+            <span class="title-normal">推荐</span>
+          </div>
+          <div class="title-decoration"></div>
+        </div>
+
+        <div v-if="recommendList.length > 0" class="recommend-grid">
+          <div
+            v-for="item in recommendList"
+            :key="item.id"
+            class="recommend-card"
+            @click="goToDetail(item.id)"
+          >
+            <div class="card-image">
+              <img :src="item.coverUrl" :alt="item.name" />
+              <div class="card-overlay">
+                <span class="college-name">{{ item.college }}</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">{{ item.name }}</h3>
+              <div class="card-footer">
+                <span class="publish-date">发布时间:{{ formatDate(item.createTime) }}</span>
+                <div class="view-count">
+                  <el-icon><View /></el-icon>
+                  <span>{{ item.statPv }}人</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚 -->
     <PageFooter />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { View, Loading, VideoPlay } from '@element-plus/icons-vue'
 import AppHeader from '@/components/common/AppHeader/index.vue'
 import AppNavigation from '@/components/common/AppNavigation/index.vue'
 import PageFooter from '@/components/common/PageFooter/index.vue'
 import VideoPlayer from '@/components/common/VideoPlayer/index.vue'
-import { getCollegePageList, type CollegeItem } from '@/api/college'
+import { getCollegeDetail, getCollegePageList, type CollegeItem } from '@/api/college'
 
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 
-const collegeInfo = ref<CollegeItem | null>(null)
-const activeTab = ref('introduction')
+// 数据
+const detail = ref<CollegeItem | null>(null)
+const loading = ref(false)
+const activeTab = ref('video')
+const currentVideoUrl = ref('')
+const recommendList = ref<CollegeItem[]>([])
+
+// 视频列表（模拟数据，实际应从 API 获取）
+const videoList = ref([
+  { name: '视频名称', url: '', thumbnail: '' },
+  { name: '视频名称', url: '', thumbnail: '' },
+  { name: '视频名称', url: '', thumbnail: '' },
+  { name: '视频名称', url: '', thumbnail: '' }
+])
 
 // 格式化日期
 const formatDate = (dateStr: string) => {
@@ -157,413 +219,645 @@ const formatDate = (dateStr: string) => {
   return `${year}-${month}-${day}`
 }
 
-// 格式化类型列表
-const formatTypes = (types: string[]) => {
-  if (!types || types.length === 0) return ''
-  return types.join('、')
-}
+// 加载详情
+const loadDetail = async () => {
+  const id = Number(route.params.id)
+  if (!id) {
+    ElMessage.error('参数错误')
+    router.push('/college')
+    return
+  }
 
-// 加载案例详情
-const loadCollegeDetail = async () => {
+  loading.value = true
   try {
-    const id = Number(route.params.id)
-    if (!id) {
-      ElMessage.error('参数错误')
-      return
-    }
-
-    // 通过分页接口查询所有数据，然后筛选出目标案例
-    const result = await getCollegePageList({
-      pageIndex: 1,
-      pageSize: 1000,
-      showFront: 1
-    })
-
-    const targetCollege = result.records.find(item => item.id === id)
-    if (!targetCollege) {
-      ElMessage.error('案例不存在')
-      router.push('/college')
-      return
-    }
-
-    collegeInfo.value = targetCollege
+    detail.value = await getCollegeDetail(id)
+    currentVideoUrl.value = detail.value.videoUrl || ''
+    
+    // 加载推荐列表
+    loadRecommendList()
   } catch (error) {
-    console.error('加载案例详情失败:', error)
+    console.error('加载详情失败:', error)
     ElMessage.error('加载失败，请稍后重试')
+  } finally {
+    loading.value = false
   }
 }
 
-// 导航方法
-const goToHome = () => {
-  router.push('/')
+// 加载推荐列表
+const loadRecommendList = async () => {
+  try {
+    const result = await getCollegePageList({
+      pageIndex: 1,
+      pageSize: 4,
+      showFront: 1
+    })
+    // 过滤掉当前详情项
+    recommendList.value = result.records.filter(item => item.id !== detail.value?.id).slice(0, 4)
+  } catch (error) {
+    console.error('加载推荐列表失败:', error)
+  }
 }
 
-const goToCollege = () => {
-  router.push('/college')
+// 播放视频
+const playVideo = (video: any) => {
+  if (video.url) {
+    currentVideoUrl.value = video.url
+  } else {
+    ElMessage.warning('该视频暂无播放地址')
+  }
+}
+
+// 跳转详情
+const goToDetail = (id: number) => {
+  router.push(`/college/detail/${id}`)
+  // 重新加载详情
+  loadDetail()
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(() => {
-  loadCollegeDetail()
+  loadDetail()
 })
 </script>
 
 <style scoped>
 .college-detail-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #fff;
 }
 
-/* 横幅 */
-.college-banner {
-  height: 300px;
-  background: linear-gradient(135deg, #c30d23 0%, #8b0a1a 100%);
+/* Banner */
+.banner-section {
+  position: relative;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  overflow: hidden;
+  background: linear-gradient(135deg, #c30d23 0%, #8b0a19 50%, #c30d23 100%);
+  background-size: cover;
+  background-position: center;
 }
 
-.banner-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .banner-title {
+  position: relative;
   margin: 0;
-  font-size: 64px;
-  font-weight: bold;
+  font-size: 56px;
   font-family: 'Source Han Sans CN', sans-serif;
-}
-
-.title-highlight {
-  color: #fff;
-}
-
-.title-normal {
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: bold;
+  background: linear-gradient(to bottom, #fff 0%, #f7eea4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 2px 8px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* 主内容 */
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 20px 60px;
+  padding: 0 20px 60px;
 }
 
 /* 面包屑 */
 .breadcrumb {
-  margin-bottom: 24px;
-  font-size: 14px;
-  color: #666;
+  display: flex;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid #ebebeb;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #333;
 }
 
-.breadcrumb-item {
-  margin-right: 4px;
+.breadcrumb-text {
+  opacity: 0.5;
 }
 
-.breadcrumb-item.inactive {
-  cursor: pointer;
-  transition: color 0.3s;
+.breadcrumb-link {
+  color: #333;
+  opacity: 0.5;
+  text-decoration: none;
 }
 
-.breadcrumb-item.inactive:hover {
+.breadcrumb-link:hover {
+  opacity: 0.7;
+}
+
+.breadcrumb-current {
   color: #c30d23;
 }
 
-.breadcrumb-item.active {
-  color: #c30d23;
-  font-weight: bold;
-}
-
-/* 信息卡片 */
-.info-card {
-  position: relative;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 32px;
-  margin-bottom: 24px;
+/* 详情卡片 */
+.detail-card {
   display: flex;
   gap: 32px;
+  margin-top: 40px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.info-cover {
+.detail-cover {
+  position: relative;
+  width: 540px;
+  height: 304px;
   flex-shrink: 0;
-  width: 360px;
-  height: 240px;
-  border-radius: 8px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.cover-img {
+.detail-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.info-content {
+.level-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 8px;
+  background: linear-gradient(to left, #bc7120 0%, #bc2220 100%);
+  color: #fff;
+  font-size: 14px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
+  font-family: 'Source Han Sans CN', sans-serif;
+}
+
+.detail-info {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
-.info-title {
-  font-size: 28px;
-  color: #333;
-  margin: 0 0 24px 0;
+.detail-title {
+  margin: 0;
+  font-size: 24px;
   font-weight: bold;
+  color: #333;
+  font-family: 'Source Han Sans CN', sans-serif;
 }
 
-.info-meta {
+.detail-college {
+  font-size: 14px;
+  color: #333;
+}
+
+.detail-college .label {
+  opacity: 0.5;
+}
+
+.detail-intro {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 24px;
+  padding: 10px 0;
+  background: #f9f9f9;
 }
 
-.meta-item {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-}
-
-.meta-label {
-  color: #666;
-  min-width: 100px;
-}
-
-.meta-value {
-  color: #333;
-  font-weight: 500;
-}
-
-/* 教师信息 */
-.teachers-box {
-  background: #f8f8f8;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-
-.teachers-header {
+.intro-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  padding: 0;
 }
 
-.header-bar {
-  width: 4px;
-  height: 18px;
+.intro-indicator {
+  width: 5px;
+  height: 16px;
   background: #c30d23;
-  border-radius: 2px;
+}
+
+.intro-title {
+  font-size: 16px;
+  color: #c30d23;
+  font-family: 'Source Han Sans CN', sans-serif;
+}
+
+.intro-content {
+  padding: 0 13px;
+}
+
+.intro-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  opacity: 0.5;
+}
+
+.detail-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 14px;
+  color: #333;
+}
+
+.stats-icon {
+  font-size: 20px;
+  opacity: 0.5;
+}
+
+.stats-label {
+  opacity: 0.5;
+}
+
+.stats-count {
+  color: #c30d23;
+  font-weight: bold;
+}
+
+.stats-unit {
+  opacity: 0.5;
+}
+
+/* 加载状态 */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 12px;
+  color: #999;
+}
+
+/* 内容区域 */
+.content-section {
+  display: flex;
+  gap: 0;
+  margin-top: 40px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.side-nav {
+  width: 214px;
+  flex-shrink: 0;
+  background: #f9f9f9;
+  padding: 24px 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 24px 8px 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 4px;
+  font-size: 18px;
+  color: #333;
+  font-family: 'Source Han Sans CN', sans-serif;
+}
+
+.nav-item .nav-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #999;
+  flex-shrink: 0;
+}
+
+.nav-item.active {
+  background: #c30d23;
+  color: #fff;
+}
+
+.nav-item.active .nav-indicator {
+  background: #fff;
+}
+
+.content-main {
+  flex: 1;
+  background: #fff;
+  padding: 32px 24px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.content-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-indicator {
+  width: 5px;
+  height: 20px;
+  background: #c30d23;
+  flex-shrink: 0;
 }
 
 .header-title {
-  font-size: 16px;
-  color: #333;
+  margin: 0;
+  font-size: 20px;
   font-weight: bold;
+  color: #333;
+  font-family: 'Source Han Sans CN', sans-serif;
 }
 
-.teachers-list {
+.header-divider {
+  height: 1px;
+  background: #e5e5e5;
+}
+
+/* 视频区域 */
+.video-section {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 16px;
 }
 
-.teacher-item {
+.video-player-wrapper {
+  width: 100%;
+  height: 514px;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.no-video {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-}
-
-.teacher-name {
-  font-size: 15px;
-  color: #333;
-  font-weight: 500;
-}
-
-.teacher-title {
-  font-size: 13px;
+  justify-content: center;
+  height: 100%;
   color: #999;
-}
-
-/* 浏览量 */
-.view-count {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #666;
-  margin-top: auto;
-}
-
-.count-value {
-  color: #c30d23;
-  font-weight: bold;
   font-size: 18px;
 }
 
-/* Tab区域 */
-.tab-section {
+.video-list {
   display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 0;
 }
 
-.tab-sidebar {
+.video-item {
+  width: 240px;
   flex-shrink: 0;
-  width: 200px;
-  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px 0;
+  overflow: hidden;
+  transition: all 0.3s;
 }
 
-.tab-item {
+.video-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  height: 135px;
+  overflow: hidden;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 16px;
-  color: #666;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-.tab-item:hover {
-  background: #f5f5f5;
+.video-item:hover .video-overlay {
+  opacity: 1;
 }
 
-.tab-item.active {
-  background: #fff5f5;
-  color: #c30d23;
-  font-weight: 500;
-}
-
-.tab-dot {
-  width: 8px;
-  height: 8px;
+.play-icon {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: #ddd;
-  transition: background 0.3s;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c30d23;
 }
 
-.tab-item.active .tab-dot {
-  background: #c30d23;
+.video-name {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Tab内容区 */
-.tab-content {
-  flex: 1;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-height: 400px;
+/* 图文介绍 */
+.intro-section {
+  padding: 40px 0;
 }
 
-.content-section {
-  padding: 32px;
+.intro-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #999;
+  font-size: 16px;
 }
 
-.section-header {
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
+/* 相关推荐 */
+.recommend-section {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.recommend-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .section-title {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  font-size: 30px;
+  font-weight: bold;
+  font-family: 'Source Han Sans CN', sans-serif;
+  white-space: nowrap;
+}
+
+.title-highlight {
+  color: #c30d23;
+}
+
+.title-normal {
+  color: #333;
+}
+
+.title-decoration {
+  flex: 1;
+  height: 15px;
+  background: repeating-linear-gradient(
+    90deg,
+    #c30d23 0px,
+    #c30d23 3px,
+    transparent 3px,
+    transparent 8px
+  );
+  background-size: 8px 15px;
+  background-position: left center;
+}
+
+.recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.recommend-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.recommend-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 364 / 200;
+  overflow: hidden;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.recommend-card:hover .card-image img {
+  transform: scale(1.05);
+}
+
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+}
+
+.college-name {
+  font-size: 14px;
+  color: #fff;
+}
+
+.card-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 16px;
   color: #333;
   margin: 0;
-  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.section-body {
-  line-height: 1.8;
-}
-
-/* 富文本内容 */
-.rich-content {
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
   color: #333;
-  font-size: 15px;
+  opacity: 0.5;
 }
 
-.rich-content :deep(p) {
-  margin: 1em 0;
-}
-
-.rich-content :deep(img) {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 1em auto;
-}
-
-.rich-content :deep(h1),
-.rich-content :deep(h2),
-.rich-content :deep(h3),
-.rich-content :deep(h4),
-.rich-content :deep(h5),
-.rich-content :deep(h6) {
-  margin: 1.5em 0 1em;
-  font-weight: bold;
-  color: #333;
-}
-
-.rich-content :deep(ul),
-.rich-content :deep(ol) {
-  padding-left: 2em;
-  margin: 1em 0;
-}
-
-.rich-content :deep(blockquote) {
-  border-left: 4px solid #c30d23;
-  padding-left: 1em;
-  margin: 1em 0;
-  color: #666;
-}
-
-.empty-tip {
-  text-align: center;
-  color: #999;
-  padding: 60px 0;
+.view-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
 }
 
 /* 响应式 */
-@media (max-width: 1024px) {
-  .info-card {
+@media (max-width: 1200px) {
+  .recommend-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .detail-card {
     flex-direction: column;
   }
-
-  .info-cover {
+  
+  .detail-cover {
     width: 100%;
-    height: 300px;
-  }
-
-  .tab-section {
-    flex-direction: column;
-  }
-
-  .tab-sidebar {
-    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 }
 
 @media (max-width: 768px) {
+  .recommend-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .content-section {
+    flex-direction: column;
+  }
+  
+  .side-nav {
+    width: 100%;
+    flex-direction: row;
+    padding: 16px;
+  }
+  
   .banner-title {
-    font-size: 48px;
+    font-size: 32px;
   }
+}
 
-  .info-title {
-    font-size: 24px;
-  }
-
-  .section-title {
-    font-size: 20px;
+@media (max-width: 480px) {
+  .recommend-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

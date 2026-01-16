@@ -1,5 +1,8 @@
 <template>
   <div class="college-page">
+    <!-- Header -->
+    <AppHeader />
+
     <!-- Banner 轮播 -->
     <PageBanner />
 
@@ -20,7 +23,10 @@
       <!-- 统计信息和搜索栏 -->
       <div class="toolbar">
         <div class="stats">
-          <img src="/images/image 9.png" alt="icon" class="stats-icon" />
+          <svg class="stats-icon" width="38" height="35" viewBox="0 0 38 35" fill="none">
+            <rect x="2" y="2" width="34" height="31" rx="2" stroke="#c30d23" stroke-width="2"/>
+            <path d="M12 10h14v3H12v-3zm0 6h14v3H12v-3zm0 6h10v3H12v-3z" fill="#c30d23"/>
+          </svg>
           <span class="stats-text">
             参与学院 <span class="stats-count">{{ total }}</span> 个
           </span>
@@ -93,7 +99,11 @@
       <div class="virtual-bg"></div>
       <div class="virtual-title">
         <div class="virtual-logo">
-          <img src="/images/image 4.png" alt="智慧树" class="logo-img" />
+          <svg class="logo-img" width="120" height="35" viewBox="0 0 120 35" fill="none">
+            <circle cx="17.5" cy="17.5" r="15" fill="#4CAF50"/>
+            <path d="M17.5 8v19M8 17.5h19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <text x="40" y="23" font-family="Arial" font-size="18" font-weight="bold" fill="white">智慧树</text>
+          </svg>
         </div>
         <h2 class="virtual-heading">智慧福州轻虚仿专题实验</h2>
       </div>
@@ -139,6 +149,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, View, Loading } from '@element-plus/icons-vue'
+import AppHeader from '@/components/common/AppHeader/index.vue'
 import PageBanner from '@/components/common/PageBanner/index.vue'
 import AppNavigation from '@/components/common/AppNavigation/index.vue'
 import PageFooter from '@/components/common/PageFooter/index.vue'
@@ -472,6 +483,68 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-bottom: 60px;
+}
+
+/* 自定义分页样式 - 根据Figma设计稿 */
+.pagination-wrapper :deep(.el-pagination) {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination-wrapper :deep(.el-pager) {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-wrapper :deep(.el-pager li),
+.pagination-wrapper :deep(.btn-prev),
+.pagination-wrapper :deep(.btn-next) {
+  min-width: 32px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0;
+  margin: 0;
+  background-color: #f4f4f5;
+  color: #333;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: normal;
+  border: none;
+}
+
+.pagination-wrapper :deep(.el-pager li:hover),
+.pagination-wrapper :deep(.btn-prev:hover),
+.pagination-wrapper :deep(.btn-next:hover) {
+  color: #333;
+  background-color: #e5e5e5;
+}
+
+.pagination-wrapper :deep(.el-pager li.is-active) {
+  background-color: #c30d23;
+  color: #fff;
+  font-weight: bold;
+}
+
+.pagination-wrapper :deep(.el-pager li.is-active:hover) {
+  background-color: #c30d23;
+  color: #fff;
+}
+
+.pagination-wrapper :deep(.btn-prev),
+.pagination-wrapper :deep(.btn-next) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-wrapper :deep(.el-icon) {
+  font-size: 12px;
+}
+
+/* 隐藏跳转输入框 */
+.pagination-wrapper :deep(.el-pagination__jump) {
+  display: none;
 }
 
 /* 轻虚仿专题区域 */

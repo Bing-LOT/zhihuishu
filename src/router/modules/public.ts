@@ -89,7 +89,7 @@ const publicRoutes: RouteRecordRaw[] = [
   {
     path: '/college',
     name: 'College',
-    component: () => import('@/views/College/test.vue'),
+    component: () => import('@/views/College/index.vue'),
     meta: {
       title: '一院一品',
       requiresAuth: false

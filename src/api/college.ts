@@ -36,8 +36,10 @@ export interface CollegePageParams {
   pageIndex: number
   pageSize: number
   keyword?: string
+  property?: string // 课程性质
+  levelName?: string // 示范等级
+  college?: string // 所在学院
   showFront?: number // 1=显示；0=隐藏；不传显示所有
-  college?: string
 }
 
 /**

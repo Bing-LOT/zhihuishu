@@ -85,6 +85,24 @@ const publicRoutes: RouteRecordRaw[] = [
       title: '特色专题',
       requiresAuth: false
     }
+  },
+  {
+    path: '/college',
+    name: 'College',
+    component: () => import('@/views/College/test.vue'),
+    meta: {
+      title: '一院一品',
+      requiresAuth: false
+    }
+  },
+  {
+    path: '/college/detail/:id',
+    name: 'CollegeDetail',
+    component: () => import('@/views/College/Detail.vue'),
+    meta: {
+      title: '学院案例详情',
+      requiresAuth: false
+    }
   }
 ]
 

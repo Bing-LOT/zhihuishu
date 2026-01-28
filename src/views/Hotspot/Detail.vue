@@ -91,7 +91,7 @@
             <div class="article-body" v-html="detail.content" />
 
             <!-- Related Links -->
-            <div class="related-links">
+            <!-- <div class="related-links">
               <div class="links-header">
                 <h3>新闻链接</h3>
                 <div class="header-divider">
@@ -114,7 +114,7 @@
                   </div>
                 </a>
               </div>
-            </div>
+            </div> -->
           </div>
 
           <!-- Right: Special Topics -->
